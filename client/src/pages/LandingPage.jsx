@@ -1,10 +1,15 @@
 import { useLayoutEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import Button from '../components/Button.jsx';
-import SiteHeader from '../components/SiteHeader.jsx';
-import { principles } from '../data/principles.js';
+import Footer from '../components/Footer.jsx';
+import Navbar from '../components/Navbar.jsx';
 import { useReducedMotion } from '../hooks/useReducedMotion.js';
+import FeaturesSection from '../sections/FeaturesSection.jsx';
+import FinalCTASection from '../sections/FinalCTASection.jsx';
+import HeroSection from '../sections/HeroSection.jsx';
+import HowItWorksSection from '../sections/HowItWorksSection.jsx';
+import IntroductionSection from '../sections/IntroductionSection.jsx';
+import ProgressionSection from '../sections/ProgressionSection.jsx';
 import '../styles/landing.css';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -17,24 +22,70 @@ export default function LandingPage() {
     if (reduceMotion) return undefined;
 
     const context = gsap.context(() => {
-      gsap.from('.hero-copy > *', {
-        y: 22,
-        opacity: 0,
-        duration: 0.8,
-        stagger: 0.12,
-        ease: 'power3.out',
+      const entrance = gsap.timeline({ defaults: { ease: 'power3.out' } });
+      entrance
+        .from('.hero-eyebrow', { y: 16, autoAlpha: 0, duration: 0.55 })
+        .from('.hero-content h1', { y: 30, autoAlpha: 0, duration: 0.75 }, '-=0.3')
+        .from('.hero-copy', { y: 18, autoAlpha: 0, duration: 0.6 }, '-=0.42')
+        .from('.hero-actions .button', { y: 14, autoAlpha: 0, stagger: 0.12, duration: 0.48 }, '-=0.3')
+        .from('.hero-bottom', { autoAlpha: 0, duration: 0.45 }, '-=0.18');
+
+      gsap.utils.toArray('.scroll-reveal').forEach((element) => {
+        gsap.from(element, {
+          y: 26,
+          autoAlpha: 0,
+          duration: 0.72,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: element,
+            start: 'top 88%',
+            toggleActions: 'play none none reverse',
+          },
+        });
       });
 
-      gsap.from('.principle-card', {
-        y: 28,
-        opacity: 0,
-        duration: 0.65,
-        stagger: 0.12,
-        ease: 'power2.out',
-        scrollTrigger: {
-          trigger: '.principles-grid',
-          start: 'top 82%',
+      gsap.to('.hero-section .shadow-shape--one', {
+        xPercent: 9, yPercent: 15, rotation: -10, ease: 'none',
+        scrollTrigger: { trigger: '.hero-section', start: 'top top', end: 'bottom top', scrub: 1.3 },
+      });
+      gsap.to('.hero-section .shadow-shape--two', {
+        xPercent: -10, yPercent: -13, rotation: 8, ease: 'none',
+        scrollTrigger: { trigger: '.hero-section', start: 'top top', end: 'bottom top', scrub: 1.7 },
+      });
+      gsap.to('.hero-section .shadow-ring--one', {
+        yPercent: 22, rotation: 8, ease: 'none',
+        scrollTrigger: { trigger: '.hero-section', start: 'top top', end: 'bottom top', scrub: 1.5 },
+      });
+      gsap.to('.progression-section .shadow-shape--one', {
+        xPercent: 8, yPercent: 14, rotation: -9, clipPath: 'polygon(0 42%, 13% 18%, 29% 29%, 45% 3%, 60% 25%, 100% 32%, 88% 69%, 70% 85%, 48% 63%, 28% 100%, 12% 67%)', ease: 'none',
+        scrollTrigger: { trigger: '.progression-section', start: 'top bottom', end: 'bottom top', scrub: 1.5 },
+      });
+      gsap.to('.progression-section .shadow-shape--two', {
+        xPercent: -9, yPercent: -12, rotation: 8, ease: 'none',
+        scrollTrigger: { trigger: '.progression-section', start: 'top bottom', end: 'bottom top', scrub: 1.8 },
+      });
+      gsap.to('.progress-track-fill', {
+        scaleX: 1, ease: 'none', transformOrigin: 'left center',
+        scrollTrigger: { trigger: '.stages-grid', start: 'top 80%', end: 'bottom 58%', scrub: 0.8 },
+      });
+
+      gsap.fromTo('.stage-card',
+        { autoAlpha: 0, y: 30, scale: 0.96 },
+        {
+          autoAlpha: 1, y: 0, scale: 1, stagger: 0.12, duration: 0.68, ease: 'power3.out',
+          scrollTrigger: { trigger: '.stages-grid', start: 'top 82%', toggleActions: 'play none none reverse' },
         },
+      );
+      gsap.fromTo('.stage-card .emblem-stroke:not(.emblem-core)',
+        { strokeDasharray: 240, strokeDashoffset: 240 },
+        {
+          strokeDashoffset: 0, stagger: { each: 0.035, from: 'start' }, duration: 0.9, ease: 'power2.out',
+          scrollTrigger: { trigger: '.stages-grid', start: 'top 78%', toggleActions: 'play none none reverse' },
+        },
+      );
+      gsap.from('.final-cta .shadow-shape', {
+        yPercent: 35, stagger: 0.1, ease: 'none',
+        scrollTrigger: { trigger: '.final-cta', start: 'top bottom', end: 'bottom bottom', scrub: 1.4 },
       });
     }, pageRef);
 
@@ -42,59 +93,17 @@ export default function LandingPage() {
   }, [reduceMotion]);
 
   return (
-    <div className="site-shell" id="top" ref={pageRef}>
-      <SiteHeader />
+    <div className="site-shell" ref={pageRef}>
+      <Navbar />
       <main>
-        <section className="hero section-wrap" aria-labelledby="hero-title">
-          <div className="hero-copy">
-            <p className="eyebrow"><span className="status-dot" /> A better way forward</p>
-            <h1 id="hero-title">Make progress<br /><span>your default.</span></h1>
-            <p className="hero-description">
-              Build a life that moves with intention. THE SYSTEM gives your daily effort a clear direction, a steady rhythm, and room to grow.
-            </p>
-            <div className="hero-actions">
-              <Button href="#principles" variant="primary">Explore the system <span aria-hidden="true">↗</span></Button>
-              <a className="text-link" href="#about">See how it works <span aria-hidden="true">↓</span></a>
-            </div>
-          </div>
-          <div className="hero-visual" aria-label="Abstract illustration of progress" role="img">
-            <div className="orbit orbit-one" />
-            <div className="orbit orbit-two" />
-            <div className="orbit orbit-three" />
-            <div className="visual-center"><span>01</span><i /></div>
-            <div className="visual-label label-top">INTENTION <span>01 / 03</span></div>
-            <div className="visual-label label-bottom">BUILT, DAILY <span>EST. NOW</span></div>
-            <div className="visual-cross cross-one">+</div>
-            <div className="visual-cross cross-two">+</div>
-          </div>
-          <a className="scroll-cue" href="#principles"><span /> Scroll to explore</a>
-        </section>
-
-        <section className="principles section-wrap" id="principles" aria-labelledby="principles-title">
-          <div className="section-heading">
-            <p className="eyebrow">The foundation</p>
-            <h2 id="principles-title">Small steps.<br /><span>Lasting change.</span></h2>
-          </div>
-          <div className="principles-grid">
-            {principles.map((principle) => (
-              <article className="principle-card" key={principle.number}>
-                <div className="card-top"><span>{principle.number}</span><span aria-hidden="true">{principle.symbol}</span></div>
-                <h3>{principle.title}</h3>
-                <p>{principle.description}</p>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section className="closing section-wrap" id="about">
-          <p className="eyebrow">A system that grows with you</p>
-          <div className="closing-row">
-            <h2>Start where<br />you are.</h2>
-            <p>Consistency isn’t a finish line. It’s a practice you can return to, one intentional day at a time.</p>
-          </div>
-          <div className="closing-rule"><span>THE SYSTEM</span><span>© 2026</span><span>MADE FOR MOMENTUM</span></div>
-        </section>
+        <HeroSection />
+        <IntroductionSection />
+        <HowItWorksSection />
+        <FeaturesSection />
+        <ProgressionSection />
+        <FinalCTASection />
       </main>
+      <Footer />
     </div>
   );
 }

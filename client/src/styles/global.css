@@ -17,16 +17,16 @@ body::before {
   position: fixed;
   z-index: -1;
   inset: 0;
-  background-image: radial-gradient(rgb(255 255 255 / 2.4%) 0.6px, transparent 0.6px);
-  background-size: 5px 5px;
+  background-image: radial-gradient(rgb(189 218 255 / 2.4%) 0.6px, transparent 0.6px);
+  background-size: 6px 6px;
   content: '';
   pointer-events: none;
 }
 
 a { color: inherit; text-decoration: none; }
 button, a { -webkit-tap-highlight-color: transparent; }
-a:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 5px; }
-::selection { color: var(--color-bg); background: var(--color-accent); }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--color-cyan); outline-offset: 4px; }
+::selection { color: #06101b; background: #83d5ff; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }

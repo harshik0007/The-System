@@ -1,3 +1,3 @@
-export default function Button({ children, href, variant = 'primary' }) {
-  return <a className={`button button-${variant}`} href={href}>{children}</a>;
+export default function Button({ children, href, variant = 'primary', className = '', ...props }) {
+  return <a className={`button button--${variant} ${className}`.trim()} href={href} {...props}>{children}</a>;
 }

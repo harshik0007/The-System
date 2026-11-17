@@ -1,19 +1,31 @@
 :root {
-  font-family: 'DM Sans', sans-serif;
-  color: #eeefe8;
-  background: #10120f;
+  color-scheme: dark;
+  font-family: 'DM Sans', system-ui, sans-serif;
+  color: #edf5ff;
+  background: #070b13;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
 
-  --color-bg: #10120f;
-  --color-surface: #171a16;
-  --color-surface-raised: #1d211b;
-  --color-text: #eeefe8;
-  --color-muted: #a1a69a;
-  --color-subtle: #72786c;
-  --color-accent: #d5f16a;
-  --color-line: rgb(238 239 232 / 12%);
-  --font-body: 'DM Sans', sans-serif;
+  --color-bg: #070b13;
+  --color-bg-soft: #0b1220;
+  --color-surface: rgb(12 23 39 / 78%);
+  --color-surface-raised: #101c2d;
+  --color-text: #edf5ff;
+  --color-muted: #9aaec5;
+  --color-subtle: #687f9b;
+  --color-accent: #69bfff;
+  --color-cyan: #4de0ef;
+  --color-line: rgb(139 181 225 / 16%);
+  --cursor-color: #63cfff;
+  --cursor-color-secondary: #4de0ef;
+  --cursor-void: #07101b;
+  --cursor-glow: rgb(53 176 255 / 34%);
+  --cursor-size: 34px;
+  --cursor-height: 42px;
+  --cursor-fragment-size: 16px;
+  --z-cursor: 2147483647;
+  --font-body: 'DM Sans', system-ui, sans-serif;
+  --font-display: 'Space Grotesk', 'DM Sans', sans-serif;
   --font-mono: 'DM Mono', monospace;
   --space-1: 0.5rem;
   --space-2: 1rem;
@@ -23,5 +35,5 @@
   --space-6: 5rem;
   --page-width: 1240px;
   --motion-fast: 180ms ease;
-  --motion-standard: 320ms ease;
+  --motion-standard: 320ms cubic-bezier(.2, .75, .25, 1);
 }
