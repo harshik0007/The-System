@@ -104,12 +104,21 @@ export default function PageTransition({ children }) {
   useLayoutEffect(() => {
     if (pendingFocusKeyRef.current !== activeLocation.key) return;
 
-    const heading = stageRef.current?.querySelector('.page-transition__view--enter h1');
-    if (heading) {
+    const focusHeading = () => {
+      const heading = stageRef.current?.querySelector('.page-transition__view--enter h1');
+      if (!heading) return false;
       heading.setAttribute('tabindex', '-1');
       heading.focus({ preventScroll: true });
-    }
-    pendingFocusKeyRef.current = null;
+      pendingFocusKeyRef.current = null;
+      return true;
+    };
+
+    if (focusHeading()) return undefined;
+    const observer = new MutationObserver(() => {
+      if (focusHeading()) observer.disconnect();
+    });
+    if (stageRef.current) observer.observe(stageRef.current, { childList: true, subtree: true });
+    return () => observer.disconnect();
   }, [activeLocation.key]);
 
   useLayoutEffect(() => {
@@ -127,48 +136,71 @@ export default function PageTransition({ children }) {
       }
     };
 
-    if (motionPreference.matches) {
-      finishExit();
-      return undefined;
-    }
+    const hasPageContent = () => Boolean(entering.querySelector('.site-shell, .auth-layout, .public-layout, .app-layout'));
+    let observer;
+    let context;
 
-    const context = gsap.context(() => {
-      if (exiting) gsap.to(exiting, { opacity: 0.84, y: -4, duration: 0.18, ease: 'power1.out' });
-
-      const timeline = gsap.timeline({
-        defaults: { ease: 'power2.out' },
-        onComplete: finishExit,
-      });
-      const isInitial = initialEntranceRef.current;
-      const authPage = entering.querySelector('.auth-layout');
-      const publicPage = entering.querySelector('.public-layout');
-
-      if (authPage) {
-        revealAuthPage(timeline, entering, isInitial);
-      } else if (publicPage) {
-        revealPublicPage(timeline, entering, isInitial);
-      } else {
-        timeline.fromTo(entering,
-          { opacity: 0.8, y: 9 },
-          { opacity: 1, y: 0, duration: isInitial ? 0.42 : 0.34, clearProps: 'opacity,transform' },
-          0,
-        );
+    const runEntrance = () => {
+      if (!isCurrentRun()) return;
+      if (motionPreference.matches) {
+        finishExit();
+        return;
       }
-    }, stageRef);
+
+      context = gsap.context(() => {
+        if (exiting) gsap.to(exiting, { opacity: 0.84, y: -4, duration: 0.18, ease: 'power1.out' });
+
+        const timeline = gsap.timeline({
+          defaults: { ease: 'power2.out' },
+          onComplete: finishExit,
+        });
+        const isInitial = initialEntranceRef.current;
+        const authPage = entering.querySelector('.auth-layout');
+        const publicPage = entering.querySelector('.public-layout');
+
+        if (authPage) {
+          revealAuthPage(timeline, entering, isInitial);
+        } else if (publicPage) {
+          revealPublicPage(timeline, entering, isInitial);
+        } else {
+          timeline.fromTo(entering,
+            { opacity: 0.8, y: 9 },
+            { opacity: 1, y: 0, duration: isInitial ? 0.42 : 0.34, clearProps: 'opacity,transform' },
+            0,
+          );
+        }
+      }, stageRef);
+    };
 
     const stopForReducedMotion = (event) => {
       if (!event.matches || !isCurrentRun()) return;
       animationRunRef.current += 1;
-      context.revert();
+      observer?.disconnect();
+      context?.revert();
       gsap.set(entering, { clearProps: 'opacity,transform' });
       if (outgoingKey) setOutgoingLocation((current) => (current?.key === outgoingKey ? null : current));
     };
     motionPreference.addEventListener('change', stopForReducedMotion);
 
+    if (motionPreference.matches) {
+      finishExit();
+    } else if (hasPageContent()) {
+      runEntrance();
+    } else {
+      observer = new MutationObserver(() => {
+        if (!hasPageContent()) return;
+        observer.disconnect();
+        observer = undefined;
+        runEntrance();
+      });
+      observer.observe(entering, { childList: true, subtree: true });
+    }
+
     return () => {
       motionPreference.removeEventListener('change', stopForReducedMotion);
+      observer?.disconnect();
       if (isCurrentRun()) animationRunRef.current += 1;
-      context.revert();
+      context?.revert();
     };
   }, [activeLocation.key]);
 

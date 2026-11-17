@@ -41,6 +41,8 @@
 .void-shard-cursor.is-pressed .void-shard-art--fragment-b { transform: translate(1px, -1px) scale(.9); }
 .void-shard-cursor.is-native,
 .void-shard-cursor.is-offscreen { opacity: 0; }
+.void-shard-cursor.is-native.is-rippling { opacity: 1; }
+.void-shard-cursor.is-native.is-rippling .void-shard-position { visibility: hidden; }
 
 @keyframes shard-drift-a {
   0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
@@ -65,16 +67,17 @@ html.has-void-shard-cursor body [role='button'],
 html.has-void-shard-cursor body [role='tab'],
 html.has-void-shard-cursor body [data-cursor-hover] { cursor: none !important; }
 
-html.has-void-shard-cursor input,
+html.has-void-shard-cursor input:not([type]),
+html.has-void-shard-cursor input:is([type='text'], [type='email'], [type='password'], [type='search'], [type='url'], [type='tel'], [type='number']),
 html.has-void-shard-cursor textarea,
-html.has-void-shard-cursor select,
 html.has-void-shard-cursor [contenteditable='true'],
 html.has-void-shard-cursor [role='textbox'] { cursor: text !important; }
 
 html.has-void-shard-cursor[data-void-native-cursor='true'],
 html.has-void-shard-cursor[data-void-native-cursor='true'] * { cursor: auto !important; }
 
-html.has-void-shard-cursor[data-void-native-cursor='true'] input,
+html.has-void-shard-cursor[data-void-native-cursor='true'] input:not([type]),
+html.has-void-shard-cursor[data-void-native-cursor='true'] input:is([type='text'], [type='email'], [type='password'], [type='search'], [type='url'], [type='tel'], [type='number']),
 html.has-void-shard-cursor[data-void-native-cursor='true'] textarea,
 html.has-void-shard-cursor[data-void-native-cursor='true'] [contenteditable='true'],
 html.has-void-shard-cursor[data-void-native-cursor='true'] [role='textbox'] { cursor: text !important; }

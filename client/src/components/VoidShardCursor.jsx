@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
 const INTERACTIVE_SELECTOR = 'a[href], button:not(:disabled), [role="button"], [role="tab"], [data-cursor-hover]';
-const TEXT_ENTRY_SELECTOR = 'input, textarea, select, [contenteditable="true"], [role="textbox"]';
+const TEXT_ENTRY_SELECTOR = 'input:not([type]), input:is([type="text"], [type="email"], [type="password"], [type="search"], [type="url"], [type="tel"], [type="number"]), textarea, [contenteditable="true"], [role="textbox"]';
 const EXCLUDED_TEXT_SELECTOR = 'button, [role="button"], [role="tab"], input, textarea, select, [contenteditable="true"], a[href]';
 
 function closestElement(target, selector) {
@@ -26,13 +26,14 @@ export default function VoidShardCursor() {
   const frameRef = useRef(0);
   const focusFrameRef = useRef(0);
   const pressTimerRef = useRef(0);
+  const rippleTimerRef = useRef(0);
   const motionRef = useRef({
     x: 0, y: 0, targetX: 0, targetY: 0,
     fragmentAX: 0, fragmentAY: 0, fragmentBX: 0, fragmentBY: 0,
     velocityX: 0, velocityY: 0, nextVelocityX: 0, nextVelocityY: 0,
     scrollVelocity: 0, nextScrollVelocity: 0, lastScrollY: 0, lastScrollTime: 0,
     lastX: 0, lastY: 0, lastTime: 0, initialized: false,
-    hovering: false, native: false, selecting: false, selectedText: false, focusedEntry: false,
+    hovering: false, native: false, selecting: false, selectedText: false,
   });
   const [enabled, setEnabled] = useState(false);
 
@@ -72,7 +73,9 @@ export default function VoidShardCursor() {
     if (!root || !main || !fragmentA || !fragmentB || !ripple) return undefined;
 
     const syncNativeMode = () => {
-      const nativeMode = motion.native || motion.selecting || motion.selectedText || motion.focusedEntry;
+      // Keep the custom pointer visible while selecting regular page text.
+      // Use the native cursor only while the pointer is over an editable field.
+      const nativeMode = motion.native;
       root.classList.toggle('is-native', nativeMode);
       if (nativeMode) document.documentElement.setAttribute('data-void-native-cursor', 'true');
       else document.documentElement.removeAttribute('data-void-native-cursor');
@@ -83,7 +86,7 @@ export default function VoidShardCursor() {
     };
 
     const syncHover = (target) => {
-      if (motion.native || motion.selecting || motion.selectedText || motion.focusedEntry) return;
+      if (motion.native || motion.selecting || motion.selectedText) return;
       const hoverable = Boolean(closestElement(target, INTERACTIVE_SELECTOR));
       if (hoverable !== motion.hovering) {
         motion.hovering = hoverable;
@@ -201,11 +204,19 @@ export default function VoidShardCursor() {
       motion.native = isTextEntry(event.target);
       motion.selecting = isTextSelectable(event.target);
       syncNativeMode();
-      if (motion.native || motion.selecting) return;
 
-      root.classList.add('is-pressed');
-      window.clearTimeout(pressTimerRef.current);
-      pressTimerRef.current = window.setTimeout(() => root.classList.remove('is-pressed'), 150);
+      if (!motion.native && !motion.selecting) {
+        root.classList.add('is-pressed');
+        window.clearTimeout(pressTimerRef.current);
+        pressTimerRef.current = window.setTimeout(() => root.classList.remove('is-pressed'), 150);
+      }
+
+      root.classList.add('is-rippling');
+      window.clearTimeout(rippleTimerRef.current);
+      rippleTimerRef.current = window.setTimeout(() => {
+        root.classList.remove('is-rippling');
+        rippleTimerRef.current = 0;
+      }, 360);
 
       ripple.style.left = `${event.clientX - 20}px`;
       ripple.style.top = `${event.clientY - 20}px`;
@@ -229,7 +240,7 @@ export default function VoidShardCursor() {
       motion.selecting = false;
       motion.selectedText = Boolean(window.getSelection()?.toString());
       syncNativeMode();
-      if (!motion.native && !motion.selectedText && !motion.focusedEntry) {
+      if (!motion.native && !motion.selectedText) {
         syncHover(document.elementFromPoint(motion.targetX, motion.targetY));
       }
     };
@@ -255,7 +266,10 @@ export default function VoidShardCursor() {
       window.cancelAnimationFrame(frameRef.current);
       frameRef.current = 0;
       window.clearTimeout(pressTimerRef.current);
+      window.clearTimeout(rippleTimerRef.current);
       pressTimerRef.current = 0;
+      rippleTimerRef.current = 0;
+      root.classList.remove('is-rippling');
     };
 
     const handleVisibilityChange = () => {
@@ -270,17 +284,14 @@ export default function VoidShardCursor() {
       if (!motion.selectedText) syncHover(document.elementFromPoint(motion.targetX, motion.targetY));
     };
 
-    const handleFocusIn = (event) => {
-      motion.focusedEntry = isTextEntry(event.target);
-      syncNativeMode();
-    };
-
-    const handleFocusOut = () => {
+    const handleFocusChange = () => {
       window.cancelAnimationFrame(focusFrameRef.current);
       focusFrameRef.current = window.requestAnimationFrame(() => {
         focusFrameRef.current = 0;
-        motion.focusedEntry = isTextEntry(document.activeElement);
+        const target = document.elementFromPoint(motion.targetX, motion.targetY);
+        motion.native = isTextEntry(target);
         syncNativeMode();
+        if (!motion.native && !motion.selecting && !motion.selectedText) syncHover(target);
       });
     };
 
@@ -293,8 +304,8 @@ export default function VoidShardCursor() {
     window.addEventListener('blur', suspendCursor);
     document.addEventListener('visibilitychange', handleVisibilityChange);
     document.addEventListener('selectionchange', handleSelectionChange);
-    document.addEventListener('focusin', handleFocusIn);
-    document.addEventListener('focusout', handleFocusOut);
+    document.addEventListener('focusin', handleFocusChange);
+    document.addEventListener('focusout', handleFocusChange);
 
     return () => {
       document.removeEventListener('pointermove', handlePointerMove);
@@ -306,11 +317,12 @@ export default function VoidShardCursor() {
       window.removeEventListener('blur', suspendCursor);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       document.removeEventListener('selectionchange', handleSelectionChange);
-      document.removeEventListener('focusin', handleFocusIn);
-      document.removeEventListener('focusout', handleFocusOut);
+      document.removeEventListener('focusin', handleFocusChange);
+      document.removeEventListener('focusout', handleFocusChange);
       window.cancelAnimationFrame(frameRef.current);
       window.cancelAnimationFrame(focusFrameRef.current);
       window.clearTimeout(pressTimerRef.current);
+      window.clearTimeout(rippleTimerRef.current);
       motion.initialized = false;
       if (typeof ripple.getAnimations === 'function') {
         ripple.getAnimations().forEach((animation) => animation.cancel());

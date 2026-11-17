@@ -1,4 +1,5 @@
 import { useId } from 'react';
+import '../../styles/rank-emblem.css';
 
 const designs = {
   origin: <>

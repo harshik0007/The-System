@@ -1,0 +1,6 @@
+/* Base static emblem treatment shared by public rank cards and app surfaces. */
+.emblem-art .emblem-metal { fill: var(--rank-metal-fill, var(--rank-accent)); stroke: #EAF6FF; stroke-width: 1.2; stroke-linejoin: round; }
+.emblem-art .emblem-inlay { fill: var(--rank-inlay-fill, #08121E); fill-opacity: .78; stroke: #DDF7FF; stroke-opacity: .68; stroke-width: .85; stroke-linejoin: round; }
+.emblem-art .emblem-engrave { fill: none; stroke: #F5FAFF; stroke-opacity: .72; stroke-width: 1; stroke-linecap: round; stroke-linejoin: round; }
+.emblem-art .emblem-core { fill: #F5FAFF; stroke: var(--rank-accent); stroke-width: 1.2; transform-box: fill-box; transform-origin: center; }
+.rank-logo .emblem-art * { animation: none !important; filter: none !important; transition: none !important; }
