@@ -124,6 +124,12 @@
 .task-card__recovery-note a:hover { color: #e3f9ff; }
 .task-card__miss-preview { justify-self: start; padding: 5px 0; border: 0; background: transparent; color: #c18a8e; font-size: .57rem; cursor: pointer; }
 .task-card__miss-preview:hover { color: #ffb1b5; }
+.task-card__pause-note { margin: 0; color: #b7a16f; font-size: .56rem; line-height: 1.5; }
+.task-submit-button:disabled, .task-card button:disabled { cursor: not-allowed; opacity: .45; transform: none; }
+.daily-task-pause-banner { display: flex; align-items: flex-start; gap: 11px; padding: 12px 14px; border: 1px solid rgb(220 177 102 / 22%); border-radius: 6px; background: linear-gradient(120deg, rgb(92 65 26 / 16%), rgb(15 25 34 / 75%)); color: #bdc9d3; }
+.daily-task-pause-banner > .app-icon { width: 17px; height: 17px; flex: 0 0 auto; color: #e1bb74; }
+.daily-task-pause-banner p { margin: 0; font-size: .67rem; line-height: 1.55; }
+.daily-task-pause-banner strong { color: #f0d49b; font-weight: 600; }
 .task-card__preview-review { display: flex; align-items: center; flex-wrap: wrap; justify-content: space-between; gap: 8px 12px; }
 .task-card__preview-review p { margin: 0; color: #8296a8; font-size: .55rem; line-height: 1.5; }
 .task-card__preview-review button { padding: 6px 8px; border: 1px solid rgb(87 201 172 / 20%); border-radius: 5px; background: rgb(24 69 62 / 25%); color: #9bd9c4; font-size: .55rem; cursor: pointer; }

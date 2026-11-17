@@ -9,6 +9,7 @@ import AppIcon from '../../components/app/AppIcon.jsx';
 import AppProgressBar from '../../components/app/AppProgressBar.jsx';
 import GracePointSummary from '../../components/app/GracePointSummary.jsx';
 import DisciplinePointsSummary from '../../components/app/DisciplinePointsSummary.jsx';
+import EmergencyPauseControls from '../../components/app/EmergencyPauseControls.jsx';
 import { useTaskSchedule } from '../../context/TaskScheduleContext.jsx';
 import { RECOVERY_STATUS } from '../../utils/recoveryQuestManager.js';
 import { getIstDateKey } from '../../utils/taskScheduleBuilder.js';
@@ -101,6 +102,7 @@ export default function DashboardPage() {
               <span className="dashboard-rank-panel__position">Progression <b>·</b> {rank.progressionOrder} of 7</span>
             </div>
             <Link className="app-action-link" to={`/ranks/${rank.slug}`}>Explore Rank <AppIcon name="arrow" /></Link>
+            <EmergencyPauseControls />
           </div>
         </section>
 

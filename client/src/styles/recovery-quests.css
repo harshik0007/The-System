@@ -174,3 +174,10 @@
   .recovery-quest-card, .recovery-window__track span, .recovery-complete-button { transition: none; }
   .recovery-quest-card:hover, .recovery-complete-button:hover, .recovery-complete-button:active { transform: none; }
 }
+.recovery-pause-banner { display: flex; align-items: flex-start; gap: 11px; margin: 0 0 16px; padding: 12px 14px; border: 1px solid rgb(220 177 102 / 22%); border-radius: 6px; background: linear-gradient(120deg, rgb(92 65 26 / 16%), rgb(15 25 34 / 75%)); color: #bdc9d3; font-size: .67rem; line-height: 1.55; }
+.recovery-pause-banner > .app-icon { width: 17px; height: 17px; flex: 0 0 auto; color: #e1bb74; }
+.recovery-pause-banner strong { color: #f0d49b; font-weight: 600; }
+.recovery-quest-card--frozen { border-color: rgb(220 177 102 / 28%); }
+.recovery-quest-card--frozen .recovery-quest-status { color: #e2c27d; }
+.recovery-quest-frozen-note { flex: 1 1 100%; margin: 1px 0 0; color: #c0a66e; font-size: .59rem; line-height: 1.5; }
+.recovery-confirm-modal__actions button:disabled { cursor: not-allowed; opacity: .45; }

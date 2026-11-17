@@ -44,7 +44,7 @@ function RedemptionDialog({ points, onCancel, onConfirm }) {
 }
 
 export default function DisciplinePage() {
-  const { disciplineState, recoveryState, currentSchedule, redeemGracePoint } = useTaskSchedule();
+  const { disciplineState, recoveryState, currentSchedule, emergencyPauseState, isEmergencyPauseActive, activeEmergencyPause, redeemGracePoint } = useTaskSchedule();
   const [now, setNow] = useState(Date.now());
   const [confirmRedemption, setConfirmRedemption] = useState(false);
   const [feedback, setFeedback] = useState('');
@@ -53,7 +53,7 @@ export default function DisciplinePage() {
   const cycleRank = getRankDisciplineConfig(disciplineState.cycle.rankSlug);
   const level = getLevelFromTotalXp(disciplineState.totalXp);
   const levelRequirement = getLevelXpRequirement(level);
-  const xpDrainAtNextReset = Math.round(levelRequirement * RECOVERY_QUEST_XP_DRAIN_RATE * activeQuestCount * 100) / 100;
+  const xpDrainAtNextReset = isEmergencyPauseActive ? 0 : Math.round(levelRequirement * RECOVERY_QUEST_XP_DRAIN_RATE * activeQuestCount * 100) / 100;
   const dailyXpBonus = Math.round(levelRequirement * rank.dailyXpPercent / 100);
   const remaining = Math.max(0, disciplineState.cycle.requiredDays - disciplineState.cycle.progress);
   const cyclePercent = Math.min(100, Math.round(disciplineState.cycle.progress / disciplineState.cycle.requiredDays * 100));
@@ -126,13 +126,13 @@ export default function DisciplinePage() {
 
       <section className="discipline-drain app-panel" aria-labelledby="discipline-drain-title">
         <div className="discipline-drain__icon"><AppIcon name="recovery" /></div>
-        <div className="discipline-drain__copy"><p className="app-eyebrow">ACTIVE RECOVERY QUESTS · XP DRAIN</p><h2 id="discipline-drain-title">{activeQuestCount} active {activeQuestCount === 1 ? 'Quest' : 'Quests'} · {xpDrainAtNextReset.toFixed(2)} XP estimated at next reset</h2><p>Each Active Recovery Quest drains 7% of the current Level requirement ({levelRequirement} XP). Completed, expired and threshold-cleared Quests stop future drains. Past deductions are not reversed.</p></div>
+        <div className="discipline-drain__copy"><p className="app-eyebrow">ACTIVE RECOVERY QUESTS · XP DRAIN</p><h2 id="discipline-drain-title">{activeQuestCount} active {activeQuestCount === 1 ? 'Quest' : 'Quests'} · {xpDrainAtNextReset.toFixed(2)} XP estimated at next reset</h2><p>{isEmergencyPauseActive ? `Emergency Pause suspends Recovery Quest XP drain until ${activeEmergencyPause?.scheduledResumeAt ? new Intl.DateTimeFormat('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' }).format(new Date(activeEmergencyPause.scheduledResumeAt)) : 'normal activity resumes'} IST. No paused-day drain is applied later.` : `Each Active Recovery Quest drains 7% of the current Level requirement (${levelRequirement} XP). Completed, expired and threshold-cleared Quests stop future drains. Past deductions are not reversed.`}</p></div>
         <Link to="/app/recovery-quests" className="discipline-drain__link">Review Quests <AppIcon name="arrow" /></Link>
         {recentXpDrains.length > 0 && <div className="discipline-drain__events"><h3>Recorded daily drains</h3><ul>{recentXpDrains.map((event) => <li key={event.id}><time>{event.date}</time><span>{event.activeRecoveryQuestCount} Active Quests</span><strong>−{event.amount.toFixed(2)} XP</strong></li>)}</ul></div>}
         {disciplineState.levelDownEvents.length > 0 && <p className="discipline-level-down" role="status">Latest XP drain caused a Level decrease to Level {getLevelFromTotalXp(disciplineState.totalXp)}. Total XP never falls below 0 and Level cannot fall below 0.</p>}
       </section>
 
-      <DisciplineActivityMap disciplineState={disciplineState} schedule={currentSchedule} />
+      <DisciplineActivityMap disciplineState={disciplineState} schedule={currentSchedule} emergencyPauseState={emergencyPauseState} />
       <p className="discipline-disclosure"><AppIcon name="activity" />Frontend demonstration data is held in this browser tab's session only. Closing the session clears it. XP thresholds are demonstration values; no account or permanent storage is connected.</p>
 
       {confirmRedemption && <RedemptionDialog points={disciplineState.dpBalance} onCancel={() => setConfirmRedemption(false)} onConfirm={confirmConversion} />}

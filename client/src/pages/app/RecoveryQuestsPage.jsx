@@ -25,16 +25,16 @@ function statusLabel(quest) {
   return quest.status[0].toUpperCase() + quest.status.slice(1);
 }
 
-function QuestCard({ quest, onComplete, onExpire }) {
+function QuestCard({ quest, onComplete, onExpire, paused = false }) {
   const active = quest.status === RECOVERY_STATUS.ACTIVE;
   const completed = quest.status === RECOVERY_STATUS.COMPLETED;
   const expired = quest.status === RECOVERY_STATUS.EXPIRED;
   const progress = active ? (quest.recoveryDay / quest.recoveryWindowDays) * 100 : (expired ? 100 : completed ? 100 : 0);
   return (
-    <article className={`recovery-quest-card recovery-quest-card--${quest.status}`}>
+    <article className={`recovery-quest-card recovery-quest-card--${quest.status}${paused && active ? ' recovery-quest-card--frozen' : ''}`}>
       <div className="recovery-quest-card__topline">
         <span className="recovery-quest-card__eyebrow">RECOVERY QUEST <i>·</i> {formatDate(quest.activationDate)}</span>
-        <span className={`recovery-quest-status recovery-quest-status--${quest.status}`}><i aria-hidden="true" />{statusLabel(quest)}</span>
+        <span className={`recovery-quest-status recovery-quest-status--${quest.status}`}><i aria-hidden="true" />{paused && active ? 'Frozen · Emergency Pause' : statusLabel(quest)}</span>
       </div>
       <div className="recovery-quest-card__connection">
         <div className="recovery-quest-card__source">
@@ -58,8 +58,9 @@ function QuestCard({ quest, onComplete, onExpire }) {
         {quest.status === RECOVERY_STATUS.THRESHOLD_CLEARED && <p>Automatically cleared when active Recovery Quests exceeded five. No completion is required, and no individual expiry deduction applies.</p>}
       </div>}
       {active && <div className="recovery-quest-card__actions">
-        <button type="button" className="recovery-complete-button" onClick={() => onComplete(quest)}><AppIcon name="tasks" />Complete Recovery Quest</button>
-        <button type="button" className="recovery-expire-button" onClick={() => onExpire(quest)}>Simulate expiry</button>
+        {!paused && <><button type="button" className="recovery-complete-button" onClick={() => onComplete(quest)}><AppIcon name="tasks" />Complete Recovery Quest</button>
+        <button type="button" className="recovery-expire-button" onClick={() => onExpire(quest)}>Simulate expiry</button></>}
+        {paused && <p className="recovery-quest-frozen-note">This Recovery Quest and its remaining window are preserved until the pause ends.</p>}
       </div>}
       {completed && <p className="recovery-quest-card__outcome">Completed in this preview. No Grace Point was deducted and no XP was awarded.</p>}
     </article>
@@ -67,7 +68,7 @@ function QuestCard({ quest, onComplete, onExpire }) {
 }
 
 export default function RecoveryQuestsPage() {
-  const { recoveryState, completeQuest, expireQuest } = useTaskSchedule();
+  const { recoveryState, completeQuest, expireQuest, isEmergencyPauseActive, activeEmergencyPause } = useTaskSchedule();
   const reduceMotion = useReducedMotion();
   const [filter, setFilter] = useState('active');
   const [confirmQuest, setConfirmQuest] = useState(null);
@@ -94,15 +95,22 @@ export default function RecoveryQuestsPage() {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [confirmQuest]);
 
+  useEffect(() => {
+    if (isEmergencyPauseActive) setConfirmQuest(null);
+  }, [isEmergencyPauseActive]);
+
   const confirmCompletion = () => {
-    if (!confirmQuest) return;
-    completeQuest(confirmQuest.id);
+    if (!confirmQuest || isEmergencyPauseActive) return;
+    const result = completeQuest(confirmQuest.id);
+    if (!result?.success) return;
     setFeedback(`“${confirmQuest.accountabilityActionTitle}” was marked complete in this preview. No XP was awarded.`);
     setConfirmQuest(null);
   };
 
   const handleExpiryPreview = (quest) => {
-    expireQuest(quest.id);
+    if (isEmergencyPauseActive) return;
+    const result = expireQuest(quest.id);
+    if (!result?.success) return;
     setFeedback(`“${quest.accountabilityActionTitle}” was marked expired for this preview. One Grace Point was deducted.`);
   };
 
@@ -112,6 +120,8 @@ export default function RecoveryQuestsPage() {
         <div><p className="app-eyebrow">ACCOUNTABILITY · RECOVERY WINDOW</p><h1>Recovery Quests</h1><p>Complete the actions you committed to when your scheduled tasks were missed.</p></div>
         <Link className="recovery-page__back-link" to="/app/tasks"><AppIcon name="tasks" />View Daily Tasks</Link>
       </header>
+
+      {isEmergencyPauseActive && <div className="recovery-pause-banner" role="status"><AppIcon name="clock" /><span><strong>Recovery processing is paused.</strong> Active Quests remain unchanged; completion, expiry and the Recovery Window countdown are suspended{activeEmergencyPause?.scheduledResumeAt ? ` until ${new Intl.DateTimeFormat('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' }).format(new Date(activeEmergencyPause.scheduledResumeAt))} IST` : ''}.</span></div>}
 
       <div className="recovery-summary-grid">
         <section className="app-panel recovery-count-summary" aria-label="Recovery Quest status summary">
@@ -135,7 +145,7 @@ export default function RecoveryQuestsPage() {
           {filters.map((item) => <button key={item.id} type="button" aria-pressed={filter === item.id} className={filter === item.id ? 'is-selected' : ''} onClick={() => setFilter(item.id)}>{item.label}<span>{item.id === 'all' ? recoveryState.quests.length : counts[item.id] ?? 0}</span></button>)}
         </div>
         {filteredQuests.length ? <div className="recovery-quest-list">
-          {filteredQuests.map((quest) => <QuestCard key={quest.id} quest={quest} onComplete={setConfirmQuest} onExpire={handleExpiryPreview} />)}
+          {filteredQuests.map((quest) => <QuestCard key={quest.id} quest={quest} onComplete={setConfirmQuest} onExpire={handleExpiryPreview} paused={isEmergencyPauseActive} />)}
         </div> : <div className="recovery-empty-state"><span><AppIcon name="recovery" /></span><h3>{filter === 'active' ? 'No active Recovery Quests' : 'No records in this view'}</h3><p>{filter === 'active' ? 'When a scheduled task is marked missed, its own Accountability Action appears here.' : 'Completed, expired and threshold-cleared records remain available in All.'}</p></div>}
       </section>
 
@@ -154,7 +164,7 @@ export default function RecoveryQuestsPage() {
           <p id="recovery-confirm-description">Confirm that you completed the action committed to when this task was missed.</p>
           <div className="recovery-confirm-modal__details"><span>ORIGINAL MISSED TASK</span><strong>{confirmQuest.originalTaskName}</strong><span>ACCOUNTABILITY ACTION</span><strong>{confirmQuest.accountabilityActionTitle}</strong><p>{confirmQuest.accountabilityActionDescription}</p></div>
           <p className="recovery-confirm-modal__note">This preview will mark the quest complete. It does not submit proof, verify the action, deduct a Grace Point or award XP.</p>
-          <div className="recovery-confirm-modal__actions"><button type="button" className="recovery-confirm-modal__cancel" onClick={() => setConfirmQuest(null)}>Keep Active</button><button type="button" className="recovery-complete-button" onClick={confirmCompletion}>Confirm Completion</button></div>
+          <div className="recovery-confirm-modal__actions"><button type="button" className="recovery-confirm-modal__cancel" onClick={() => setConfirmQuest(null)}>Keep Active</button><button type="button" className="recovery-complete-button" disabled={isEmergencyPauseActive} onClick={confirmCompletion}>Confirm Completion</button></div>
         </section>
       </div>}
     </div>

@@ -113,7 +113,7 @@ function TaskManageMenu({ task, onModify, canModify, changesExhausted }) {
   );
 }
 
-export default function TaskCard({ task, onSubmit, onMarkMissed, onMarkCompleted, onModify, canModify, changesExhausted }) {
+export default function TaskCard({ task, onSubmit, onMarkMissed, onMarkCompleted, onModify, canModify, changesExhausted, paused = false }) {
   const [expanded, setExpanded] = useState(false);
   const detailsId = `task-details-${task.id}`;
   const isScheduled = task.status === 'scheduled';
@@ -131,7 +131,7 @@ export default function TaskCard({ task, onSubmit, onMarkMissed, onMarkCompleted
             </button>
           </div>
           <div className="task-card__action">
-            {isScheduled && <button className="task-submit-button" type="button" onClick={() => onSubmit(task)}><AppIcon name="tasks" />Submit Completion</button>}
+            {isScheduled && <button className="task-submit-button" type="button" disabled={paused} onClick={() => onSubmit(task)}><AppIcon name="tasks" />Submit Completion</button>}
             {isScheduled && <TaskManageMenu task={task} onModify={onModify} canModify={canModify} changesExhausted={changesExhausted} />}
             {task.status === 'submitted' && <span className="task-card__locked"><AppIcon name="clock" />Awaiting review</span>}
             {task.status === 'completed' && <span className="task-card__locked task-card__locked--complete"><AppIcon name="tasks" />Completed</span>}
@@ -148,8 +148,9 @@ export default function TaskCard({ task, onSubmit, onMarkMissed, onMarkCompleted
               {task.accountabilityActionDescription && <p className="task-accountability-action__description">{task.accountabilityActionDescription}</p>}
               {task.status === 'missed' && <div className="task-card__recovery-note"><p>This task’s own Accountability Action is shown as the Recovery Quest in this preview. The ordinary missed task does not carry forward.</p><Link to="/app/recovery-quests">View Recovery Quests <span aria-hidden="true">↗</span></Link></div>}
             </div>
-            {task.status === 'submitted' && <div className="task-card__preview-review"><p>Preview only: no proof is checked or verified.</p><button type="button" onClick={() => onMarkCompleted(task.id)}>Set Completed for preview</button></div>}
-            {isScheduled && <button className="task-card__miss-preview" type="button" onClick={() => onMarkMissed(task.id)}>Mark missed in this preview</button>}
+            {task.status === 'submitted' && <div className="task-card__preview-review"><p>Preview only: no proof is checked or verified.</p><button type="button" disabled={paused} onClick={() => onMarkCompleted(task.id)}>Set Completed for preview</button></div>}
+            {isScheduled && <button className="task-card__miss-preview" type="button" disabled={paused} onClick={() => onMarkMissed(task.id)}>Mark missed in this preview</button>}
+            {paused && <p className="task-card__pause-note" role="status">Emergency Pause is active. Task actions and Recovery Quest generation are suspended.</p>}
           </div>
         )}
       </article>

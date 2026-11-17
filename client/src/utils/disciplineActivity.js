@@ -1,4 +1,5 @@
 import { getCycleDay, getIstDateKey, getTaskOccurrenceKey } from './taskScheduleBuilder.js';
+import { isEmergencyPauseDate } from './emergencyPauseManager.js';
 
 export function addIstCalendarDays(dateKey, amount) {
   const date = new Date(`${dateKey}T12:00:00Z`);
@@ -51,12 +52,14 @@ export function countRecoveryQuestsActiveOnDate(recoveryState, dateKey) {
   }).length;
 }
 
-export function getVisibleActivityRecord({ dateKey, disciplineState, schedule, todayKey = getIstDateKey(), emergencyPauseDates = [] }) {
+export function getVisibleActivityRecord({ dateKey, disciplineState, schedule, todayKey = getIstDateKey(), emergencyPauseDates = [], emergencyPauseState }) {
   if (dateKey < disciplineState.memberSince || dateKey > todayKey) return null;
   const savedRecord = disciplineState.dailyRecords[dateKey];
-  if (savedRecord) return savedRecord;
+  const emergencyPause = emergencyPauseDates.includes(dateKey) || isEmergencyPauseDate(emergencyPauseState, dateKey);
+  if (savedRecord) return emergencyPause && !savedRecord.emergencyPause
+    ? { ...savedRecord, emergencyPause: true, qualifies: true, qualificationStatus: 'emergency-pause-protected' }
+    : savedRecord;
   const taskSnapshot = getScheduleDaySnapshot(schedule, dateKey, { todayKey });
-  const emergencyPause = emergencyPauseDates.includes(dateKey);
   const isCurrentDay = dateKey === todayKey;
   const qualifies = emergencyPause || taskSnapshot.completedTaskCount >= 5;
   return {

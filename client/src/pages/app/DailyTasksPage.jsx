@@ -18,7 +18,7 @@ import '../../styles/daily-tasks.css';
 export default function DailyTasksPage() {
   const pageRef = useRef(null);
   const reducedMotion = useReducedMotion();
-  const { currentSchedule, setCurrentSchedule, weeklyAllowance, setWeeklyAllowance, addRecoveryQuest } = useTaskSchedule();
+  const { currentSchedule, setCurrentSchedule, weeklyAllowance, setWeeklyAllowance, addRecoveryQuest, isEmergencyPauseActive, isScheduledTaskActivitySuspended, activeEmergencyPause } = useTaskSchedule();
   const referenceDate = dailyTaskScheduleDemo.taskChangesWeekDate;
   const allowance = useMemo(() => getWeeklyChangeAllowance(weeklyAllowance, referenceDate), [weeklyAllowance, referenceDate]);
   const currentDateKey = getIstDateKey(new Date());
@@ -47,6 +47,9 @@ export default function DailyTasksPage() {
   const [changeTarget, setChangeTarget] = useState(null);
   const [feedback, setFeedback] = useState('');
   const metrics = useMemo(() => getDailyTaskMetrics(tasks), [tasks]);
+  const pauseResumeAt = activeEmergencyPause?.scheduledResumeAt
+    ? new Intl.DateTimeFormat('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' }).format(new Date(activeEmergencyPause.scheduledResumeAt))
+    : '';
 
   useEffect(() => setTasks(currentDayTasks), [currentDayTasks]);
 
@@ -59,6 +62,7 @@ export default function DailyTasksPage() {
   }, [reducedMotion]);
 
   const submitCompletion = (taskId, submission) => {
+    if (isEmergencyPauseActive || isScheduledTaskActivitySuspended()) return;
     const task = tasks.find((item) => item.id === taskId);
     if (!task || task.status !== 'scheduled') return;
     setTasks((current) => current.map((item) => item.id === taskId ? { ...item, status: 'submitted', submission } : item));
@@ -68,11 +72,13 @@ export default function DailyTasksPage() {
   };
 
   const markMissedForPreview = (taskId) => {
+    if (isEmergencyPauseActive || isScheduledTaskActivitySuspended()) return;
     const task = tasks.find((item) => item.id === taskId);
     if (!task || task.status !== 'scheduled') return;
+    const result = addRecoveryQuest(task, { occurrenceKey: task.occurrenceKey, activationDate: currentDateKey, actionId: task.accountabilityActionId || `${task.id}-accountability-action` });
+    if (result.paused) return;
     setTasks((current) => current.map((item) => item.id === taskId ? { ...item, status: 'missed' } : item));
     saveOccurrence(task, 'missed');
-    const result = addRecoveryQuest(task, { occurrenceKey: task.occurrenceKey, activationDate: currentDateKey, actionId: task.accountabilityActionId || `${task.id}-accountability-action` });
     setFeedback(result.thresholdTriggered
       ? `“${task.name}” was marked missed. Its Recovery Quest triggered the 6-active limit: one Grace Point was deducted and the active group was cleared.`
       : result.quest
@@ -81,6 +87,7 @@ export default function DailyTasksPage() {
   };
 
   const markCompletedForPreview = (taskId) => {
+    if (isEmergencyPauseActive || isScheduledTaskActivitySuspended()) return;
     const task = tasks.find((item) => item.id === taskId);
     if (!task || task.status !== 'submitted') return;
     setTasks((current) => current.map((item) => item.id === taskId ? { ...item, status: 'completed' } : item));
@@ -89,6 +96,7 @@ export default function DailyTasksPage() {
   };
 
   const saveOccurrence = (task, status, extra = {}) => {
+    if (isEmergencyPauseActive || isScheduledTaskActivitySuspended()) return;
     if (!currentSchedule || !task?.occurrenceKey) return;
     setCurrentSchedule((current) => ({
       ...current,
@@ -108,6 +116,7 @@ export default function DailyTasksPage() {
   };
 
   const confirmTaskChange = ({ taskId, mode, draft }) => {
+    if (isEmergencyPauseActive || isScheduledTaskActivitySuspended()) return;
     const consumed = consumeWeeklyChange(weeklyAllowance, referenceDate);
     const original = currentSchedule?.tasks.find((item) => item.id === taskId);
     const visible = tasks.find((item) => item.id === taskId);
@@ -149,6 +158,8 @@ export default function DailyTasksPage() {
 
       {feedback && <div className="daily-task-feedback daily-task-reveal" role="status" aria-live="polite"><AppIcon name="shield" /><p>{feedback}</p><button type="button" aria-label="Dismiss message" onClick={() => setFeedback('')}><AppIcon name="close" /></button></div>}
 
+      {isEmergencyPauseActive && <div className="daily-task-pause-banner" role="status"><AppIcon name="clock" /><p><strong>Emergency Pause is active.</strong> Scheduled Task actions and new Recovery Quest generation are suspended{pauseResumeAt ? ` until ${pauseResumeAt} IST` : ''}.</p></div>}
+
       <div className="daily-task-overview-grid daily-task-reveal">
         <DailyTaskSummary metrics={metrics} milestones={dailyTaskMilestones} />
         <TaskCyclePanel context={schedule} allowance={allowance} />
@@ -160,7 +171,7 @@ export default function DailyTasksPage() {
           <span className="daily-task-list-heading__count">{metrics.completed}<i>/</i>{metrics.total}<small>completed</small></span>
         </div>
         <ol className="daily-task-list">
-          {tasks.map((task) => <TaskCard key={task.id} task={task} onSubmit={setSubmissionTask} onMarkMissed={markMissedForPreview} onMarkCompleted={markCompletedForPreview} onModify={(selectedTask, mode) => setChangeTarget({ task: selectedTask, mode })} canModify={allowance.remaining > 0} changesExhausted={allowance.remaining === 0} />)}
+          {tasks.map((task) => <TaskCard key={task.id} task={task} onSubmit={setSubmissionTask} onMarkMissed={markMissedForPreview} onMarkCompleted={markCompletedForPreview} onModify={(selectedTask, mode) => setChangeTarget({ task: selectedTask, mode })} canModify={!isEmergencyPauseActive && allowance.remaining > 0} changesExhausted={allowance.remaining === 0} paused={isEmergencyPauseActive} />)}
         </ol>
       </section>
 

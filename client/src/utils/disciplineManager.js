@@ -159,7 +159,7 @@ export function processDailyReset(state, {
   const levelBeforeDrain = getLevelFromTotalXp(next.totalXp);
   const xpRequirement = getLevelXpRequirement(levelBeforeDrain);
   const activeCount = Math.max(0, Math.floor(activeRecoveryQuestCount));
-  const xpDrained = calculateRecoveryQuestXpDrain(xpRequirement, activeCount);
+  const xpDrained = protectedDay ? 0 : calculateRecoveryQuestXpDrain(xpRequirement, activeCount);
   const xpBeforeDrain = next.totalXp;
   next.totalXp = Math.max(0, round2(next.totalXp - xpDrained));
   const levelAfterDrain = getLevelFromTotalXp(next.totalXp);
@@ -167,6 +167,7 @@ export function processDailyReset(state, {
     id: makeId('recovery-xp-drain', dateKey),
     date: dateKey,
     activeRecoveryQuestCount: activeCount,
+    emergencyPause: protectedDay,
     levelAtCalculation: levelBeforeDrain,
     levelRequirement: xpRequirement,
     ratePerQuest: RECOVERY_QUEST_XP_DRAIN_RATE,

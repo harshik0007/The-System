@@ -103,7 +103,7 @@ function ActivityTooltip({ dateKey, record, todayKey, position, tooltipRef }) {
   );
 }
 
-export default function DisciplineActivityMap({ disciplineState, schedule, compact = false }) {
+export default function DisciplineActivityMap({ disciplineState, schedule, emergencyPauseState, compact = false }) {
   const todayKey = getIstDateKey();
   const dateKeys = useMemo(() => getRollingActivityDates(todayKey, 365), [todayKey]);
   const groupedMonths = useMemo(() => {
@@ -124,8 +124,8 @@ export default function DisciplineActivityMap({ disciplineState, schedule, compa
   const [tooltipPosition, setTooltipPosition] = useState(null);
   const tooltipRef = useRef(null);
   const tooltipAnchorRef = useRef(null);
-  const selectedRecord = getVisibleActivityRecord({ dateKey: selectedDate, disciplineState, schedule, todayKey, emergencyPauseDates: disciplineState.emergencyPauseDates || [] });
-  const tooltipRecord = tooltipDate ? getVisibleActivityRecord({ dateKey: tooltipDate, disciplineState, schedule, todayKey, emergencyPauseDates: disciplineState.emergencyPauseDates || [] }) : null;
+  const selectedRecord = getVisibleActivityRecord({ dateKey: selectedDate, disciplineState, schedule, todayKey, emergencyPauseDates: disciplineState.emergencyPauseDates || [], emergencyPauseState });
+  const tooltipRecord = tooltipDate ? getVisibleActivityRecord({ dateKey: tooltipDate, disciplineState, schedule, todayKey, emergencyPauseDates: disciplineState.emergencyPauseDates || [], emergencyPauseState }) : null;
   const selectedQualification = getActivityQualificationLabel(selectedRecord, selectedDate, todayKey);
   const activityDays = Object.values(disciplineState.dailyRecords).filter((record) => record.completedTaskCount > 0).length;
 
