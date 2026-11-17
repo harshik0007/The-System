@@ -189,7 +189,7 @@ function ScheduleReview({ cycleLength, cycleDays, tasks, validation, attempted, 
 }
 
 export default function CreateTaskSchedulePage() {
-  const { setCurrentSchedule } = useTaskSchedule();
+  const { currentSchedule, setCurrentSchedule } = useTaskSchedule();
   const reducedMotion = useReducedMotion();
   const [step, setStep] = useState(1);
   const [cycleLength, setCycleLength] = useState(null);
@@ -204,6 +204,16 @@ export default function CreateTaskSchedulePage() {
   const cycleDays = useMemo(() => cycleLength ? createCycleDays(cycleLength, startDate) : [], [cycleLength, startDate]);
   const validation = useMemo(() => getScheduleValidation(cycleLength, startDate, tasks), [cycleLength, startDate, tasks]);
 
+  if (currentSchedule?.source === 'created') return (
+    <div className="task-creation-page">
+      <section className="task-builder-success" aria-labelledby="schedule-exists-title">
+        <p className="app-eyebrow">SCHEDULE ALREADY ACTIVE</p><h1 id="schedule-exists-title">Manage Tasks individually.</h1>
+        <p>To preserve the weekly Task change allowance, update one future Task at a time from Daily Tasks. Existing historical records remain protected.</p>
+        <Link className="task-builder-button task-builder-button--primary" to="/app/tasks">Return to Daily Tasks <span aria-hidden="true">↗</span></Link>
+      </section>
+    </div>
+  );
+
   const selectCycleLength = (length) => {
     setCycleLength(length);
     setActiveDay((day) => Math.min(day, length));
@@ -215,7 +225,7 @@ export default function CreateTaskSchedulePage() {
   const confirmSchedule = () => {
     setAttempted(true);
     if (!validation.valid) return;
-    setCurrentSchedule({ cycleLength, startDate: cycleLength === 7 ? '' : startDate, tasks: tasks.map((task) => ({ ...task, cycleDays: [...task.cycleDays] })), confirmedAt: new Date().toISOString() });
+    setCurrentSchedule({ cycleLength, startDate: cycleLength === 7 ? '' : startDate, source: 'created', tasks: tasks.map((task) => ({ ...task, cycleDays: [...task.cycleDays] })), taskHistory: currentSchedule?.taskHistory || [], occurrences: currentSchedule?.occurrences || {}, confirmedAt: new Date().toISOString() });
     setSuccess(true);
   };
 

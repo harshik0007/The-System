@@ -2,8 +2,7 @@ import AppIcon from '../app/AppIcon.jsx';
 
 const WEEKDAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-export default function TaskCyclePanel({ context, changesAllowed, changesUsed }) {
-  const remaining = Math.max(0, changesAllowed - changesUsed);
+export default function TaskCyclePanel({ context, allowance }) {
 
   return (
     <section className="app-panel task-cycle-panel" aria-labelledby="task-cycle-title">
@@ -22,11 +21,11 @@ export default function TaskCyclePanel({ context, changesAllowed, changesUsed })
       </ol>
 
       <div className="task-change-allowance">
-        <div className="task-change-allowance__copy"><div><p className="app-eyebrow">WEEKLY TASK CHANGES · EXAMPLE</p><strong>{changesUsed} of {changesAllowed} used</strong></div><span>{remaining} remaining</span></div>
-        <div className="task-change-allowance__segments" aria-label={`${changesUsed} of ${changesAllowed} demonstration weekly changes used`}>
-          {Array.from({ length: changesAllowed }, (_, index) => <i className={index < changesUsed ? 'is-used' : ''} key={index} />)}
+        <div className="task-change-allowance__copy"><div><p className="app-eyebrow">WEEKLY TASK CHANGES</p><strong>{allowance.used} / {allowance.maximum} used</strong></div><span>{allowance.remaining} remaining</span></div>
+        <div className="task-change-allowance__segments" aria-label={`${allowance.used} of ${allowance.maximum} weekly task changes used`}>
+          {Array.from({ length: allowance.maximum }, (_, index) => <i className={index < allowance.used ? 'is-used' : ''} key={index} />)}
         </div>
-        <p>Calendar week: Monday–Sunday. Edits, replacements and rescheduling count. Resets Monday; unused changes do not carry forward.</p>
+        <p><strong className="task-change-allowance__range">{allowance.rangeLabel}</strong> · Next reset Monday, {allowance.nextResetLabel}. Unused changes do not carry forward.</p>
       </div>
     </section>
   );

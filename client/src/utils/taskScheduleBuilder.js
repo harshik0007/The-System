@@ -1,5 +1,15 @@
 export const CYCLE_WEEKDAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
+export function getIstDateKey(date = new Date()) {
+  const parts = new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Kolkata', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(date);
+  const values = Object.fromEntries(parts.map(({ type, value }) => [type, value]));
+  return `${values.year}-${values.month}-${values.day}`;
+}
+
+export function getTaskOccurrenceKey(taskId, cycleDay, dateKey) {
+  return `${taskId}:${cycleDay}:${dateKey}`;
+}
+
 export function createCycleDays(cycleLength, startDate) {
   return Array.from({ length: cycleLength }, (_, index) => {
     const dayNumber = index + 1;

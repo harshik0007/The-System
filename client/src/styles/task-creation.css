@@ -176,7 +176,6 @@
 .task-builder-confirm-hint { margin: -10px 0 0; color: #b69569; font-size: .55rem; text-align: right; }
 .task-builder-disclosure { display: flex; align-items: flex-start; gap: 7px; }
 .task-builder-disclosure .app-icon { width: 13px; height: 13px; flex: 0 0 auto; color: #6c94a7; }
-.daily-tasks-create-link { min-height: 36px; padding-inline: 12px; font-size: .6rem; text-decoration: none; }
 .task-builder-success { display: grid; min-height: 55vh; align-content: center; justify-items: center; gap: 12px; padding: 30px; border: 1px solid rgb(77 224 239 / 19%); border-radius: 10px; background: radial-gradient(ellipse at 50% 20%, rgb(38 124 147 / 15%), transparent 60%), linear-gradient(145deg, #0c1b29, #080f19); text-align: center; }
 .task-builder-success__mark { display: grid; width: 50px; height: 50px; place-items: center; border: 1px solid rgb(91 206 185 / 47%); border-radius: 50%; background: rgb(27 94 80 / 32%); color: #9be3ce; font-size: 1.2rem; }
 .task-builder-success .app-eyebrow { margin: 3px 0 0; color: #7ed3c4; }
