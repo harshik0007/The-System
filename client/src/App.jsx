@@ -1,10 +1,11 @@
 import { lazy, Suspense, useEffect } from 'react';
-import { BrowserRouter, Navigate, Route } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, useLocation } from 'react-router-dom';
 import VoidShardCursor from './components/VoidShardCursor.jsx';
 import PageTransition from './components/PageTransition.jsx';
+import EmergencyPauseAtmosphere from './components/app/EmergencyPauseAtmosphere.jsx';
 import LandingPage from './pages/LandingPage.jsx';
 import { applicationNavigationItems } from './data/applicationNavigation.js';
-import { TaskScheduleProvider } from './context/TaskScheduleContext.jsx';
+import { TaskScheduleProvider, useTaskSchedule } from './context/TaskScheduleContext.jsx';
 
 const routeLoaders = {
   signup: () => import('./pages/auth/SignUpPage.jsx'),
@@ -99,11 +100,20 @@ function RouteView({ children }) {
   return <Suspense fallback={null}>{children}</Suspense>;
 }
 
+function EmergencyPauseAtmosphereGate() {
+  const { pathname } = useLocation();
+  const { isEmergencyPauseActive } = useTaskSchedule();
+
+  if (pathname !== '/app' && !pathname.startsWith('/app/')) return null;
+  return <EmergencyPauseAtmosphere active={isEmergencyPauseActive} />;
+}
+
 export default function App() {
   return (
     <BrowserRouter>
       <TaskScheduleProvider>
       <RoutePrefetch />
+      <EmergencyPauseAtmosphereGate />
       <PageTransition>
         <Route path="/" element={<LandingPage />} />
         <Route path="/signup" element={<RouteView><SignUpPage /></RouteView>} />
