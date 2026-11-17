@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import BrandLogo from './BrandLogo.jsx';
 
 const navigation = [
@@ -11,6 +12,11 @@ const navigation = [
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const location = useLocation();
+  const onLanding = location.pathname === '/';
+  const links = onLanding ? navigation : [
+    ['About', '/about'], ['How it works', '/how-it-works'], ['Features', '/features'], ['Seven ranks', '/ranks'], ['Rules', '/rules'],
+  ];
 
   useEffect(() => {
     const updateScroll = () => setScrolled(window.scrollY > 30);
@@ -23,7 +29,7 @@ export default function Navbar() {
 
   return (
     <header className={`site-header${scrolled ? ' is-scrolled' : ''}`}>
-      <BrandLogo onClick={closeMenu} />
+      <BrandLogo href={onLanding ? '#top' : '/'} onClick={closeMenu} />
       <button
         className="menu-toggle"
         type="button"
@@ -35,11 +41,13 @@ export default function Navbar() {
         <span /><span />
       </button>
       <nav className={`main-nav${menuOpen ? ' is-open' : ''}`} id="main-navigation" aria-label="Main navigation">
-        {navigation.map(([label, href]) => <a className="nav-link" href={href} key={href} onClick={closeMenu}>{label}</a>)}
+        {links.map(([label, href]) => onLanding
+          ? <a className="nav-link" href={href} key={href} onClick={closeMenu}>{label}</a>
+          : <Link className="nav-link" to={href} key={href} onClick={closeMenu}>{label}</Link>)}
       </nav>
       <div className="nav-actions">
-        <a className="nav-login" href="/login">Log in</a>
-        <a className="nav-signup" href="/signup">Sign up</a>
+        <Link className="nav-login" to="/login">Log in</Link>
+        <Link className="nav-signup" to="/signup">Sign up</Link>
       </div>
     </header>
   );

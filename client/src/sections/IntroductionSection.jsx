@@ -8,8 +8,8 @@ export default function IntroductionSection() {
       <div className="intro-grid">
         <ScrollReveal as="h2" className="section-title" id="intro-title">A clearer way<br /><em>to move forward.</em></ScrollReveal>
         <ScrollReveal className="intro-copy">
-          <p>THE SYSTEM is a personal progression framework built around the work you choose to do. Set a direction, follow through on meaningful actions, and keep a record of what you accomplish.</p>
-          <p>Your path is yours to shape. Progress begins with one intentional step.</p>
+          <p>THE SYSTEM is a personal progression framework built around your daily Task schedule. Set a direction, follow through on meaningful actions, and keep a record of what you accomplish.</p>
+          <p>Your path is yours to shape. Progress begins with one intentional Task.</p>
         </ScrollReveal>
       </div>
       <div className="principle-strip scroll-reveal" aria-label="Three principles">

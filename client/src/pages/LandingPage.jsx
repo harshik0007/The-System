@@ -66,21 +66,21 @@ export default function LandingPage() {
       });
       gsap.to('.progress-track-fill', {
         scaleX: 1, ease: 'none', transformOrigin: 'left center',
-        scrollTrigger: { trigger: '.stages-grid', start: 'top 80%', end: 'bottom 58%', scrub: 0.8 },
+        scrollTrigger: { trigger: '.ranks-grid', start: 'top 80%', end: 'bottom 58%', scrub: 0.8 },
       });
 
-      gsap.fromTo('.stage-card',
+      gsap.fromTo('.ranks-grid .rank-tile',
         { autoAlpha: 0, y: 30, scale: 0.96 },
         {
           autoAlpha: 1, y: 0, scale: 1, stagger: 0.12, duration: 0.68, ease: 'power3.out',
-          scrollTrigger: { trigger: '.stages-grid', start: 'top 82%', toggleActions: 'play none none reverse' },
+          scrollTrigger: { trigger: '.ranks-grid', start: 'top 82%', toggleActions: 'play none none reverse' },
         },
       );
-      gsap.fromTo('.stage-card .emblem-stroke:not(.emblem-core)',
+      gsap.fromTo('.ranks-grid .emblem-stroke:not(.emblem-core)',
         { strokeDasharray: 240, strokeDashoffset: 240 },
         {
           strokeDashoffset: 0, stagger: { each: 0.035, from: 'start' }, duration: 0.9, ease: 'power2.out',
-          scrollTrigger: { trigger: '.stages-grid', start: 'top 78%', toggleActions: 'play none none reverse' },
+          scrollTrigger: { trigger: '.ranks-grid', start: 'top 78%', toggleActions: 'play none none reverse' },
         },
       );
       gsap.from('.final-cta .shadow-shape', {

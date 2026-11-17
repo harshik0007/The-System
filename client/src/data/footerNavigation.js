@@ -2,37 +2,37 @@ export const footerNavigation = [
   {
     title: 'Product',
     links: [
-      { label: 'How It Works', href: '#how-it-works' },
-      { label: 'Features', href: '#features' },
-      { label: 'Seven Ranks', href: '#progression' },
-      { label: 'System Rules', pending: true },
+      { label: 'How It Works', href: '/how-it-works' },
+      { label: 'Features', href: '/features' },
+      { label: 'Seven Ranks', href: '/ranks' },
+      { label: 'System Rules', href: '/rules' },
     ],
   },
   {
     title: 'Resources',
     links: [
-      { label: 'Getting Started', pending: true },
-      { label: 'Proof Submission Guide', pending: true },
-      { label: 'FAQ', pending: true },
-      { label: 'Help Center', pending: true },
+      { label: 'Getting Started', href: '/getting-started' },
+      { label: 'Proof Verification', href: '/legal/proof-verification' },
+      { label: 'FAQ', href: '/faq' },
+      { label: 'Help Center', href: '/contact' },
     ],
   },
   {
     title: 'Legal',
     links: [
-      { label: 'Terms & Conditions', pending: true },
-      { label: 'Privacy Policy', pending: true },
-      { label: 'Cookie Policy', pending: true },
-      { label: 'Data Retention & Deletion Policy', pending: true },
+      { label: 'Terms & Conditions', href: '/legal/terms' },
+      { label: 'Privacy Policy', href: '/legal/privacy' },
+      { label: 'Cookie Policy', href: '/legal/cookies' },
+      { label: 'Data Retention & Deletion Policy', href: '/legal/data-retention' },
     ],
   },
   {
     title: 'Guidelines',
     links: [
-      { label: 'Community Guidelines', pending: true },
-      { label: 'Acceptable Use Policy', pending: true },
-      { label: 'AI & Proof Verification Policy', pending: true },
-      { label: 'Account & Progression Reset Policy', pending: true },
+      { label: 'Community Guidelines', href: '/legal/community-guidelines' },
+      { label: 'Acceptable Use Policy', href: '/legal/acceptable-use' },
+      { label: 'AI & Proof Verification Policy', href: '/legal/ai-disclosure' },
+      { label: 'Account & Progression Reset Policy', href: '/legal/account-reset' },
     ],
   },
 ];

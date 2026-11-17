@@ -4,6 +4,8 @@ import App from './App.jsx';
 import './styles/tokens.css';
 import './styles/global.css';
 import './styles/void-shard-cursor.css';
+import './styles/auth.css';
+import './styles/page-transitions.css';
 
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>

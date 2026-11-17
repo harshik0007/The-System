@@ -1,5 +1,6 @@
 import BrandLogo from './BrandLogo.jsx';
 import { footerNavigation } from '../data/footerNavigation.js';
+import { Link, useLocation } from 'react-router-dom';
 
 function FooterDestination({ label, href, pending }) {
   if (pending) {
@@ -10,19 +11,21 @@ function FooterDestination({ label, href, pending }) {
     );
   }
 
+  if (href.startsWith('/')) return <Link className="footer-destination" to={href}>{label}</Link>;
   return <a className="footer-destination" href={href}>{label}</a>;
 }
 
 export default function Footer() {
+  const location = useLocation();
   return (
     <footer className="site-footer">
       <div className="footer-main">
         <div className="footer-brand-block">
-          <BrandLogo className="brand-logo--footer" />
+          <BrandLogo href={location.pathname === '/' ? '#top' : '/'} className="brand-logo--footer" />
           <p className="footer-tagline">Progress is built, not given.</p>
           <div className="footer-contact-links" aria-label="Contact options">
-            <FooterDestination label="Contact" pending />
-            <FooterDestination label="Grievance contact" pending />
+            <FooterDestination label="Contact" href="/contact" />
+            <FooterDestination label="Grievance information" href="/legal/grievance" />
           </div>
         </div>
 
@@ -44,7 +47,7 @@ export default function Footer() {
 
       <div className="footer-bottom">
         <small>© {new Date().getFullYear()} THE SYSTEM</small>
-        <a href="#top" className="back-top">Back to top <span aria-hidden="true">↑</span></a>
+        {location.pathname === '/' ? <a href="#top" className="back-top">Back to top <span aria-hidden="true">↑</span></a> : <Link to={location.pathname} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="back-top">Back to top <span aria-hidden="true">↑</span></Link>}
       </div>
     </footer>
   );
