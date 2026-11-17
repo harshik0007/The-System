@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import AppIcon from '../../components/app/AppIcon.jsx';
-import GraceChargeSummary from '../../components/app/GraceChargeSummary.jsx';
+import GracePointSummary from '../../components/app/GracePointSummary.jsx';
 import { useTaskSchedule } from '../../context/TaskScheduleContext.jsx';
 import { RECOVERY_STATUS } from '../../utils/recoveryQuestManager.js';
 import { useReducedMotion } from '../../hooks/useReducedMotion.js';
@@ -20,7 +20,7 @@ function formatDate(date) {
 }
 
 function statusLabel(quest) {
-  if (quest.status === RECOVERY_STATUS.THRESHOLD_CLEARED) return 'Cleared — Grace Charge Threshold';
+  if (quest.status === RECOVERY_STATUS.THRESHOLD_CLEARED) return 'Cleared — Grace Point Threshold';
   if (quest.status === RECOVERY_STATUS.EXPIRED) return 'Failed / Expired';
   return quest.status[0].toUpperCase() + quest.status.slice(1);
 }
@@ -54,14 +54,14 @@ function QuestCard({ quest, onComplete, onExpire }) {
         <p>Activated {formatDate(quest.activationDate)} · its original activation date anchors this window.</p>
       </div> : <div className="recovery-quest-card__history">
         {completed && <span>Completed {formatDate(quest.completedDate)}</span>}
-        {expired && <span>Expired {formatDate(quest.expiryDate)} · individual deduction: −{quest.chargeEventId ? '1' : '0'} Grace Charge</span>}
+        {expired && <span>Expired {formatDate(quest.expiryDate)} · individual deduction: −{quest.gracePointEventId ? '1' : '0'} Grace Point</span>}
         {quest.status === RECOVERY_STATUS.THRESHOLD_CLEARED && <p>Automatically cleared when active Recovery Quests exceeded five. No completion is required, and no individual expiry deduction applies.</p>}
       </div>}
       {active && <div className="recovery-quest-card__actions">
         <button type="button" className="recovery-complete-button" onClick={() => onComplete(quest)}><AppIcon name="tasks" />Complete Recovery Quest</button>
         <button type="button" className="recovery-expire-button" onClick={() => onExpire(quest)}>Simulate expiry</button>
       </div>}
-      {completed && <p className="recovery-quest-card__outcome">Completed in this preview. No Grace Charge was deducted and no XP was awarded.</p>}
+      {completed && <p className="recovery-quest-card__outcome">Completed in this preview. No Grace Point was deducted and no XP was awarded.</p>}
     </article>
   );
 }
@@ -103,7 +103,7 @@ export default function RecoveryQuestsPage() {
 
   const handleExpiryPreview = (quest) => {
     expireQuest(quest.id);
-    setFeedback(`“${quest.accountabilityActionTitle}” was marked expired for this preview. One Grace Charge was deducted.`);
+    setFeedback(`“${quest.accountabilityActionTitle}” was marked expired for this preview. One Grace Point was deducted.`);
   };
 
   return (
@@ -123,10 +123,10 @@ export default function RecoveryQuestsPage() {
             <div className="is-cleared"><strong>{counts.cleared}</strong><span>Threshold cleared</span></div>
           </div>
         </section>
-        <GraceChargeSummary recoveryState={recoveryState} />
+        <GracePointSummary recoveryState={recoveryState} />
       </div>
 
-      {activeCount >= 4 && <div className={`recovery-threshold-note${activeCount === 5 ? ' is-at-limit' : ''}`} role="status"><AppIcon name="activity" /><span><strong>{activeCount === 5 ? 'Active quest limit reached.' : `${5 - activeCount} active quest${5 - activeCount === 1 ? '' : 's'} until the limit.`}</strong> Generating a 6th active quest deducts one Grace Charge and clears the full active group.</span></div>}
+      {activeCount >= 4 && <div className={`recovery-threshold-note${activeCount === 5 ? ' is-at-limit' : ''}`} role="status"><AppIcon name="activity" /><span><strong>{activeCount === 5 ? 'Active quest limit reached.' : `${5 - activeCount} active quest${5 - activeCount === 1 ? '' : 's'} until the limit.`}</strong> Generating a 6th active quest deducts one Grace Point and clears the full active group.</span></div>}
       {feedback && <p className="recovery-feedback" role="status"><AppIcon name="shield" />{feedback}<button type="button" aria-label="Dismiss message" onClick={() => setFeedback('')}><AppIcon name="close" /></button></p>}
 
       <section className="recovery-quest-section" aria-labelledby="recovery-quest-list-title">
@@ -141,9 +141,9 @@ export default function RecoveryQuestsPage() {
 
       <div className="recovery-rules-grid">
         <article className="app-panel recovery-rule-card"><span className="recovery-rule-card__icon"><AppIcon name="clock" /></span><div><p className="app-eyebrow">RECOVERY WINDOW</p><h3>Three days to complete</h3><p>Each quest keeps its original activation date and a three-day Recovery Window. Remaining-day values here are demonstration data; exact expiry timing is not finalized.</p></div></article>
-        <article className="app-panel recovery-rule-card"><span className="recovery-rule-card__icon recovery-rule-card__icon--warning"><AppIcon name="activity" /></span><div><p className="app-eyebrow">ACTIVE QUEST LIMIT</p><h3>Five active quests maximum</h3><p>At the 6th active quest, one Grace Charge is deducted and the active group is cleared. Cleared records remain in All and do not expire individually.</p></div></article>
+        <article className="app-panel recovery-rule-card"><span className="recovery-rule-card__icon recovery-rule-card__icon--warning"><AppIcon name="activity" /></span><div><p className="app-eyebrow">ACTIVE QUEST LIMIT</p><h3>Five active quests maximum</h3><p>At the 6th active quest, one Grace Point is deducted and the active group is cleared. Cleared records remain in All and do not expire individually.</p></div></article>
       </div>
-      <p className="recovery-disclosure"><AppIcon name="activity" />Demonstration data only. Changes are held in shared frontend state and reset when the page is refreshed.</p>
+      <p className="recovery-disclosure"><AppIcon name="activity" />Demonstration data only. Changes persist through refresh in this browser tab's session, then clear when the session ends.</p>
 
       {confirmQuest && <div className="recovery-modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setConfirmQuest(null); }}>
         <section className="recovery-confirm-modal" role="dialog" aria-modal="true" aria-labelledby="recovery-confirm-title" aria-describedby="recovery-confirm-description">
@@ -153,7 +153,7 @@ export default function RecoveryQuestsPage() {
           <h2 id="recovery-confirm-title">Complete this Recovery Quest?</h2>
           <p id="recovery-confirm-description">Confirm that you completed the action committed to when this task was missed.</p>
           <div className="recovery-confirm-modal__details"><span>ORIGINAL MISSED TASK</span><strong>{confirmQuest.originalTaskName}</strong><span>ACCOUNTABILITY ACTION</span><strong>{confirmQuest.accountabilityActionTitle}</strong><p>{confirmQuest.accountabilityActionDescription}</p></div>
-          <p className="recovery-confirm-modal__note">This preview will mark the quest complete. It does not submit proof, verify the action, deduct a Grace Charge or award XP.</p>
+          <p className="recovery-confirm-modal__note">This preview will mark the quest complete. It does not submit proof, verify the action, deduct a Grace Point or award XP.</p>
           <div className="recovery-confirm-modal__actions"><button type="button" className="recovery-confirm-modal__cancel" onClick={() => setConfirmQuest(null)}>Keep Active</button><button type="button" className="recovery-complete-button" onClick={confirmCompletion}>Confirm Completion</button></div>
         </section>
       </div>}

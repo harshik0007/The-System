@@ -25,9 +25,10 @@
 .grace-charge-summary__balance .app-eyebrow { margin-bottom: 3px; }
 .grace-charge-summary__balance h2 { margin: 0; color: #d6edfa; font: 500 1.18rem/1.2 var(--font-display); }
 .grace-charge-summary__balance h2 span { color: #8299ae; font: 400 .58rem var(--font-body); }
-.grace-charge-summary__pips { display: flex; gap: 6px; padding-left: 45px; }
-.grace-charge-summary__pips span { width: 23px; height: 4px; border-radius: 8px; background: rgb(101 123 143 / 25%); }
+.grace-charge-summary__pips { display: flex; align-items: center; gap: 8px; padding-left: 45px; }
+.grace-charge-summary__pips span { width: 23px; height: 4px; flex: 0 0 auto; border-radius: 8px; background: rgb(101 123 143 / 25%); }
 .grace-charge-summary__pips .is-available { background: linear-gradient(90deg, #438eae, #59c2d4); box-shadow: 0 0 10px rgb(80 194 220 / 18%); }
+.grace-charge-summary__pips strong { color: #7390a7; font: 500 .45rem var(--font-mono); letter-spacing: .08em; }
 .grace-charge-summary__explanation { margin: 0; color: #8197ab; font-size: .58rem; line-height: 1.55; }
 .grace-charge-summary__warning { margin: 0; padding: 9px 10px; border: 1px solid rgb(226 130 95 / 27%); border-radius: 5px; background: rgb(91 41 32 / 19%); color: #d7a193; font-size: .59rem; line-height: 1.5; }
 .grace-charge-summary__warning strong { color: #f2b49f; }

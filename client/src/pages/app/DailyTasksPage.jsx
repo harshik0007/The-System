@@ -74,7 +74,7 @@ export default function DailyTasksPage() {
     saveOccurrence(task, 'missed');
     const result = addRecoveryQuest(task, { occurrenceKey: task.occurrenceKey, activationDate: currentDateKey, actionId: task.accountabilityActionId || `${task.id}-accountability-action` });
     setFeedback(result.thresholdTriggered
-      ? `“${task.name}” was marked missed. Its Recovery Quest triggered the 6-active limit: one Grace Charge was deducted and the active group was cleared.`
+      ? `“${task.name}” was marked missed. Its Recovery Quest triggered the 6-active limit: one Grace Point was deducted and the active group was cleared.`
       : result.quest
         ? `“${task.name}” was marked missed. Its Accountability Action is now an active Recovery Quest.`
         : `“${task.name}” was marked missed, but no Recovery Quest was created because its Accountability Action is missing.`);
@@ -156,7 +156,7 @@ export default function DailyTasksPage() {
 
       <section className="daily-task-list-section" aria-labelledby="daily-task-list-title">
         <div className="daily-task-list-heading daily-task-reveal">
-        <div><p className="app-eyebrow">{schedule.weekday.toUpperCase()} · {currentSchedule ? 'YOUR SCHEDULE' : 'EXAMPLE SCHEDULE'}</p><h2 id="daily-task-list-title">Your scheduled tasks</h2><p>{currentSchedule ? 'Your current cycle-day schedule is shown below. This frontend preview resets on refresh.' : 'Seven demonstration tasks for this schedule. The number shown is not a maximum.'}</p></div>
+        <div><p className="app-eyebrow">{schedule.weekday.toUpperCase()} · {currentSchedule ? 'YOUR SCHEDULE' : 'EXAMPLE SCHEDULE'}</p><h2 id="daily-task-list-title">Your scheduled tasks</h2><p>{currentSchedule ? 'Your current cycle-day schedule and session activity are shown below.' : 'Seven demonstration tasks for this schedule. The number shown is not a maximum.'}</p></div>
           <span className="daily-task-list-heading__count">{metrics.completed}<i>/</i>{metrics.total}<small>completed</small></span>
         </div>
         <ol className="daily-task-list">
@@ -172,14 +172,14 @@ export default function DailyTasksPage() {
           <p>When a scheduled task is missed, its associated Accountability Action activates as a Recovery Quest. The ordinary missed task does not carry forward; only its associated Recovery Quest does.</p>
           <ul>
             <li>Each Recovery Quest has a three-day Recovery Window and must be completed before its deadline.</li>
-            <li>If it expires incomplete, one Grace Charge is deducted.</li>
-            <li>Generating a 6th active Recovery Quest deducts one Grace Charge and clears the active group.</li>
+            <li>If it expires incomplete, one Grace Point is deducted.</li>
+            <li>Generating a 6th active Recovery Quest deducts one Grace Point and clears the active group.</li>
           </ul>
           <Link className="dashboard-text-link" to="/app/recovery-quests">Open Recovery Quests <span aria-hidden="true">↗</span></Link>
         </div>
       </section>
 
-      <p className="daily-tasks-disclosure"><AppIcon name="activity" />This page uses local demonstration data only. Changes reset on refresh and are not saved to an account or sent for real verification.</p>
+      <p className="daily-tasks-disclosure"><AppIcon name="activity" />This page uses session-only demonstration data. Changes survive refresh in this browser tab, then clear when the session ends. Nothing is saved to an account or sent for real verification.</p>
 
       <TaskSubmissionDialog task={submissionTask} onClose={() => setSubmissionTask(null)} onSubmit={submitCompletion} />
       <TaskChangeDialog task={changeTarget?.task} mode={changeTarget?.mode} cycleLength={currentSchedule?.cycleLength || dailyTaskScheduleDemo.cycleLength} tasks={currentSchedule?.tasks || []} allowance={allowance} onConfirm={confirmTaskChange} onClose={() => setChangeTarget(null)} />

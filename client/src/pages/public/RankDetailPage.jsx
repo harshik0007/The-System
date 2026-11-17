@@ -36,7 +36,7 @@ export default function RankDetailPage() {
             <div><span>Rank position</span><strong>{rank.number} / 07</strong><small>{Number(rank.number) === 7 ? 'Starting Rank' : Number(rank.number) === 2 ? 'Second-highest Rank' : isHighest ? 'Highest Rank' : `${Number(rank.number) - 1} Ranks stand above`}</small></div>
           </div>
 
-          <RankBenefitSection benefit={rank.xpBenefit} />
+          <RankBenefitSection rank={rank} />
 
           <p className="rank-demo-note">{rankDemoDisclosure}</p>
         </div>

@@ -10,7 +10,7 @@ This document is the current product-rule reference for public frontend content.
 | Mandatory user-selected consequence | Accountability Action |
 | Activated consequence | Recovery Quest |
 | Three-day completion period | Recovery Window |
-| Remaining missed-task chances | Grace Charges |
+| Recovery protection balance | Grace Points |
 | Sustained-discipline reward currency | Discipline Points |
 | Experience | XP |
 | Progression | Level |
@@ -20,7 +20,7 @@ This document is the current product-rule reference for public frontend content.
 | Competitive ranking | Leaderboard |
 | Progress reset | Progression Reset |
 
-Discipline Points and Grace Charges are official names and must not be renamed. Use Member or User for a person; identity naming remains undecided.
+Discipline Points and Grace Points are official names. Use Member or User for a person; identity naming remains undecided.
 
 ## 1. Task schedule and cycles
 
@@ -42,16 +42,18 @@ Discipline Points and Grace Charges are official names and must not be renamed. 
 - Do not generate generic or unrelated Recovery Quests.
 - Each Recovery Quest has a 3-day Recovery Window.
 - An unfinished Recovery Quest carries forward during its Recovery Window.
-- If it is incomplete when the Recovery Window expires, it becomes a failed quest and deducts 1 Grace Charge.
+- If it is incomplete when the Recovery Window expires, it becomes a failed quest and deducts 1 Grace Point.
+- Each Active Recovery Quest drains 7% of the current Level XP requirement at daily reset. Completed, expired and threshold-cleared Quests stop future drains; prior deductions are not reversed.
 
-## 3. Grace Charges and Progression Reset
+## 3. Grace Points and Progression Reset
 
-- A Member starts with 3 Grace Charges.
-- If the System detects 3 failed quests in a day, deduct another 1 Grace Charge.
-- Both deductions can occur on the same day: an expired Recovery Quest can deduct 1, while the 3-failed-quests condition deducts another 1. Therefore, 2 Grace Charges can be deducted in one day when both triggers apply.
-- Exhausting all Grace Charges causes a Progression Reset.
+- A Member starts with 3 Grace Points, with no maximum balance.
+- An individually expired Recovery Quest deducts 1 Grace Point.
+- Up to 5 Active Recovery Quests are allowed. Generating a 6th deducts exactly 1 Grace Point and clears all Active Recovery Quests. Their history remains; cleared Quests do not incur additional per-Quest deductions.
+- One Discipline Point can be redeemed for one Grace Point. A successful redemption starts a rolling 72-hour cooldown; a failed redemption does not.
+- Exhausting all Grace Points causes a Progression Reset.
 - A Progression Reset resets progression while preserving the account.
-- **Unresolved:** which exact progression fields reset, and whether the failed-quest daily threshold can trigger more than once on the same calendar day if additional groups of three are detected.
+- A Progression Reset creates a new progression run for one-time Rank-entry reward eligibility, preserves prior reward history and Member Since, and does not break the Discipline Streak.
 
 ## 4. XP and completion milestones
 
@@ -71,7 +73,7 @@ Discipline Points and Grace Charges are official names and must not be renamed. 
 - Ranks provide rank-specific XP benefits and unique profile badges.
 - Each Rank has an original geometric emblem and a collectible badge with its Rank number, name, THE SYSTEM branding, accent colour and a visible serial plate. The reusable frontend badge component is intended for future Member Profile, Dashboard, Leaderboard and Rank Details use.
 - Badge visual identities: Origin compass crest; Ember flame crest; Surge three-wave crest; Vector directional diamond; Apex mountain and crown; Zenith SOLAR DIADEM, an elegant rising solar crown with a gold frame and platinum core; Continuum ECLIPSE CROWN, a red-dominant angular celestial crest with a symmetrical crown silhouette, central star core, metallic highlights and eclipse orbit. Approved visual source files are preserved in `design-reference/ranks/` and are recreated as reusable SVG artwork rather than displayed as flattened page images.
-- **Unresolved:** Rank thresholds, exact XP benefits, and whether a Progression Reset changes profile badge history. No qualification thresholds or numerical XP benefits are assigned here.
+- Current Rank rewards are described in §6. Rank-entry XP amounts remain pending configuration. The frontend Level thresholds are demonstration values and are not finalized product thresholds.
 
 ### Demonstration rank counts
 
@@ -99,17 +101,22 @@ These frontend values are examples only; they are not live statistics or badge a
 - Example for Zenith: before deletion, `ZE.00005`, `ZE.00006`, `ZE.00007`, `ZE.00008`, `ZE.00009`; deleting `ZE.00007` leaves `ZE.00005`, `ZE.00006`, `ZE.00007`, `ZE.00008`. The former `ZE.00008` holder now has `ZE.00007`.
 - These are requirements for future backend implementation only. This frontend milestone does not implement account deletion, live member counts, serial assignment or renumbering.
 
-## 6. Discipline Points
+## 6. Discipline System and Rank Rewards
 
-- Every three months of discipline awards 0.25 Discipline Points.
-- The maximum stored Discipline Points balance is 10.
-- **Unresolved:** the qualification test for a three-month period of discipline, including continuity and any exceptions.
+- A Discipline day qualifies when at least 5 original scheduled Tasks are completed that day. Recovery Quests and Accountability Actions do not count.
+- Fewer than 5 completed original scheduled Tasks on a non-paused day breaks the current streak and resets the recurring reward-cycle progress. The longest streak and activity history remain.
+- Current and longest streak, total qualifying days, current recurring cycle, total scheduled Tasks completed, DP balance and event history are tracked.
+- Recurring cycle values by Rank: Origin: 30 days/+0.25 DP; Ember: 35/+0.40; Surge: 40/+0.50; Vector: 45/+0.60; Apex: 50/+0.70; Zenith: 55/+0.80; Continuum: 60/+0.90. Each cycle repeats. A Rank-up does not change an active cycle; the next cycle uses the new Rank.
+- Discipline Points have a shared 4.00 cap. Recurring and Rank-entry rewards award only the remaining room and record the actual amount. Unused points do not expire.
+- One-time Rank-entry DP: Origin 0; Ember +0.10; Surge +0.20; Vector +0.30; Apex +0.40; Zenith +0.55; Continuum +0.75. It is claimed once per Rank per progression run. One-time Rank-entry XP is approved as a category but all values remain unconfigured and are not awarded.
+- Daily Rank XP benefit: Origin 0.50%; Ember 0.75%; Surge 1.00%; Vector 1.25%; Apex 1.50%; Zenith 1.75%; Continuum 2.00% of the XP needed for the next Level, awarded once per IST calendar day. The benefit is XP only, does not stack and is recalculated when Rank changes. Rounding uses the nearest whole XP.
 
 ## 7. Emergency Pause
 
 - Emergency Pause may be activated at most 2 times per calendar month.
 - Each activation can last up to 7 consecutive days.
-- **Unresolved in this update:** whether Task completion, Recovery Windows, XP awards, and other progression activity pause or continue during an Emergency Pause; calendar-month boundary and time-zone handling.
+- A protected date does not require five completed Tasks, break the Discipline Streak, or pause/extend the reward countdown. Calendar time continues normally; the activity record marks the date as protected.
+- Calendar-month boundary and time-zone handling remain unspecified beyond the daily Discipline boundary being IST.
 
 ## 8. Monthly Analysis
 
@@ -130,4 +137,4 @@ The Leaderboard is based on XP, missed Tasks, and failed quests. **Unresolved:**
 
 ## Status and change control
 
-The rules above describe the current product direction and are for frontend information only; there is no backend implementation in this milestone. Do not restore prior rules that conflict with this document. The specific unresolved mechanics listed above need owner decisions. All legal/policy pages remain drafts pending legal review.
+The rules above describe the current product direction and are for frontend information only; there is no backend implementation in this milestone. The UI preview uses session-only browser state and no permanent storage. The activity map shows a rolling 365 IST calendar days while older records remain in history. All legal/policy pages remain drafts pending legal review.

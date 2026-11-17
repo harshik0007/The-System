@@ -1,4 +1,4 @@
-export const INITIAL_GRACE_CHARGES = 3;
+export const INITIAL_GRACE_POINTS = 3;
 export const RECOVERY_WINDOW_DAYS = 3;
 export const ACTIVE_QUEST_LIMIT = 5;
 
@@ -29,9 +29,9 @@ export function createRecoveryQuestState(demoTasks, activationDate = new Date().
   }
 
   return {
-    charges: INITIAL_GRACE_CHARGES,
+    gracePoints: INITIAL_GRACE_POINTS,
     quests,
-    chargeEvents: [],
+    gracePointEvents: [],
     activity: [],
   };
 }
@@ -54,7 +54,7 @@ function makeQuest({ id, occurrenceKey, task, actionId, actionTitle, actionDescr
     completedDate: null,
     expiryDate: null,
     thresholdEventId: null,
-    chargeEventId: null,
+    gracePointEventId: null,
   };
 }
 
@@ -62,8 +62,8 @@ function addActivity(state, event) {
   return [event, ...state.activity];
 }
 
-function chargeEvent(state, { id, kind, date, questId, title, detail }) {
-  const appliedAmount = Math.min(1, Math.max(0, state.charges));
+function gracePointEvent(state, { id, kind, date, questId, title, detail }) {
+  const appliedAmount = Math.min(1, Math.max(0, state.gracePoints));
   const event = {
     id,
     kind,
@@ -73,13 +73,13 @@ function chargeEvent(state, { id, kind, date, questId, title, detail }) {
     detail: appliedAmount === 0 ? `${detail} The balance was already at zero and remains there.` : detail,
     amount: 1,
     appliedAmount,
-    balanceBefore: state.charges,
-    balanceAfter: Math.max(0, state.charges - 1),
+    balanceBefore: state.gracePoints,
+    balanceAfter: Math.max(0, state.gracePoints - 1),
   };
   return {
     ...state,
-    charges: event.balanceAfter,
-    chargeEvents: [event, ...state.chargeEvents],
+    gracePoints: event.balanceAfter,
+    gracePointEvents: [event, ...state.gracePointEvents],
     activity: addActivity(state, event),
   };
 }
@@ -115,13 +115,13 @@ export function generateRecoveryQuest(state, task, { occurrenceKey, activationDa
   const active = nextState.quests.filter((item) => item.status === RECOVERY_STATUS.ACTIVE);
   if (active.length <= ACTIVE_QUEST_LIMIT) return { state: nextState, quest, thresholdTriggered: false, duplicate: false };
 
-  const eventId = `charge-threshold-${quest.id}`;
-  nextState = chargeEvent(nextState, {
+  const eventId = `grace-point-threshold-${quest.id}`;
+  nextState = gracePointEvent(nextState, {
     id: eventId,
     kind: 'threshold',
     date: quest.activationDate,
-    title: 'Recovery Quest Limit Exceeded — -1 Grace Charge',
-    detail: 'The number of active Recovery Quests exceeded 5. One Grace Charge was deducted, and all active Recovery Quests were cleared.',
+    title: 'Recovery Quest Limit Exceeded — -1 Grace Point',
+    detail: 'The number of active Recovery Quests exceeded 5. One Grace Point was deducted, and all active Recovery Quests were cleared.',
   });
   nextState.quests = nextState.quests.map((item) => item.status === RECOVERY_STATUS.ACTIVE
     ? { ...item, status: RECOVERY_STATUS.THRESHOLD_CLEARED, clearedDate: quest.activationDate, thresholdEventId: eventId }
@@ -152,17 +152,17 @@ export function completeRecoveryQuest(state, questId, completionDate = new Date(
 export function expireRecoveryQuest(state, questId, expiryDate = new Date().toISOString().slice(0, 10)) {
   const quest = state.quests.find((item) => item.id === questId && item.status === RECOVERY_STATUS.ACTIVE);
   if (!quest) return state;
-  const eventId = `charge-expiry-${quest.id}`;
-  let nextState = chargeEvent(state, {
+  const eventId = `grace-point-expiry-${quest.id}`;
+  let nextState = gracePointEvent(state, {
     id: eventId,
     kind: 'expiry',
     date: expiryDate,
     questId,
-    title: 'Recovery Quest expired — -1 Grace Charge',
+    title: 'Recovery Quest expired — -1 Grace Point',
     detail: `“${quest.accountabilityActionTitle}” expired after its Recovery Window.`,
   });
   nextState.quests = nextState.quests.map((item) => item.id === questId
-    ? { ...item, status: RECOVERY_STATUS.EXPIRED, expiryDate, chargeEventId: eventId, remainingDays: 0 }
+      ? { ...item, status: RECOVERY_STATUS.EXPIRED, expiryDate, gracePointEventId: eventId, remainingDays: 0 }
     : item);
   return nextState;
 }

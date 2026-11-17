@@ -163,7 +163,7 @@ function AccountabilityActions({ tasks, setTasks, activeActionId, setActiveActio
           <div className="task-action-preview"><p className="app-eyebrow">TASK + ACTION PREVIEW</p><strong>{activeTask.name}</strong><span>{activeTask.actionTitle || 'Action title will appear here'}</span><p>{activeTask.actionDescription || 'Add an action description to complete this Task.'}</p></div>
         </div>}
       </div>}
-      <aside className="task-builder-rules task-builder-rules--recovery"><AppIcon name="recovery" /><div><strong>How the Accountability Action is used</strong><p>If the original Task is missed, its own Accountability Action activates as a Recovery Quest. It carries forward during a three-day Recovery Window. If incomplete when it expires, one Grace Charge is deducted. A third failed Quest in one day can cause another deduction; both conditions may apply on the same day. This explains the rules only—the builder does not activate Quests or deduct charges.</p></div></aside>
+      <aside className="task-builder-rules task-builder-rules--recovery"><AppIcon name="recovery" /><div><strong>How the Accountability Action is used</strong><p>If the original Task is missed, its own Accountability Action activates as a Recovery Quest. It carries forward during a three-day Recovery Window. If incomplete when it expires, one Grace Point is deducted. Generating a sixth Active Recovery Quest deducts one Grace Point and clears the active group. This explains the rules only—the builder does not activate Quests or deduct points.</p></div></aside>
     </section>
   );
 }

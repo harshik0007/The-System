@@ -7,7 +7,7 @@ export const applicationNavigation = [
     title: 'My Progress',
     items: [
       { id: 'tasks', label: 'Tasks', path: '/app/tasks', icon: 'tasks', description: 'View your daily schedule, completion progress and Accountability Actions.' },
-      { id: 'goals', label: 'Goals', path: '/app/goals', icon: 'goals', description: 'Goal planning and tracking are planned for a future milestone.' },
+      { id: 'discipline', label: 'Discipline', path: '/app/discipline', icon: 'activity', description: 'Track qualifying days, Rank rewards and your activity history.' },
       { id: 'recovery-quests', label: 'Recovery Quests', path: '/app/recovery-quests', icon: 'recovery', description: 'Manage the Accountability Actions activated by missed Tasks.' },
       { id: 'monthly-analysis', label: 'Monthly Analysis', path: '/app/monthly-analysis', icon: 'analysis', description: 'Monthly progress analysis is planned for a future milestone.' },
     ],

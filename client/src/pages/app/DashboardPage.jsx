@@ -7,21 +7,52 @@ import { useReducedMotion } from '../../hooks/useReducedMotion.js';
 import RankBadge from '../../components/ranks/RankBadge.jsx';
 import AppIcon from '../../components/app/AppIcon.jsx';
 import AppProgressBar from '../../components/app/AppProgressBar.jsx';
-import GraceChargeSummary from '../../components/app/GraceChargeSummary.jsx';
+import GracePointSummary from '../../components/app/GracePointSummary.jsx';
+import DisciplinePointsSummary from '../../components/app/DisciplinePointsSummary.jsx';
 import { useTaskSchedule } from '../../context/TaskScheduleContext.jsx';
 import { RECOVERY_STATUS } from '../../utils/recoveryQuestManager.js';
+import { getIstDateKey } from '../../utils/taskScheduleBuilder.js';
+import { getRankDisciplineConfig } from '../../data/disciplineConfig.js';
+import { getLevelFromTotalXp, getLevelProgress } from '../../utils/disciplineManager.js';
+import { getScheduleDaySnapshot } from '../../utils/disciplineActivity.js';
 import '../../styles/public-pages.css';
 
+function buildRecentEvents(schedule, recoveryState, disciplineState) {
+  const taskEvents = Object.entries(schedule?.occurrences || {}).filter(([, occurrence]) => occurrence.status === 'completed').map(([key, occurrence]) => {
+    const [, , date] = key.split(':');
+    return { id: `task:${key}`, date, icon: 'tasks', title: 'Scheduled Task completed', detail: occurrence.snapshot?.name || 'Completed scheduled Task' };
+  });
+  const recoveryEvents = (recoveryState.activity || []).map((event) => ({ ...event, icon: event.kind === 'completed' ? 'tasks' : 'recovery' }));
+  const xpDrainEvents = disciplineState.xpDrainEvents.filter((event) => event.amount > 0).map((event) => ({ id: event.id, date: event.date, icon: 'activity', title: 'Recovery Quest XP drain', detail: `−${event.amount.toFixed(2)} XP from ${event.activeRecoveryQuestCount} Active Recovery Quests` }));
+  const rankXpEvents = disciplineState.dailyRankXpEvents.filter((event) => event.amount > 0).map((event) => ({ id: event.id, date: event.date, icon: 'spark', title: 'Daily Rank XP benefit', detail: `+${event.amount} XP · Rank ${event.rankName}` }));
+  const pointEvents = disciplineState.dpEvents.filter((event) => event.amount > 0).map((event) => ({ id: event.id, date: event.date, icon: 'activity', title: 'Discipline Points awarded', detail: `+${event.amount.toFixed(2)} DP · ${event.title}` }));
+  return [...taskEvents, ...recoveryEvents, ...xpDrainEvents, ...rankXpEvents, ...pointEvents]
+    .sort((left, right) => String(right.date || '').localeCompare(String(left.date || '')))
+    .slice(0, 4)
+    .map((event) => ({ ...event, time: event.date === getIstDateKey() ? 'Today' : event.date || 'Recorded' }));
+}
+
 export default function DashboardPage() {
-  const { recoveryState } = useTaskSchedule();
+  const { recoveryState, disciplineState, currentSchedule } = useTaskSchedule();
   const pageRef = useRef(null);
   const reduceMotion = useReducedMotion();
-  const rank = ranks.find((item) => item.slug === dashboardDemo.identity.rankSlug) || ranks[0];
-  const completedTasks = dashboardDemo.tasks.filter((task) => task.completed).length;
-  const taskCompletion = Math.round((completedTasks / dashboardDemo.tasks.length) * 100);
+  const rank = ranks.find((item) => item.slug === disciplineState.currentRankSlug) || ranks[0];
   const activeRecoveryQuests = recoveryState.quests.filter((quest) => quest.status === RECOVERY_STATUS.ACTIVE);
   const activeRecoveryCount = activeRecoveryQuests.length;
   const nearestRecoveryDays = activeRecoveryQuests.length ? Math.min(...activeRecoveryQuests.map((quest) => quest.remainingDays)) : null;
+  const today = getIstDateKey(new Date());
+  const todaySnapshot = getScheduleDaySnapshot(currentSchedule, today, { todayKey: today });
+  const completedTasks = todaySnapshot.completedTaskCount;
+  const scheduledTaskCount = todaySnapshot.scheduledTaskCount;
+  const taskCompletion = scheduledTaskCount ? Math.round((completedTasks / scheduledTaskCount) * 100) : 0;
+  const todayTasks = todaySnapshot.tasks.map((task, index) => {
+    const definition = currentSchedule.tasks.find((item) => item.id === task.id) || currentSchedule.taskHistory.find((item) => item.id === task.id);
+    return { id: task.id, title: definition?.name || `Scheduled task ${index + 1}`, completed: task.status === 'completed', status: task.status };
+  });
+  const currentLevel = getLevelFromTotalXp(disciplineState.totalXp);
+  const levelProgress = getLevelProgress(disciplineState.totalXp);
+  const rankReward = getRankDisciplineConfig(disciplineState.cycle.rankSlug);
+  const recentEvents = buildRecentEvents(currentSchedule, recoveryState, disciplineState);
 
   useLayoutEffect(() => {
     if (reduceMotion || !pageRef.current) return undefined;
@@ -75,22 +106,22 @@ export default function DashboardPage() {
 
         <section className="app-panel dashboard-level-panel dashboard-reveal" aria-labelledby="dashboard-level-heading">
           <div className="app-panel__heading"><div><p className="app-eyebrow">LEVEL & XP · EXAMPLE</p><h2 id="dashboard-level-heading">Progress snapshot</h2></div><span className="dashboard-level-panel__icon"><AppIcon name="spark" /></span></div>
-          <div className="dashboard-level-panel__values"><div><span>Current Level</span><strong>{String(dashboardDemo.identity.level).padStart(2, '0')}</strong></div><div><span>Total XP</span><strong>{dashboardDemo.identity.totalXp.toLocaleString('en-US')}</strong></div></div>
-          <AppProgressBar value={dashboardDemo.identity.xpProgressPercent} label="Illustrative progress to next Level" description={dashboardDemo.identity.levelProgressLabel} />
-          <p className="app-panel__note">Illustrative progress only. No XP formula or Level threshold is assigned.</p>
+          <div className="dashboard-level-panel__values"><div><span>Current Level</span><strong>{String(currentLevel).padStart(2, '0')}</strong></div><div><span>Total XP</span><strong>{disciplineState.totalXp.toLocaleString('en-US')}</strong></div></div>
+          <AppProgressBar value={levelProgress.percent} label="Progress to next Level" description={`${levelProgress.earnedInLevel} of ${levelProgress.requirement} XP toward the next Level using demonstration thresholds.`} />
+          <p className="app-panel__note">Session preview thresholds. Rank XP and Recovery Quest drains use this shared demonstration progression.</p>
         </section>
       </div>
 
       <div className="dashboard-content-grid dashboard-content-grid--primary">
         <section className="app-panel dashboard-tasks-panel dashboard-reveal" aria-labelledby="dashboard-tasks-heading">
-          <div className="app-panel__heading"><div><p className="app-eyebrow">TODAY · EXAMPLE SCHEDULE</p><h2 id="dashboard-tasks-heading">Today's Tasks</h2></div><span className="dashboard-panel-count">{completedTasks}<i>/</i>{dashboardDemo.tasks.length}</span></div>
-          <div className="dashboard-task-summary"><strong>{taskCompletion}%</strong><span>complete <i>· equal Task weighting</i></span><AppProgressBar value={taskCompletion} label="Today's Task completion" description={`${completedTasks} of ${dashboardDemo.tasks.length} demonstration Tasks completed; Tasks are equally weighted.`} /></div>
+          <div className="app-panel__heading"><div><p className="app-eyebrow">TODAY · SHARED SCHEDULE</p><h2 id="dashboard-tasks-heading">Today's Tasks</h2></div><span className="dashboard-panel-count">{completedTasks}<i>/</i>{scheduledTaskCount}</span></div>
+          <div className="dashboard-task-summary"><strong>{taskCompletion}%</strong><span>complete <i>· equal Task weighting</i></span><AppProgressBar value={taskCompletion} label="Today's Task completion" description={`${completedTasks} of ${scheduledTaskCount} scheduled Tasks completed; Tasks are equally weighted.`} /></div>
           <ul className="dashboard-task-list">
-            {dashboardDemo.tasks.map((task, index) => (
+            {todayTasks.map((task, index) => (
               <li className={task.completed ? 'is-complete' : ''} key={task.id}>
-                <span className="dashboard-task-list__status" aria-label={task.completed ? 'Completed example Task' : 'Outstanding example Task'}>{task.completed ? <AppIcon name="tasks" /> : <span>{String(index + 1).padStart(2, '0')}</span>}</span>
+                <span className="dashboard-task-list__status" aria-label={task.completed ? 'Completed Task' : `${task.status} Task`}>{task.completed ? <AppIcon name="tasks" /> : <span>{String(index + 1).padStart(2, '0')}</span>}</span>
                 <span>{task.title}</span>
-                <small>{task.completed ? 'COMPLETE' : 'SCHEDULED'}</small>
+                <small>{task.completed ? 'COMPLETE' : task.status.toUpperCase()}</small>
               </li>
             ))}
           </ul>
@@ -115,36 +146,28 @@ export default function DashboardPage() {
             <Link className="app-panel__footer-link" to="/app/recovery-quests">View Recovery Quests <AppIcon name="arrow" /></Link>
           </section>
 
-          <GraceChargeSummary compact recoveryState={recoveryState} />
+          <GracePointSummary compact recoveryState={recoveryState} />
         </div>
       </div>
 
       <div className="dashboard-content-grid dashboard-content-grid--secondary">
-        <section className="app-panel dashboard-points-panel dashboard-reveal" aria-labelledby="dashboard-points-heading">
-          <div className="app-panel__heading"><div><p className="app-eyebrow">LONG-TERM PROGRESSION · EXAMPLE</p><h2 id="dashboard-points-heading">Discipline Points</h2></div><span className="dashboard-points-panel__icon"><AppIcon name="activity" /></span></div>
-          <div className="dashboard-points-panel__balance"><strong>{dashboardDemo.disciplinePoints.balance.toFixed(2)}</strong><span>/ {dashboardDemo.disciplinePoints.maximum} maximum</span></div>
-          <AppProgressBar value={(dashboardDemo.disciplinePoints.balance / dashboardDemo.disciplinePoints.maximum) * 100} label="Demonstration Discipline Points balance" description={`${dashboardDemo.disciplinePoints.balance} of ${dashboardDemo.disciplinePoints.maximum} maximum example points`} />
-          <p className="app-panel__note">{dashboardDemo.disciplinePoints.explanation}</p>
-          <Link to="/rules#discipline-points" className="dashboard-text-link">Read the Discipline Points rule <span aria-hidden="true">↗</span></Link>
-        </section>
+        <DisciplinePointsSummary compact disciplineState={disciplineState} />
 
-        <section className="app-panel dashboard-goals-panel dashboard-reveal" aria-labelledby="dashboard-goals-heading">
-          <div className="app-panel__heading"><div><p className="app-eyebrow">ACTIVE GOALS · EXAMPLE</p><h2 id="dashboard-goals-heading">Goals</h2></div><Link className="app-panel__small-link" to="/app/goals">View all <AppIcon name="arrow" /></Link></div>
-          <ul className="dashboard-goal-list">
-            {dashboardDemo.goals.map((goal) => (
-              <li key={goal.id}><div className="dashboard-goal-list__title"><strong>{goal.title}</strong><span>{goal.progress}%</span></div><AppProgressBar value={goal.progress} label={`${goal.title} example progress`} description="Demonstration indicator only; no goal-completion formula is assigned." /></li>
-            ))}
-          </ul>
-          <p className="app-panel__note">Goal progress indicators are examples only.</p>
+        <section className="app-panel dashboard-discipline-panel dashboard-reveal" aria-labelledby="dashboard-discipline-heading">
+          <div className="app-panel__heading"><div><p className="app-eyebrow">DAILY CONSISTENCY · SHARED STATE</p><h2 id="dashboard-discipline-heading">Discipline</h2></div><Link className="app-panel__small-link" to="/app/discipline">View details <AppIcon name="arrow" /></Link></div>
+          <div className="dashboard-discipline-stats"><div><strong>{disciplineState.currentStreak}</strong><span>current streak days</span></div><div><strong>{disciplineState.longestStreak}</strong><span>longest streak days</span></div></div>
+          <p className="dashboard-discipline-cycle">Next Rank {rankReward.number} reward <strong>+{disciplineState.cycle.rewardDp.toFixed(2)} DP</strong> · {disciplineState.cycle.progress}/{disciplineState.cycle.requiredDays} qualifying days</p>
+          <Link className="app-panel__footer-link" to="/app/discipline">Open Discipline <AppIcon name="arrow" /></Link>
         </section>
       </div>
 
       <section className="app-panel dashboard-activity-panel dashboard-reveal" aria-labelledby="dashboard-activity-heading">
-        <div className="app-panel__heading"><div><p className="app-eyebrow">RECENT ACTIVITY · EXAMPLE</p><h2 id="dashboard-activity-heading">Activity timeline</h2></div><span className="dashboard-activity-panel__label">DEMONSTRATION DATA</span></div>
+        <div className="app-panel__heading"><div><p className="app-eyebrow">RECENT ACTIVITY · SHARED STATE</p><h2 id="dashboard-activity-heading">Activity timeline</h2></div><span className="dashboard-activity-panel__label">THIS SESSION</span></div>
         <ol className="dashboard-activity-list">
-          {dashboardDemo.activity.map((event) => (
+          {recentEvents.map((event) => (
             <li key={event.id}><span className="dashboard-activity-list__icon"><AppIcon name={event.icon} /></span><div><strong>{event.title}</strong><p>{event.detail}</p></div><time>{event.time}</time></li>
           ))}
+          {!recentEvents.length && <li className="dashboard-activity-list__empty">No completed scheduled-task or progression events have been recorded in this session.</li>}
         </ol>
       </section>
 

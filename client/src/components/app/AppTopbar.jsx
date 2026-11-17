@@ -5,11 +5,15 @@ import { dashboardDemo } from '../../data/dashboardDemo.js';
 import AppIcon from './AppIcon.jsx';
 import AppNotificationPanel from './AppNotificationPanel.jsx';
 import MemberProfileMenu from './MemberProfileMenu.jsx';
+import { Link } from 'react-router-dom';
+import { useTaskSchedule } from '../../context/TaskScheduleContext.jsx';
+import { DISCIPLINE_POINTS_CAP } from '../../data/disciplineConfig.js';
 
 const titles = new Map(applicationNavigationItems.map((item) => [item.path, item.label]));
 
 export default function AppTopbar({ isMobile, sidebarExpanded, onNavigationToggle }) {
   const location = useLocation();
+  const { recoveryState, disciplineState } = useTaskSchedule();
   const [openPanel, setOpenPanel] = useState(null);
   const [previewMessage, setPreviewMessage] = useState('');
   const topbarRef = useRef(null);
@@ -63,6 +67,14 @@ export default function AppTopbar({ isMobile, sidebarExpanded, onNavigationToggl
         <div className="app-topbar__breadcrumbs"><span>THE SYSTEM</span><i aria-hidden="true">/</i><strong>{title}</strong></div>
       </div>
       <div className="app-topbar__actions">
+        <nav className="app-topbar-balances" aria-label="Current balances">
+          <Link className="app-topbar-balance app-topbar-balance--grace" to="/app/discipline" aria-label={`Grace Points: ${recoveryState.gracePoints}`} title="Grace Points">
+            <AppIcon name="shield" /><span>GP</span><strong>{recoveryState.gracePoints}</strong>
+          </Link>
+          <Link className="app-topbar-balance app-topbar-balance--discipline" to="/app/discipline" aria-label={`Discipline Points: ${disciplineState.dpBalance.toFixed(2)} of ${DISCIPLINE_POINTS_CAP.toFixed(2)}`} title="Discipline Points">
+            <AppIcon name="activity" /><span>DP</span><strong>{disciplineState.dpBalance.toFixed(2)}</strong><i>/ {DISCIPLINE_POINTS_CAP.toFixed(2)}</i>
+          </Link>
+        </nav>
         <button
           ref={notificationTriggerRef}
           className={`app-icon-button app-topbar__notification${openPanel === 'notifications' ? ' is-active' : ''}`}

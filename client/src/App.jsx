@@ -20,6 +20,8 @@ const routeLoaders = {
   dashboard: () => import('./pages/app/DashboardPage.jsx'),
   dailyTasks: () => import('./pages/app/DailyTasksPage.jsx'),
   recoveryQuests: () => import('./pages/app/RecoveryQuestsPage.jsx'),
+  discipline: () => import('./pages/app/DisciplinePage.jsx'),
+  profile: () => import('./pages/app/ProfilePage.jsx'),
   createTasks: () => import('./pages/app/CreateTaskSchedulePage.jsx'),
   appPlaceholder: () => import('./pages/app/AppPlaceholderPage.jsx'),
 };
@@ -38,6 +40,8 @@ const AppLayout = lazy(routeLoaders.appShell);
 const DashboardPage = lazy(routeLoaders.dashboard);
 const DailyTasksPage = lazy(routeLoaders.dailyTasks);
 const RecoveryQuestsPage = lazy(routeLoaders.recoveryQuests);
+const DisciplinePage = lazy(routeLoaders.discipline);
+const ProfilePage = lazy(routeLoaders.profile);
 const CreateTaskSchedulePage = lazy(routeLoaders.createTasks);
 const AppPlaceholderPage = lazy(routeLoaders.appPlaceholder);
 
@@ -46,8 +50,10 @@ function getRouteLoaders(pathname) {
   if (pathname === '/app/dashboard') return [routeLoaders.appShell, routeLoaders.dashboard];
   if (pathname === '/app/tasks') return [routeLoaders.appShell, routeLoaders.dailyTasks];
   if (pathname === '/app/recovery-quests') return [routeLoaders.appShell, routeLoaders.recoveryQuests];
+  if (pathname === '/app/discipline') return [routeLoaders.appShell, routeLoaders.discipline];
+  if (pathname === '/app/profile') return [routeLoaders.appShell, routeLoaders.profile];
   if (pathname === '/app/tasks/create') return [routeLoaders.appShell, routeLoaders.createTasks];
-  if (/^\/app\/(goals|recovery-quests|monthly-analysis|leaderboard|profile|settings)\/?$/.test(pathname)) return [routeLoaders.appShell, routeLoaders.appPlaceholder];
+  if (/^\/app\/(recovery-quests|monthly-analysis|leaderboard|settings)\/?$/.test(pathname)) return [routeLoaders.appShell, routeLoaders.appPlaceholder];
   if (pathname === '/signup') return [routeLoaders.signup];
   if (pathname === '/login') return [routeLoaders.login];
   if (pathname === '/verify-email') return [routeLoaders.verifyEmail];
@@ -121,8 +127,10 @@ export default function App() {
           <Route path="dashboard" element={<RouteView><DashboardPage /></RouteView>} />
           <Route path="tasks" element={<RouteView><DailyTasksPage /></RouteView>} />
           <Route path="recovery-quests" element={<RouteView><RecoveryQuestsPage /></RouteView>} />
+          <Route path="discipline" element={<RouteView><DisciplinePage /></RouteView>} />
+          <Route path="profile" element={<RouteView><ProfilePage /></RouteView>} />
           <Route path="tasks/create" element={<RouteView><CreateTaskSchedulePage /></RouteView>} />
-          {applicationNavigationItems.filter((item) => !['dashboard', 'tasks', 'recovery-quests'].includes(item.id)).map((item) => (
+          {applicationNavigationItems.filter((item) => !['dashboard', 'tasks', 'recovery-quests', 'discipline', 'profile'].includes(item.id)).map((item) => (
             <Route key={item.id} path={item.path.replace('/app/', '')} element={<RouteView><AppPlaceholderPage /></RouteView>} />
           ))}
         </Route>

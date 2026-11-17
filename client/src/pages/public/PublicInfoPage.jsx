@@ -15,11 +15,11 @@ const featureItems = [
   ['Accountability Actions', 'Choose a distinct Accountability Action for every Task.'],
   ['Recovery Quests', 'A missed Task activates its own associated Accountability Action as a Recovery Quest.'],
   ['Recovery Window', 'An unfinished Recovery Quest carries forward during its 3-day Recovery Window.'],
-  ['Grace Charges', 'Start with 3. Failed quests and the daily three-failure trigger can deduct charges.'],
-  ['Progression Reset', 'Exhausted Grace Charges trigger a Progression Reset that preserves the account.'],
+  ['Grace Points', 'Start with 3. Individual expiry and the 6th-active-quest threshold can deduct a point.'],
+  ['Progression Reset', 'Exhausted Grace Points trigger a Progression Reset that preserves the account.'],
   ['XP milestones', 'Tasks award base XP; completion bonuses occur at 25%, 50%, 75% and 100%.'],
   ['Seven Ranks', 'Seven named Ranks follow a fixed lowest-to-highest order, each with a unique badge and rank-specific XP benefit.'],
-  ['Discipline Points', 'Every three months of discipline awards 0.25 points; stored balance is capped at 10.'],
+  ['Discipline Points', 'Qualifying scheduled-task streaks award Rank-based recurring rewards; the balance is capped at 4.00.'],
   ['Emergency Pause', 'Use up to 2 activations per calendar month, each lasting up to 7 consecutive days.'],
   ['Monthly Analysis', 'Compare any available months in your current progression run.'],
   ['Leaderboard', 'Competitive ordering is based on XP, missed Tasks and failed quests.'],
@@ -28,7 +28,7 @@ const featureItems = [
 ].map(([title, body], i) => ({ title, body, label: String(i + 1).padStart(2, '0'), icon: ['◇', '↗', '⌑', '⌁'][i % 4] }));
 
 const steps = [
-  ['Understand the System', 'Review the Task schedule, Accountability Actions, Recovery Windows and Grace Charge rules before you begin.'],
+  ['Understand the System', 'Review the Task schedule, Accountability Actions, Recovery Windows and Grace Point rules before you begin.'],
   ['Create an account', 'Account creation belongs to the separate authentication milestone; this guide does not activate an account.'],
   ['Choose your cycle', 'Set a repeating Task cycle from 1 to 7 days. A 7-day cycle follows Monday through Sunday; someone joining Wednesday enters Day 3.'],
   ['Schedule 7 Tasks', 'Prepare your daily schedule. All 7 Tasks have equal weight in daily completion percentage.'],
@@ -44,9 +44,9 @@ const pages = {
   about: { title: 'About THE SYSTEM', description: 'Learn about THE SYSTEM, its philosophy and long-term progression.', eyebrow: 'A framework for deliberate progress', heading: 'Progress is built, not given.', intro: 'THE SYSTEM is designed to turn personal intentions into a daily Task schedule, user-selected accountability and visible long-term progression.' },
   how: { title: 'How It Works', description: 'Understand Tasks, Accountability Actions, Recovery Quests, XP and progression.', eyebrow: 'The lifecycle', heading: 'From intention to verified progress.', intro: 'A clear sequence connects a repeating Task schedule to personal accountability, recovery and progression.' },
   features: { title: 'Features', description: 'Explore THE SYSTEM terminology and current Task, recovery and progression rules.', eyebrow: 'Designed around follow-through', heading: 'Tools for a more intentional life.', intro: 'These capabilities follow the latest product rules. Some platform functionality remains planned and is not active through these information pages.' },
-  ranks: { title: 'Seven Ranks', description: 'Explore seven original Ranks and their exclusive collectible badge designs.', eyebrow: 'Progression', heading: 'Seven Ranks. One continuing path.', intro: 'Begin at Rank 07 Origin and progress through Ember, Surge, Vector, Apex and Zenith toward Rank 01 Continuum. Each Rank has a distinct emblem and collectible badge. Numerical XP benefits and qualification thresholds are not specified.' },
-  rules: { title: 'System Rules', description: 'The authoritative current reference for Tasks, Recovery Quests, Grace Charges, XP and progression.', eyebrow: 'Public rulebook', heading: 'Know the commitments.', intro: 'This page reflects the current product rules. It distinguishes confirmed concepts from mechanics that still need definition.' },
-  faq: { title: 'Frequently Asked Questions', description: 'Search answers about Tasks, Recovery Quests, Grace Charges, XP, Ranks and Progression Reset.', eyebrow: 'Help & clarity', heading: 'Frequently asked questions.', intro: 'Answers follow the current product rules. Unspecified formulas and processes are identified as unresolved.' },
+  ranks: { title: 'Seven Ranks', description: 'Explore seven original Ranks and their exclusive collectible badge designs.', eyebrow: 'Progression', heading: 'Seven Ranks. One continuing path.', intro: 'Begin at Rank 07 Origin and progress through Ember, Surge, Vector, Apex and Zenith toward Rank 01 Continuum. Each Rank has a distinct emblem and collectible badge, with configured recurring Discipline Point rewards and daily XP benefits. One-time Rank-entry XP remains pending configuration.' },
+  rules: { title: 'System Rules', description: 'The authoritative current reference for Tasks, Recovery Quests, Grace Points, XP and progression.', eyebrow: 'Public rulebook', heading: 'Know the commitments.', intro: 'This page reflects the current product rules. It distinguishes confirmed concepts from mechanics that still need definition.' },
+  faq: { title: 'Frequently Asked Questions', description: 'Search answers about Tasks, Recovery Quests, Grace Points, XP, Ranks and Progression Reset.', eyebrow: 'Help & clarity', heading: 'Frequently asked questions.', intro: 'Answers follow the current product rules. Unspecified formulas and processes are identified as unresolved.' },
   'getting-started': { title: 'Getting Started', description: 'A beginner walkthrough for Task cycles, Accountability Actions and progression.', eyebrow: 'Start with intention', heading: 'Make your first commitment count.', intro: 'Understand your schedule, weekly change limit and Recovery rules before beginning. This guide does not activate account or Task functionality.' },
   contact: { title: 'Contact Us', description: 'Choose a support inquiry topic and preview a message to THE SYSTEM.', eyebrow: 'Contact', heading: 'How can we help?', intro: 'Choose the closest inquiry type. This page currently provides a form preview only and does not deliver messages.' },
 };
@@ -63,16 +63,16 @@ function HowContent() {
     ['08', 'Review your progression', 'Follow Levels, seven Ranks, Monthly Analysis and the Leaderboard.'],
   ].map(([label, title, body]) => ({ label, title, body, icon: '↗' }));
   const details = [
-    { title: 'Grace Charges', body: 'Start with 3. An expired Recovery Quest deducts 1; detecting 3 failed quests in a day deducts another 1. Both triggers can happen on the same day.', href: '/rules#grace-charges' },
-    { title: 'Emergency Pause', body: 'Up to 2 activations per calendar month, each lasting up to 7 consecutive days. Other pause effects need confirmation.', href: '/rules#emergency-pause' },
-    { title: 'Discipline Points', body: 'Every three months of discipline awards 0.25 points. The maximum stored balance is 10.', href: '/rules#discipline-points' },
+    { title: 'Grace Points', body: 'Start with 3. Individual expiry or a 6th active quest can deduct one point; the sixth quest clears the active group.', href: '/rules#grace-points' },
+    { title: 'Emergency Pause', body: 'Up to 2 activations per calendar month, each lasting up to 7 consecutive days. A protected date does not break or pause Discipline.', href: '/rules#emergency-pause' },
+    { title: 'Discipline Points', body: 'Qualify with 5 completed original scheduled tasks per non-paused day. Rank-based cycle rewards use a 4.00 point cap.', href: '/rules#discipline-points' },
   ].map((item, i) => ({ ...item, label: `0${i + 1}`, icon: '◇', action: 'Read rule' }));
   return <><ContentSection id="lifecycle" title="A deliberate daily cycle"><InfoGrid items={lifecycle} columns={4} /></ContentSection><ContentSection title="The details that matter"><InfoGrid items={details} columns={3} /></ContentSection></>;
 }
 
 function RulesContent() {
   const [open, setOpen] = useState('tasks');
-  return <><div className="rules-layout"><nav className="rules-index" aria-label="Rules sections"><p>On this page</p>{ruleSections.map((item) => <a key={item.id} href={`#${item.id}`} onClick={() => setOpen(item.id)}>{item.title}</a>)}</nav><div className="rules-accordion">{ruleSections.map((item) => <section className="rule-accordion" id={item.id} key={item.id}><h2><button type="button" aria-expanded={open === item.id} onClick={() => setOpen(open === item.id ? '' : item.id)}>{item.title}<span className="rule-status">{item.status}</span><b aria-hidden="true">{open === item.id ? '−' : '+'}</b></button></h2>{open === item.id && <div className="rule-body"><p>{item.body}</p>{item.id === 'tasks' && <DataTable headers={['Cycle', 'Rule']} rows={taskCycleTable} caption="Repeating Task cycles" />}{item.id === 'xp' && <DataTable headers={['Completion', 'Bonus']} rows={xpMilestoneTable} caption="XP completion milestones" />}{item.id === 'grace-charges' && <p className="public-notice"><strong>Two deductions can occur on one day.</strong> An expired Recovery Quest deducts 1 Grace Charge. The 3-failed-quests-in-a-day trigger deducts another 1.</p>}</div>}</section>)}</div></div><p className="public-source-note">This reference follows <code>docs/product-rules.md</code>. Legal and policy pages remain <Link to="/legal/terms">drafts pending review</Link>.</p></>;
+  return <><div className="rules-layout"><nav className="rules-index" aria-label="On this page"><p>On this page</p>{ruleSections.map((item) => <a key={item.id} href={`#${item.id}`} onClick={() => setOpen(item.id)}>{item.title}</a>)}</nav><div className="rules-accordion">{ruleSections.map((item) => <section className="rule-accordion" id={item.id} key={item.id}><h2><button type="button" aria-expanded={open === item.id} onClick={() => setOpen(open === item.id ? '' : item.id)}>{item.title}<span className="rule-status">{item.status}</span><b aria-hidden="true">{open === item.id ? '−' : '+'}</b></button></h2>{open === item.id && <div className="rule-body"><p>{item.body}</p>{item.id === 'tasks' && <DataTable headers={['Cycle', 'Rule']} rows={taskCycleTable} caption="Repeating Task cycles" />}{item.id === 'xp' && <DataTable headers={['Completion', 'Bonus']} rows={xpMilestoneTable} caption="Completion milestone concepts" />}</div>}</section>)}</div></div><p className="public-source-note">This reference follows <code>docs/product-rules.md</code>. Legal and policy pages remain <Link to="/legal/terms">drafts pending review</Link>.</p></>;
 }
 
 function RanksContent() {
@@ -93,7 +93,7 @@ function RanksContent() {
 }
 
 function GettingStartedContent() {
-  return <><ContentSection title="Your first cycle"><InfoGrid items={steps} columns={2} /></ContentSection><ContentSection title="Before you begin"><div className="public-notice"><strong>Know the current limits.</strong><p>Seven equally weighted Tasks are scheduled per day. The deadline is midnight IST. You can make up to 3 changes per Monday–Sunday calendar week. Each Task needs its own Accountability Action. A missed Task activates a 3-day Recovery Quest. Grace Charges start at 3; exhausting them triggers a Progression Reset that preserves your account.</p><ActionLink to="/rules" secondary>Read the complete rules</ActionLink></div></ContentSection></>;
+  return <><ContentSection title="Your first cycle"><InfoGrid items={steps} columns={2} /></ContentSection><ContentSection title="Before you begin"><div className="public-notice"><strong>Know the current limits.</strong><p>Seven equally weighted Tasks are scheduled per day. The deadline is midnight IST. You can make up to 3 changes per Monday–Sunday calendar week. Each Task needs its own Accountability Action. A missed Task activates a 3-day Recovery Quest. Grace Points start at 3; exhausting them triggers a Progression Reset that preserves your account.</p><ActionLink to="/rules" secondary>Read the complete rules</ActionLink></div></ContentSection></>;
 }
 
 function AboutContent() {
@@ -102,7 +102,7 @@ function AboutContent() {
     { title: 'Commit to a schedule', body: 'A repeating daily Task cycle gives meaningful action a practical structure.', icon: '⌑' },
     { title: 'Own your recovery', body: 'Every Task has an Accountability Action chosen by the Member in advance.', icon: '⌁' },
   ];
-  return <><ContentSection title="What is THE SYSTEM?" className="about-intro"><p>THE SYSTEM is a universal real-life discipline and progression platform in development. It is designed to help Members shape meaningful goals into a repeatable Task schedule, personal accountability and long-term progression.</p><blockquote>“Progress is built, not given.”</blockquote></ContentSection><ContentSection title="Why it exists"><p>Ambition needs a structure that makes the next action clear. THE SYSTEM connects a Member’s Tasks, self-selected Accountability Actions, XP and progression—without prescribing what a meaningful life should look like.</p></ContentSection><ContentSection title="A philosophy built around action"><InfoGrid items={values} columns={3} /></ContentSection><ContentSection title="Progress with context"><p>Levels, seven named Ranks and the Leaderboard are designed to reflect progress over time. Ranks provide rank-specific XP benefits and unique profile badges; numerical formulas and qualification thresholds remain under development.</p><ActionLink to="/how-it-works">See how it works</ActionLink></ContentSection></>;
+  return <><ContentSection title="What is THE SYSTEM?" className="about-intro"><p>THE SYSTEM is a universal real-life discipline and progression platform in development. It is designed to help Members shape meaningful intentions into a repeatable Task schedule, personal accountability and long-term progression.</p><blockquote>“Progress is built, not given.”</blockquote></ContentSection><ContentSection title="Why it exists"><p>Ambition needs a structure that makes the next action clear. THE SYSTEM connects a Member’s Tasks, self-selected Accountability Actions, XP and progression—without prescribing what a meaningful life should look like.</p></ContentSection><ContentSection title="A philosophy built around action"><InfoGrid items={values} columns={3} /></ContentSection><ContentSection title="Progress with context"><p>Levels, seven named Ranks and the Leaderboard are designed to reflect progress over time. Rank-based recurring Discipline Point rewards and daily XP percentages are configured. Exact Level thresholds use demonstration values, while one-time Rank-entry XP remains unconfigured.</p><ActionLink to="/how-it-works">See how it works</ActionLink></ContentSection></>;
 }
 
 function FeaturesContent() {
