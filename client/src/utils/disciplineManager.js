@@ -99,6 +99,7 @@ function awardDp(state, { eventId, kind, dateKey, configuredAmount, title }) {
   const amount = round2(Math.min(Math.max(0, configuredAmount), Math.max(0, DISCIPLINE_POINTS_CAP - before)));
   const event = {
     id: eventId,
+    progressionRunId: state.progressionRunId,
     kind,
     date: dateKey,
     title,
@@ -165,6 +166,7 @@ export function processDailyReset(state, {
   const levelAfterDrain = getLevelFromTotalXp(next.totalXp);
   const drainEvent = {
     id: makeId('recovery-xp-drain', dateKey),
+    progressionRunId: state.progressionRunId,
     date: dateKey,
     activeRecoveryQuestCount: activeCount,
     emergencyPause: protectedDay,
@@ -176,12 +178,12 @@ export function processDailyReset(state, {
     totalXpAfter: next.totalXp,
   };
   next.xpDrainEvents = [drainEvent, ...next.xpDrainEvents];
-  next.xpHistory = [{ id: drainEvent.id, date: dateKey, kind: 'recovery-drain', amount: -drainEvent.amount, totalAfter: next.totalXp }, ...next.xpHistory];
+  next.xpHistory = [{ id: drainEvent.id, progressionRunId: state.progressionRunId, date: dateKey, kind: 'recovery-drain', amount: -drainEvent.amount, totalAfter: next.totalXp }, ...next.xpHistory];
 
   if (levelAfterDrain < levelBeforeDrain) {
     const events = [];
     for (let level = levelBeforeDrain; level > levelAfterDrain; level -= 1) {
-      events.push({ id: makeId('level-down', `${dateKey}:${level}`), date: dateKey, fromLevel: level, toLevel: level - 1, totalXp: next.totalXp });
+      events.push({ id: makeId('level-down', `${dateKey}:${level}`), progressionRunId: state.progressionRunId, date: dateKey, fromLevel: level, toLevel: level - 1, totalXp: next.totalXp });
     }
     next.levelDownEvents = [...events, ...next.levelDownEvents];
   }
@@ -189,6 +191,7 @@ export function processDailyReset(state, {
   const dailyXpAmount = Math.max(0, Math.round(getLevelXpRequirement(levelAfterDrain) * rankAtReset.dailyXpPercent / 100));
   const dailyXpEvent = {
     id: makeId('daily-rank-xp', dateKey),
+    progressionRunId: state.progressionRunId,
     date: dateKey,
     rankSlug: next.currentRankSlug,
     rankName: rankAtReset.name,
@@ -202,10 +205,11 @@ export function processDailyReset(state, {
   };
   next.totalXp = dailyXpEvent.totalXpAfter;
   next.dailyRankXpEvents = [dailyXpEvent, ...next.dailyRankXpEvents];
-  next.xpHistory = [{ id: dailyXpEvent.id, date: dateKey, kind: 'daily-rank-bonus', amount: dailyXpAmount, totalAfter: next.totalXp }, ...next.xpHistory];
+  next.xpHistory = [{ id: dailyXpEvent.id, progressionRunId: state.progressionRunId, date: dateKey, kind: 'daily-rank-bonus', amount: dailyXpAmount, totalAfter: next.totalXp }, ...next.xpHistory];
 
   const record = {
     date: dateKey,
+    progressionRunId: state.progressionRunId,
     hasDailyResetRecord: true,
     scheduledTaskCount: scheduled,
     completedTaskCount: completed,
@@ -269,6 +273,7 @@ export function redeemGracePoint(state, recoveryState, now = Date.now()) {
   const date = new Date(nowMs).toISOString();
   const event = {
     id: `grace-redemption:${date}`,
+    progressionRunId: state.progressionRunId,
     date: getIstDateKey(new Date(nowMs)),
     at: date,
     dpSpent: 1,

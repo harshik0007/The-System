@@ -36,11 +36,12 @@ export function createRecoveryQuestState(demoTasks, activationDate = new Date().
   };
 }
 
-function makeQuest({ id, occurrenceKey, task, actionId, actionTitle, actionDescription, activationDate, remainingDays = RECOVERY_WINDOW_DAYS }) {
+function makeQuest({ id, occurrenceKey, task, actionId, actionTitle, actionDescription, activationDate, progressionRunId = null, remainingDays = RECOVERY_WINDOW_DAYS }) {
   const elapsedDays = RECOVERY_WINDOW_DAYS - remainingDays;
   return {
     id,
     occurrenceKey,
+    progressionRunId,
     originalTaskId: task.id,
     originalTaskName: task.name,
     accountabilityActionId: actionId,
@@ -62,10 +63,11 @@ function addActivity(state, event) {
   return [event, ...state.activity];
 }
 
-function gracePointEvent(state, { id, kind, date, questId, title, detail }) {
+function gracePointEvent(state, { id, kind, date, questId, progressionRunId = null, title, detail }) {
   const appliedAmount = Math.min(1, Math.max(0, state.gracePoints));
   const event = {
     id,
+    progressionRunId,
     kind,
     date,
     questId: questId || null,
@@ -84,7 +86,7 @@ function gracePointEvent(state, { id, kind, date, questId, title, detail }) {
   };
 }
 
-export function generateRecoveryQuest(state, task, { occurrenceKey, activationDate, actionId } = {}) {
+export function generateRecoveryQuest(state, task, { occurrenceKey, activationDate, actionId, progressionRunId } = {}) {
   if (!task || !occurrenceKey) return { state, quest: null, thresholdTriggered: false, duplicate: false };
   const existing = state.quests.find((quest) => quest.occurrenceKey === occurrenceKey);
   if (existing) return { state, quest: existing, thresholdTriggered: false, duplicate: true };
@@ -101,10 +103,12 @@ export function generateRecoveryQuest(state, task, { occurrenceKey, activationDa
     actionTitle,
     actionDescription,
     activationDate: activationDate || new Date().toISOString().slice(0, 10),
+    progressionRunId: progressionRunId || null,
   });
   let nextState = { ...state, quests: [...state.quests, quest] };
   nextState = { ...nextState, activity: addActivity(nextState, {
     id: `activity-generated-${quest.id}`,
+    progressionRunId: quest.progressionRunId,
     kind: 'generated',
     date: quest.activationDate,
     questId: quest.id,
@@ -118,6 +122,7 @@ export function generateRecoveryQuest(state, task, { occurrenceKey, activationDa
   const eventId = `grace-point-threshold-${quest.id}`;
   nextState = gracePointEvent(nextState, {
     id: eventId,
+    progressionRunId: quest.progressionRunId,
     kind: 'threshold',
     date: quest.activationDate,
     title: 'Recovery Quest Limit Exceeded — -1 Grace Point',
@@ -134,6 +139,7 @@ export function completeRecoveryQuest(state, questId, completionDate = new Date(
   if (!quest) return state;
   const event = {
     id: `activity-completed-${quest.id}`,
+    progressionRunId: quest.progressionRunId,
     kind: 'completed',
     date: completionDate,
     questId,
@@ -155,6 +161,7 @@ export function expireRecoveryQuest(state, questId, expiryDate = new Date().toIS
   const eventId = `grace-point-expiry-${quest.id}`;
   let nextState = gracePointEvent(state, {
     id: eventId,
+    progressionRunId: quest.progressionRunId,
     kind: 'expiry',
     date: expiryDate,
     questId,

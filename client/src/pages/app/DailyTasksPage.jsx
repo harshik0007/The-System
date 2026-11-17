@@ -18,7 +18,7 @@ import '../../styles/daily-tasks.css';
 export default function DailyTasksPage() {
   const pageRef = useRef(null);
   const reducedMotion = useReducedMotion();
-  const { currentSchedule, setCurrentSchedule, weeklyAllowance, setWeeklyAllowance, addRecoveryQuest, isEmergencyPauseActive, isScheduledTaskActivitySuspended, activeEmergencyPause } = useTaskSchedule();
+  const { currentSchedule, setCurrentSchedule, weeklyAllowance, setWeeklyAllowance, disciplineState, addRecoveryQuest, isEmergencyPauseActive, isScheduledTaskActivitySuspended, activeEmergencyPause } = useTaskSchedule();
   const referenceDate = dailyTaskScheduleDemo.taskChangesWeekDate;
   const allowance = useMemo(() => getWeeklyChangeAllowance(weeklyAllowance, referenceDate), [weeklyAllowance, referenceDate]);
   const currentDateKey = getIstDateKey(new Date());
@@ -104,6 +104,7 @@ export default function DailyTasksPage() {
         ...(current.occurrences || {}),
         [task.occurrenceKey]: {
           ...(current.occurrences?.[task.occurrenceKey] || {}), status,
+          progressionRunId: disciplineState.progressionRunId,
           snapshot: current.occurrences?.[task.occurrenceKey]?.snapshot || {
             name: task.name, description: task.description,
             actionTitle: task.actionTitle || task.accountabilityAction,

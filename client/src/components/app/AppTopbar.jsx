@@ -8,12 +8,15 @@ import MemberProfileMenu from './MemberProfileMenu.jsx';
 import { Link } from 'react-router-dom';
 import { useTaskSchedule } from '../../context/TaskScheduleContext.jsx';
 import { DISCIPLINE_POINTS_CAP } from '../../data/disciplineConfig.js';
+import { getIstDateKey } from '../../utils/taskScheduleBuilder.js';
 
 const titles = new Map(applicationNavigationItems.map((item) => [item.path, item.label]));
 
 export default function AppTopbar({ isMobile, sidebarExpanded, onNavigationToggle }) {
   const location = useLocation();
-  const { recoveryState, disciplineState } = useTaskSchedule();
+  const { recoveryState, disciplineState, historyExpiryReminders } = useTaskSchedule();
+  const todayKey = getIstDateKey();
+  const activeHistoryReminders = historyExpiryReminders.filter((item) => item.createdDate === todayKey && item.expiryDate > todayKey);
   const [openPanel, setOpenPanel] = useState(null);
   const [previewMessage, setPreviewMessage] = useState('');
   const topbarRef = useRef(null);
@@ -79,13 +82,13 @@ export default function AppTopbar({ isMobile, sidebarExpanded, onNavigationToggl
           ref={notificationTriggerRef}
           className={`app-icon-button app-topbar__notification${openPanel === 'notifications' ? ' is-active' : ''}`}
           type="button"
-          aria-label={`Notifications, ${dashboardDemo.notifications.length} demonstration items`}
+          aria-label={`Notifications, ${dashboardDemo.notifications.length + activeHistoryReminders.length} items`}
           aria-expanded={openPanel === 'notifications'}
           aria-controls="app-notifications"
           onClick={() => togglePanel('notifications')}
         >
           <AppIcon name="bell" />
-          {dashboardDemo.notifications.length > 0 && <span className="app-topbar__notification-count" aria-hidden="true">{dashboardDemo.notifications.length}</span>}
+          {dashboardDemo.notifications.length + activeHistoryReminders.length > 0 && <span className="app-topbar__notification-count" aria-hidden="true">{dashboardDemo.notifications.length + activeHistoryReminders.length}</span>}
         </button>
         <MemberProfileMenu
           open={openPanel === 'profile'}
@@ -94,7 +97,7 @@ export default function AppTopbar({ isMobile, sidebarExpanded, onNavigationToggl
           onClose={() => setOpenPanel(null)}
           onSignOutPreview={handleSignOutPreview}
         />
-        {openPanel === 'notifications' && <AppNotificationPanel onClose={() => setOpenPanel(null)} />}
+        {openPanel === 'notifications' && <AppNotificationPanel historyExpiryReminders={activeHistoryReminders} onClose={() => setOpenPanel(null)} />}
         {previewMessage && <p className="app-topbar__status" role="status">{previewMessage}</p>}
       </div>
     </header>

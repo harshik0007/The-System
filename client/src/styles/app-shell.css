@@ -112,6 +112,8 @@
 .app-notifications__list strong { color: #d7e5f2; font-size: .72rem; font-weight: 550; }
 .app-notifications__list p { margin: 4px 0; color: #92a6bb; font-size: .67rem; line-height: 1.5; }
 .app-notifications__list small { color: #60768d; font: .54rem var(--font-mono); }
+.app-notifications__group-label { margin: 12px 18px 2px; color: var(--color-cyan); font: 600 .56rem var(--font-mono); letter-spacing: .12em; }
+.app-notifications__dot--system { background: #78c9f2; box-shadow: 0 0 8px rgb(120 201 242 / 45%); }
 .app-popover__footnote { margin: 0; padding: 12px 18px; color: #6c849b; font-size: .59rem; }
 .app-profile-panel { width: min(310px, calc(100vw - 28px)); padding: 15px; }
 .app-profile-panel__identity { display: flex; align-items: center; gap: 11px; padding: 3px 2px 14px; border-bottom: 1px solid rgb(139 181 225 / 12%); }
