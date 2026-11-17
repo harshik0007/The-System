@@ -1,0 +1,27 @@
+:root {
+  font-family: 'DM Sans', sans-serif;
+  color: #eeefe8;
+  background: #10120f;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+
+  --color-bg: #10120f;
+  --color-surface: #171a16;
+  --color-surface-raised: #1d211b;
+  --color-text: #eeefe8;
+  --color-muted: #a1a69a;
+  --color-subtle: #72786c;
+  --color-accent: #d5f16a;
+  --color-line: rgb(238 239 232 / 12%);
+  --font-body: 'DM Sans', sans-serif;
+  --font-mono: 'DM Mono', monospace;
+  --space-1: 0.5rem;
+  --space-2: 1rem;
+  --space-3: 1.5rem;
+  --space-4: 2rem;
+  --space-5: 3rem;
+  --space-6: 5rem;
+  --page-width: 1240px;
+  --motion-fast: 180ms ease;
+  --motion-standard: 320ms ease;
+}
