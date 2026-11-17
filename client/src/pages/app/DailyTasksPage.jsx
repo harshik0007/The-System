@@ -18,7 +18,7 @@ import '../../styles/daily-tasks.css';
 export default function DailyTasksPage() {
   const pageRef = useRef(null);
   const reducedMotion = useReducedMotion();
-  const { currentSchedule, setCurrentSchedule, weeklyAllowance, setWeeklyAllowance } = useTaskSchedule();
+  const { currentSchedule, setCurrentSchedule, weeklyAllowance, setWeeklyAllowance, addRecoveryQuest } = useTaskSchedule();
   const referenceDate = dailyTaskScheduleDemo.taskChangesWeekDate;
   const allowance = useMemo(() => getWeeklyChangeAllowance(weeklyAllowance, referenceDate), [weeklyAllowance, referenceDate]);
   const currentDateKey = getIstDateKey(new Date());
@@ -72,7 +72,12 @@ export default function DailyTasksPage() {
     if (!task || task.status !== 'scheduled') return;
     setTasks((current) => current.map((item) => item.id === taskId ? { ...item, status: 'missed' } : item));
     saveOccurrence(task, 'missed');
-    setFeedback(`“${task.name}” is marked missed in this local preview. Its own Accountability Action is shown as its Recovery Quest.`);
+    const result = addRecoveryQuest(task, { occurrenceKey: task.occurrenceKey, activationDate: currentDateKey, actionId: task.accountabilityActionId || `${task.id}-accountability-action` });
+    setFeedback(result.thresholdTriggered
+      ? `“${task.name}” was marked missed. Its Recovery Quest triggered the 6-active limit: one Grace Charge was deducted and the active group was cleared.`
+      : result.quest
+        ? `“${task.name}” was marked missed. Its Accountability Action is now an active Recovery Quest.`
+        : `“${task.name}” was marked missed, but no Recovery Quest was created because its Accountability Action is missing.`);
   };
 
   const markCompletedForPreview = (taskId) => {
@@ -168,7 +173,7 @@ export default function DailyTasksPage() {
           <ul>
             <li>Each Recovery Quest has a three-day Recovery Window and must be completed before its deadline.</li>
             <li>If it expires incomplete, one Grace Charge is deducted.</li>
-            <li>If the System detects three failed quests in a day, another Grace Charge is deducted. Both conditions can apply on the same day.</li>
+            <li>Generating a 6th active Recovery Quest deducts one Grace Charge and clears the active group.</li>
           </ul>
           <Link className="dashboard-text-link" to="/app/recovery-quests">Open Recovery Quests <span aria-hidden="true">↗</span></Link>
         </div>

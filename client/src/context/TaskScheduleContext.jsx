@@ -1,6 +1,8 @@
-import { createContext, useContext, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
 import { dailyTasksDemo, dailyTaskScheduleDemo } from '../data/dailyTasksDemo.js';
 import { getWeeklyChangePeriod } from '../utils/weeklyTaskChanges.js';
+import { completeRecoveryQuest, createRecoveryQuestState, expireRecoveryQuest, generateRecoveryQuest } from '../utils/recoveryQuestManager.js';
+import { getIstDateKey } from '../utils/taskScheduleBuilder.js';
 
 const TaskScheduleContext = createContext(null);
 
@@ -24,7 +26,31 @@ export function TaskScheduleProvider({ children }) {
     used: dailyTaskScheduleDemo.taskChangesUsed,
     weekStartDate: getWeeklyChangePeriod(dailyTaskScheduleDemo.taskChangesWeekDate).weekStartDate,
   }));
-  const value = useMemo(() => ({ currentSchedule, setCurrentSchedule, weeklyAllowance, setWeeklyAllowance }), [currentSchedule, weeklyAllowance]);
+  const [recoveryState, setRecoveryState] = useState(() => createRecoveryQuestState(dailyTasksDemo, getIstDateKey()));
+  const recoveryStateRef = useRef(recoveryState);
+  recoveryStateRef.current = recoveryState;
+
+  const addRecoveryQuest = useCallback((task, options) => {
+    const result = generateRecoveryQuest(recoveryStateRef.current, task, options);
+    recoveryStateRef.current = result.state;
+    setRecoveryState(result.state);
+    return result;
+  }, []);
+  const completeQuest = useCallback((questId) => {
+    const nextState = completeRecoveryQuest(recoveryStateRef.current, questId, getIstDateKey());
+    recoveryStateRef.current = nextState;
+    setRecoveryState(nextState);
+  }, []);
+  const expireQuest = useCallback((questId) => {
+    const nextState = expireRecoveryQuest(recoveryStateRef.current, questId, getIstDateKey());
+    recoveryStateRef.current = nextState;
+    setRecoveryState(nextState);
+  }, []);
+
+  const value = useMemo(() => ({
+    currentSchedule, setCurrentSchedule, weeklyAllowance, setWeeklyAllowance,
+    recoveryState, addRecoveryQuest, completeQuest, expireQuest,
+  }), [currentSchedule, weeklyAllowance, recoveryState, addRecoveryQuest, completeQuest, expireQuest]);
 
   return <TaskScheduleContext.Provider value={value}>{children}</TaskScheduleContext.Provider>;
 }

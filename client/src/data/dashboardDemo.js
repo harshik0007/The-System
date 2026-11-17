@@ -16,14 +16,6 @@ export const dashboardDemo = {
     { id: 'task-06', title: 'Prepare for tomorrow', completed: false },
     { id: 'task-07', title: 'Personal project', completed: false },
   ],
-  recoveryQuests: [
-    { id: 'recovery-01', title: 'Example Recovery Quest', status: 'active', daysRemaining: 2 },
-    { id: 'recovery-02', title: 'Completed example quest', status: 'completed' },
-  ],
-  graceCharges: {
-    available: 3,
-    explanation: 'Members begin with 3 Grace Charges. Published Recovery Quest and daily failure rules can affect the balance.',
-  },
   disciplinePoints: {
     balance: 1.25,
     maximum: 10,
@@ -36,7 +28,6 @@ export const dashboardDemo = {
   activity: [
     { id: 'activity-01', icon: 'tasks', title: 'Task completed', detail: 'Example activity entry', time: 'Today' },
     { id: 'activity-02', icon: 'spark', title: 'XP awarded', detail: 'Example entry · no XP formula assigned', time: 'Today' },
-    { id: 'activity-03', icon: 'recovery', title: 'Recovery Quest completed', detail: 'Example activity entry', time: 'Yesterday' },
     { id: 'activity-04', icon: 'leaderboard', title: 'Rank achievement', detail: 'Rank 01 · Continuum · example entry', time: 'Earlier' },
   ],
   notifications: [

@@ -7,15 +7,21 @@ import { useReducedMotion } from '../../hooks/useReducedMotion.js';
 import RankBadge from '../../components/ranks/RankBadge.jsx';
 import AppIcon from '../../components/app/AppIcon.jsx';
 import AppProgressBar from '../../components/app/AppProgressBar.jsx';
+import GraceChargeSummary from '../../components/app/GraceChargeSummary.jsx';
+import { useTaskSchedule } from '../../context/TaskScheduleContext.jsx';
+import { RECOVERY_STATUS } from '../../utils/recoveryQuestManager.js';
 import '../../styles/public-pages.css';
 
 export default function DashboardPage() {
+  const { recoveryState } = useTaskSchedule();
   const pageRef = useRef(null);
   const reduceMotion = useReducedMotion();
   const rank = ranks.find((item) => item.slug === dashboardDemo.identity.rankSlug) || ranks[0];
   const completedTasks = dashboardDemo.tasks.filter((task) => task.completed).length;
   const taskCompletion = Math.round((completedTasks / dashboardDemo.tasks.length) * 100);
-  const activeRecoveryCount = dashboardDemo.recoveryQuests.filter((quest) => quest.status === 'active').length;
+  const activeRecoveryQuests = recoveryState.quests.filter((quest) => quest.status === RECOVERY_STATUS.ACTIVE);
+  const activeRecoveryCount = activeRecoveryQuests.length;
+  const nearestRecoveryDays = activeRecoveryQuests.length ? Math.min(...activeRecoveryQuests.map((quest) => quest.remainingDays)) : null;
 
   useLayoutEffect(() => {
     if (reduceMotion || !pageRef.current) return undefined;
@@ -93,23 +99,23 @@ export default function DashboardPage() {
 
         <div className="dashboard-side-stack">
           <section className="app-panel dashboard-recovery-panel dashboard-reveal" aria-labelledby="dashboard-recovery-heading">
-            <div className="app-panel__heading"><div><p className="app-eyebrow">RECOVERY · EXAMPLE</p><h2 id="dashboard-recovery-heading">Recovery Quests</h2></div><span className="dashboard-panel-count">{activeRecoveryCount} active</span></div>
+            <div className="app-panel__heading"><div><p className="app-eyebrow">RECOVERY · SHARED PREVIEW</p><h2 id="dashboard-recovery-heading">Recovery Quests</h2></div><span className="dashboard-panel-count">{activeRecoveryCount} active</span></div>
+            {activeRecoveryCount >= 4 && <p className="dashboard-recovery-limit">{activeRecoveryCount}/5 active · {activeRecoveryCount === 5 ? 'next quest triggers the limit' : 'approaching the active limit'}</p>}
+            {nearestRecoveryDays !== null && <p className="dashboard-recovery-nearest">Nearest Recovery Window: <strong>{nearestRecoveryDays} demonstration {nearestRecoveryDays === 1 ? 'day' : 'days'} shown</strong></p>}
             <ul className="dashboard-quest-list">
-              {dashboardDemo.recoveryQuests.map((quest) => (
-                <li className={`dashboard-quest-list__item dashboard-quest-list__item--${quest.status}`} key={quest.id}>
-                  <span className="dashboard-quest-list__icon"><AppIcon name={quest.status === 'active' ? 'clock' : 'tasks'} /></span>
-                  <span><strong>{quest.title}</strong><small>{quest.status === 'active' ? `${quest.daysRemaining} days remain in the Recovery Window` : 'Completed · example state'}</small></span>
-                  <i>{quest.status === 'active' ? 'ACTIVE' : 'DONE'}</i>
+              {activeRecoveryQuests.slice(0, 2).map((quest) => (
+                <li className="dashboard-quest-list__item dashboard-quest-list__item--active" key={quest.id}>
+                  <span className="dashboard-quest-list__icon"><AppIcon name="clock" /></span>
+                  <span><strong>{quest.accountabilityActionTitle}</strong><small>From: {quest.originalTaskName} · {quest.remainingDays} demonstration {quest.remainingDays === 1 ? 'day' : 'days'} shown</small></span>
+                  <i>ACTIVE</i>
                 </li>
               ))}
+              {!activeRecoveryCount && <li className="dashboard-quest-list__empty">No active Recovery Quests.</li>}
             </ul>
             <Link className="app-panel__footer-link" to="/app/recovery-quests">View Recovery Quests <AppIcon name="arrow" /></Link>
           </section>
 
-          <section className="app-panel dashboard-grace-panel dashboard-reveal" aria-labelledby="dashboard-grace-heading">
-            <div className="dashboard-grace-panel__icon"><AppIcon name="shield" /></div>
-            <div><p className="app-eyebrow">ACCOUNTABILITY RESOURCE · EXAMPLE</p><h2 id="dashboard-grace-heading">Grace Charges</h2><p className="dashboard-grace-panel__value"><strong>{dashboardDemo.graceCharges.available}</strong> available</p><p className="app-panel__note">{dashboardDemo.graceCharges.explanation}</p><div className="dashboard-grace-panel__links"><Link to="/rules#grace-charges" className="dashboard-text-link">Grace Charge rules <span aria-hidden="true">↗</span></Link><Link to="/rules#emergency-pause" className="dashboard-text-link">Emergency Pause <span aria-hidden="true">↗</span></Link></div></div>
-          </section>
+          <GraceChargeSummary compact recoveryState={recoveryState} />
         </div>
       </div>
 

@@ -19,6 +19,7 @@ const routeLoaders = {
   appShell: () => import('./components/app/AppLayout.jsx'),
   dashboard: () => import('./pages/app/DashboardPage.jsx'),
   dailyTasks: () => import('./pages/app/DailyTasksPage.jsx'),
+  recoveryQuests: () => import('./pages/app/RecoveryQuestsPage.jsx'),
   createTasks: () => import('./pages/app/CreateTaskSchedulePage.jsx'),
   appPlaceholder: () => import('./pages/app/AppPlaceholderPage.jsx'),
 };
@@ -36,6 +37,7 @@ const RankDetailPage = lazy(routeLoaders.rankDetail);
 const AppLayout = lazy(routeLoaders.appShell);
 const DashboardPage = lazy(routeLoaders.dashboard);
 const DailyTasksPage = lazy(routeLoaders.dailyTasks);
+const RecoveryQuestsPage = lazy(routeLoaders.recoveryQuests);
 const CreateTaskSchedulePage = lazy(routeLoaders.createTasks);
 const AppPlaceholderPage = lazy(routeLoaders.appPlaceholder);
 
@@ -43,6 +45,7 @@ function getRouteLoaders(pathname) {
   if (pathname === '/app') return [routeLoaders.appShell, routeLoaders.dashboard];
   if (pathname === '/app/dashboard') return [routeLoaders.appShell, routeLoaders.dashboard];
   if (pathname === '/app/tasks') return [routeLoaders.appShell, routeLoaders.dailyTasks];
+  if (pathname === '/app/recovery-quests') return [routeLoaders.appShell, routeLoaders.recoveryQuests];
   if (pathname === '/app/tasks/create') return [routeLoaders.appShell, routeLoaders.createTasks];
   if (/^\/app\/(goals|recovery-quests|monthly-analysis|leaderboard|profile|settings)\/?$/.test(pathname)) return [routeLoaders.appShell, routeLoaders.appPlaceholder];
   if (pathname === '/signup') return [routeLoaders.signup];
@@ -117,8 +120,9 @@ export default function App() {
           <Route index element={<Navigate to="/app/dashboard" replace />} />
           <Route path="dashboard" element={<RouteView><DashboardPage /></RouteView>} />
           <Route path="tasks" element={<RouteView><DailyTasksPage /></RouteView>} />
+          <Route path="recovery-quests" element={<RouteView><RecoveryQuestsPage /></RouteView>} />
           <Route path="tasks/create" element={<RouteView><CreateTaskSchedulePage /></RouteView>} />
-          {applicationNavigationItems.filter((item) => !['dashboard', 'tasks'].includes(item.id)).map((item) => (
+          {applicationNavigationItems.filter((item) => !['dashboard', 'tasks', 'recovery-quests'].includes(item.id)).map((item) => (
             <Route key={item.id} path={item.path.replace('/app/', '')} element={<RouteView><AppPlaceholderPage /></RouteView>} />
           ))}
         </Route>
