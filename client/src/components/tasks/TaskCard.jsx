@@ -40,6 +40,7 @@ export default function TaskCard({ task, onSubmit, onMarkMissed, onMarkCompleted
             <div className="task-accountability-action">
               <div className="task-accountability-action__heading"><AppIcon name="recovery" /><span>USER-SELECTED ACCOUNTABILITY ACTION · DEMONSTRATION</span></div>
               <p>{task.accountabilityAction}</p>
+              {task.accountabilityActionDescription && <p className="task-accountability-action__description">{task.accountabilityActionDescription}</p>}
               {task.status === 'missed' && <div className="task-card__recovery-note"><p>This task’s own Accountability Action is shown as the Recovery Quest in this preview. The ordinary missed task does not carry forward.</p><Link to="/app/recovery-quests">View Recovery Quests <span aria-hidden="true">↗</span></Link></div>}
             </div>
             {task.status === 'submitted' && <div className="task-card__preview-review"><p>Preview only: no proof is checked or verified.</p><button type="button" onClick={() => onMarkCompleted(task.id)}>Set Completed for preview</button></div>}

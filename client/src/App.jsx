@@ -4,6 +4,7 @@ import VoidShardCursor from './components/VoidShardCursor.jsx';
 import PageTransition from './components/PageTransition.jsx';
 import LandingPage from './pages/LandingPage.jsx';
 import { applicationNavigationItems } from './data/applicationNavigation.js';
+import { TaskScheduleProvider } from './context/TaskScheduleContext.jsx';
 
 const routeLoaders = {
   signup: () => import('./pages/auth/SignUpPage.jsx'),
@@ -18,6 +19,7 @@ const routeLoaders = {
   appShell: () => import('./components/app/AppLayout.jsx'),
   dashboard: () => import('./pages/app/DashboardPage.jsx'),
   dailyTasks: () => import('./pages/app/DailyTasksPage.jsx'),
+  createTasks: () => import('./pages/app/CreateTaskSchedulePage.jsx'),
   appPlaceholder: () => import('./pages/app/AppPlaceholderPage.jsx'),
 };
 const prefetchedRoutes = new Set();
@@ -34,12 +36,14 @@ const RankDetailPage = lazy(routeLoaders.rankDetail);
 const AppLayout = lazy(routeLoaders.appShell);
 const DashboardPage = lazy(routeLoaders.dashboard);
 const DailyTasksPage = lazy(routeLoaders.dailyTasks);
+const CreateTaskSchedulePage = lazy(routeLoaders.createTasks);
 const AppPlaceholderPage = lazy(routeLoaders.appPlaceholder);
 
 function getRouteLoaders(pathname) {
   if (pathname === '/app') return [routeLoaders.appShell, routeLoaders.dashboard];
   if (pathname === '/app/dashboard') return [routeLoaders.appShell, routeLoaders.dashboard];
   if (pathname === '/app/tasks') return [routeLoaders.appShell, routeLoaders.dailyTasks];
+  if (pathname === '/app/tasks/create') return [routeLoaders.appShell, routeLoaders.createTasks];
   if (/^\/app\/(goals|recovery-quests|monthly-analysis|leaderboard|profile|settings)\/?$/.test(pathname)) return [routeLoaders.appShell, routeLoaders.appPlaceholder];
   if (pathname === '/signup') return [routeLoaders.signup];
   if (pathname === '/login') return [routeLoaders.login];
@@ -89,6 +93,7 @@ function RouteView({ children }) {
 export default function App() {
   return (
     <BrowserRouter>
+      <TaskScheduleProvider>
       <RoutePrefetch />
       <PageTransition>
         <Route path="/" element={<LandingPage />} />
@@ -112,6 +117,7 @@ export default function App() {
           <Route index element={<Navigate to="/app/dashboard" replace />} />
           <Route path="dashboard" element={<RouteView><DashboardPage /></RouteView>} />
           <Route path="tasks" element={<RouteView><DailyTasksPage /></RouteView>} />
+          <Route path="tasks/create" element={<RouteView><CreateTaskSchedulePage /></RouteView>} />
           {applicationNavigationItems.filter((item) => !['dashboard', 'tasks'].includes(item.id)).map((item) => (
             <Route key={item.id} path={item.path.replace('/app/', '')} element={<RouteView><AppPlaceholderPage /></RouteView>} />
           ))}
@@ -119,6 +125,7 @@ export default function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </PageTransition>
       <VoidShardCursor />
+      </TaskScheduleProvider>
     </BrowserRouter>
   );
 }

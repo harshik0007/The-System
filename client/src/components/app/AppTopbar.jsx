@@ -15,7 +15,9 @@ export default function AppTopbar({ isMobile, sidebarExpanded, onNavigationToggl
   const topbarRef = useRef(null);
   const notificationTriggerRef = useRef(null);
   const profileTriggerRef = useRef(null);
-  const title = titles.get(location.pathname) || 'Dashboard';
+  const title = location.pathname === '/app/tasks/create'
+    ? 'Create Schedule'
+    : titles.get(location.pathname) || 'Dashboard';
 
   useEffect(() => {
     if (!openPanel) return undefined;
