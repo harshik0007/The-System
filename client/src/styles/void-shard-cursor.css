@@ -7,6 +7,25 @@
   contain: layout style;
 }
 
+/* A body portal cannot outrank native <dialog> elements in the browser's
+   top layer. The manual popover places VOID SHARD there without taking focus
+   or intercepting pointer input. */
+.void-shard-cursor[popover] {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  overflow: clip;
+  border: 0;
+  background: transparent;
+  color: inherit;
+}
+.void-shard-cursor:popover-open { display: block; }
+
 .void-shard-position,
 .void-shard-ripple {
   position: absolute;
@@ -39,10 +58,7 @@
 .void-shard-cursor.is-hovering .void-shard-art--fragment-b { filter: drop-shadow(0 0 6px rgb(77 224 239 / 56%)); }
 .void-shard-cursor.is-pressed .void-shard-art--fragment-a { transform: translate(-1px, 2px) scale(.88); }
 .void-shard-cursor.is-pressed .void-shard-art--fragment-b { transform: translate(1px, -1px) scale(.9); }
-.void-shard-cursor.is-native,
 .void-shard-cursor.is-offscreen { opacity: 0; }
-.void-shard-cursor.is-native.is-rippling { opacity: 1; }
-.void-shard-cursor.is-native.is-rippling .void-shard-position { visibility: hidden; }
 
 @keyframes shard-drift-a {
   0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
@@ -61,26 +77,11 @@
 
 html.has-void-shard-cursor,
 html.has-void-shard-cursor body,
-html.has-void-shard-cursor body a,
-html.has-void-shard-cursor body button,
-html.has-void-shard-cursor body [role='button'],
-html.has-void-shard-cursor body [role='tab'],
-html.has-void-shard-cursor body [data-cursor-hover] { cursor: none !important; }
-
-html.has-void-shard-cursor input:not([type]),
-html.has-void-shard-cursor input:is([type='text'], [type='email'], [type='password'], [type='search'], [type='url'], [type='tel'], [type='number']),
-html.has-void-shard-cursor textarea,
-html.has-void-shard-cursor [contenteditable='true'],
-html.has-void-shard-cursor [role='textbox'] { cursor: text !important; }
-
-html.has-void-shard-cursor[data-void-native-cursor='true'],
-html.has-void-shard-cursor[data-void-native-cursor='true'] * { cursor: auto !important; }
-
-html.has-void-shard-cursor[data-void-native-cursor='true'] input:not([type]),
-html.has-void-shard-cursor[data-void-native-cursor='true'] input:is([type='text'], [type='email'], [type='password'], [type='search'], [type='url'], [type='tel'], [type='number']),
-html.has-void-shard-cursor[data-void-native-cursor='true'] textarea,
-html.has-void-shard-cursor[data-void-native-cursor='true'] [contenteditable='true'],
-html.has-void-shard-cursor[data-void-native-cursor='true'] [role='textbox'] { cursor: text !important; }
+html.has-void-shard-cursor body *,
+html.has-void-shard-cursor body *::before,
+html.has-void-shard-cursor body *::after,
+html.has-void-shard-cursor body input[type='file']::file-selector-button,
+html.has-void-shard-cursor body input[type='file']::-webkit-file-upload-button { cursor: none !important; }
 
 @media (hover: none), (pointer: coarse), (max-width: 768px), (prefers-reduced-motion: reduce) {
   .void-shard-cursor { display: none !important; }

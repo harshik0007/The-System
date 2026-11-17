@@ -2,15 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
 const INTERACTIVE_SELECTOR = 'a[href], button:not(:disabled), [role="button"], [role="tab"], [data-cursor-hover]';
-const TEXT_ENTRY_SELECTOR = 'input:not([type]), input:is([type="text"], [type="email"], [type="password"], [type="search"], [type="url"], [type="tel"], [type="number"]), textarea, [contenteditable="true"], [role="textbox"]';
 const EXCLUDED_TEXT_SELECTOR = 'button, [role="button"], [role="tab"], input, textarea, select, [contenteditable="true"], a[href]';
 
 function closestElement(target, selector) {
   return target instanceof Element ? target.closest(selector) : null;
-}
-
-function isTextEntry(target) {
-  return Boolean(closestElement(target, TEXT_ENTRY_SELECTOR));
 }
 
 function isTextSelectable(target) {
@@ -24,7 +19,6 @@ export default function VoidShardCursor() {
   const fragmentBRef = useRef(null);
   const rippleRef = useRef(null);
   const frameRef = useRef(0);
-  const focusFrameRef = useRef(0);
   const pressTimerRef = useRef(0);
   const rippleTimerRef = useRef(0);
   const motionRef = useRef({
@@ -33,7 +27,7 @@ export default function VoidShardCursor() {
     velocityX: 0, velocityY: 0, nextVelocityX: 0, nextVelocityY: 0,
     scrollVelocity: 0, nextScrollVelocity: 0, lastScrollY: 0, lastScrollTime: 0,
     lastX: 0, lastY: 0, lastTime: 0, initialized: false,
-    hovering: false, native: false, selecting: false, selectedText: false,
+    hovering: false, selecting: false, selectedText: false,
   });
   const [enabled, setEnabled] = useState(false);
 
@@ -46,7 +40,6 @@ export default function VoidShardCursor() {
       const canShowCursor = pointerQuery.matches && !motionQuery.matches;
       setEnabled(canShowCursor);
       root.classList.toggle('has-void-shard-cursor', canShowCursor);
-      if (!canShowCursor) root.removeAttribute('data-void-native-cursor');
     };
 
     syncSupport();
@@ -57,7 +50,6 @@ export default function VoidShardCursor() {
       pointerQuery.removeEventListener('change', syncSupport);
       motionQuery.removeEventListener('change', syncSupport);
       root.classList.remove('has-void-shard-cursor');
-      root.removeAttribute('data-void-native-cursor');
     };
   }, []);
 
@@ -72,21 +64,8 @@ export default function VoidShardCursor() {
     const motion = motionRef.current;
     if (!root || !main || !fragmentA || !fragmentB || !ripple) return undefined;
 
-    const syncNativeMode = () => {
-      // Keep the custom pointer visible while selecting regular page text.
-      // Use the native cursor only while the pointer is over an editable field.
-      const nativeMode = motion.native;
-      root.classList.toggle('is-native', nativeMode);
-      if (nativeMode) document.documentElement.setAttribute('data-void-native-cursor', 'true');
-      else document.documentElement.removeAttribute('data-void-native-cursor');
-      if (nativeMode && motion.hovering) {
-        motion.hovering = false;
-        root.classList.remove('is-hovering');
-      }
-    };
-
     const syncHover = (target) => {
-      if (motion.native || motion.selecting || motion.selectedText) return;
+      if (motion.selecting || motion.selectedText) return;
       const hoverable = Boolean(closestElement(target, INTERACTIVE_SELECTOR));
       if (hoverable !== motion.hovering) {
         motion.hovering = hoverable;
@@ -151,6 +130,40 @@ export default function VoidShardCursor() {
       if (!frameRef.current) frameRef.current = window.requestAnimationFrame(renderFrame);
     }
 
+    // Native modal dialogs live in the browser top layer, above every document
+    // stacking context. Keep the cursor in that same layer and move it to the
+    // front whenever another top-layer surface opens.
+    let promoting = false;
+    const promoteCursor = () => {
+      if (promoting || !root.isConnected || typeof root.showPopover !== 'function') return;
+      promoting = true;
+      try {
+        if (root.matches(':popover-open')) root.hidePopover();
+        root.showPopover();
+      } catch {
+        // Keep the fixed, high-z-index fallback for browsers without full
+        // Popover API support or while the page is being torn down.
+      } finally {
+        promoting = false;
+      }
+    };
+
+    promoteCursor();
+    const topLayerObserver = new MutationObserver((records) => {
+      if (records.some(({ target }) => target instanceof HTMLDialogElement && target.open)) {
+        promoteCursor();
+      }
+    });
+    topLayerObserver.observe(document.documentElement, {
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['open'],
+    });
+    const handleTopLayerToggle = (event) => {
+      if (event.target !== root && event.newState === 'open') promoteCursor();
+    };
+    document.addEventListener('toggle', handleTopLayerToggle, true);
+
     const handlePointerMove = (event) => {
       if (event.pointerType === 'touch') return;
       const now = performance.now();
@@ -182,9 +195,7 @@ export default function VoidShardCursor() {
       motion.lastTime = now;
       motion.targetX = event.clientX;
       motion.targetY = event.clientY;
-      motion.native = isTextEntry(event.target);
       root.classList.remove('is-offscreen');
-      syncNativeMode();
       syncHover(event.target);
       queueFrame();
     };
@@ -201,11 +212,9 @@ export default function VoidShardCursor() {
 
     const handlePointerDown = (event) => {
       if (event.pointerType === 'touch') return;
-      motion.native = isTextEntry(event.target);
       motion.selecting = isTextSelectable(event.target);
-      syncNativeMode();
 
-      if (!motion.native && !motion.selecting) {
+      if (!motion.selecting) {
         root.classList.add('is-pressed');
         window.clearTimeout(pressTimerRef.current);
         pressTimerRef.current = window.setTimeout(() => root.classList.remove('is-pressed'), 150);
@@ -239,8 +248,7 @@ export default function VoidShardCursor() {
     const handlePointerUp = () => {
       motion.selecting = false;
       motion.selectedText = Boolean(window.getSelection()?.toString());
-      syncNativeMode();
-      if (!motion.native && !motion.selectedText) {
+      if (!motion.selectedText) {
         syncHover(document.elementFromPoint(motion.targetX, motion.targetY));
       }
     };
@@ -280,19 +288,7 @@ export default function VoidShardCursor() {
 
     const handleSelectionChange = () => {
       motion.selectedText = Boolean(window.getSelection()?.toString());
-      syncNativeMode();
       if (!motion.selectedText) syncHover(document.elementFromPoint(motion.targetX, motion.targetY));
-    };
-
-    const handleFocusChange = () => {
-      window.cancelAnimationFrame(focusFrameRef.current);
-      focusFrameRef.current = window.requestAnimationFrame(() => {
-        focusFrameRef.current = 0;
-        const target = document.elementFromPoint(motion.targetX, motion.targetY);
-        motion.native = isTextEntry(target);
-        syncNativeMode();
-        if (!motion.native && !motion.selecting && !motion.selectedText) syncHover(target);
-      });
     };
 
     document.addEventListener('pointermove', handlePointerMove, { passive: true });
@@ -304,8 +300,6 @@ export default function VoidShardCursor() {
     window.addEventListener('blur', suspendCursor);
     document.addEventListener('visibilitychange', handleVisibilityChange);
     document.addEventListener('selectionchange', handleSelectionChange);
-    document.addEventListener('focusin', handleFocusChange);
-    document.addEventListener('focusout', handleFocusChange);
 
     return () => {
       document.removeEventListener('pointermove', handlePointerMove);
@@ -317,10 +311,9 @@ export default function VoidShardCursor() {
       window.removeEventListener('blur', suspendCursor);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       document.removeEventListener('selectionchange', handleSelectionChange);
-      document.removeEventListener('focusin', handleFocusChange);
-      document.removeEventListener('focusout', handleFocusChange);
+      document.removeEventListener('toggle', handleTopLayerToggle, true);
+      topLayerObserver.disconnect();
       window.cancelAnimationFrame(frameRef.current);
-      window.cancelAnimationFrame(focusFrameRef.current);
       window.clearTimeout(pressTimerRef.current);
       window.clearTimeout(rippleTimerRef.current);
       motion.initialized = false;
@@ -335,7 +328,7 @@ export default function VoidShardCursor() {
   if (!enabled) return null;
 
   return createPortal((
-    <div className="void-shard-cursor is-offscreen" ref={cursorRef} aria-hidden="true">
+    <div className="void-shard-cursor is-offscreen" popover="manual" ref={cursorRef} aria-hidden="true">
       <span className="void-shard-position void-shard-position--main" ref={mainRef}>
         <svg className="void-shard-art void-shard-art--pointer" viewBox="0 0 34 42" fill="none">
           <defs>

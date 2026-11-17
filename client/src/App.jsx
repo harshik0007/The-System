@@ -17,6 +17,7 @@ const routeLoaders = {
   rankDetail: () => import('./pages/public/RankDetailPage.jsx'),
   appShell: () => import('./components/app/AppLayout.jsx'),
   dashboard: () => import('./pages/app/DashboardPage.jsx'),
+  dailyTasks: () => import('./pages/app/DailyTasksPage.jsx'),
   appPlaceholder: () => import('./pages/app/AppPlaceholderPage.jsx'),
 };
 const prefetchedRoutes = new Set();
@@ -32,12 +33,14 @@ const LegalPage = lazy(routeLoaders.legal);
 const RankDetailPage = lazy(routeLoaders.rankDetail);
 const AppLayout = lazy(routeLoaders.appShell);
 const DashboardPage = lazy(routeLoaders.dashboard);
+const DailyTasksPage = lazy(routeLoaders.dailyTasks);
 const AppPlaceholderPage = lazy(routeLoaders.appPlaceholder);
 
 function getRouteLoaders(pathname) {
   if (pathname === '/app') return [routeLoaders.appShell, routeLoaders.dashboard];
   if (pathname === '/app/dashboard') return [routeLoaders.appShell, routeLoaders.dashboard];
-  if (/^\/app\/(tasks|goals|recovery-quests|monthly-analysis|leaderboard|profile|settings)\/?$/.test(pathname)) return [routeLoaders.appShell, routeLoaders.appPlaceholder];
+  if (pathname === '/app/tasks') return [routeLoaders.appShell, routeLoaders.dailyTasks];
+  if (/^\/app\/(goals|recovery-quests|monthly-analysis|leaderboard|profile|settings)\/?$/.test(pathname)) return [routeLoaders.appShell, routeLoaders.appPlaceholder];
   if (pathname === '/signup') return [routeLoaders.signup];
   if (pathname === '/login') return [routeLoaders.login];
   if (pathname === '/verify-email') return [routeLoaders.verifyEmail];
@@ -108,7 +111,8 @@ export default function App() {
         <Route path="/app" element={<RouteView><AppLayout /></RouteView>}>
           <Route index element={<Navigate to="/app/dashboard" replace />} />
           <Route path="dashboard" element={<RouteView><DashboardPage /></RouteView>} />
-          {applicationNavigationItems.filter((item) => item.id !== 'dashboard').map((item) => (
+          <Route path="tasks" element={<RouteView><DailyTasksPage /></RouteView>} />
+          {applicationNavigationItems.filter((item) => !['dashboard', 'tasks'].includes(item.id)).map((item) => (
             <Route key={item.id} path={item.path.replace('/app/', '')} element={<RouteView><AppPlaceholderPage /></RouteView>} />
           ))}
         </Route>
