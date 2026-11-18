@@ -4,7 +4,8 @@ import { dashboardDemo } from '../../data/dashboardDemo.js';
 import { useTaskSchedule } from '../../context/TaskScheduleContext.jsx';
 import { RANK_DISCIPLINE_CONFIG } from '../../data/disciplineConfig.js';
 import { getIstDateKey } from '../../utils/taskScheduleBuilder.js';
-import { formatDateKey, formatMonthLabel, getIstMonthKey } from '../../utils/monthlyAnalysis.js';
+import { buildEmergencyPauseMonthlyStats, formatDateKey, formatMonthLabel, getEmergencyPauseRecordKey, getIstMonthKey } from '../../utils/monthlyAnalysis.js';
+import { getEmergencyPauseDatesForRecord, getUniqueEmergencyPauseRecords } from '../../utils/emergencyPauseManager.js';
 import { RECOVERY_STATUS } from '../../utils/recoveryQuestManager.js';
 import '../../styles/monthly-analysis.css';
 
@@ -19,8 +20,57 @@ const rowsForIds = (items, ids) => {
   const wanted = new Set(ids || []);
   return (items || []).filter((item) => wanted.has(item.id));
 };
-const istDateTime = (value) => value ? new Intl.DateTimeFormat('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value)) : 'Data unavailable';
+const istDateTime = (value) => {
+  const timestamp = Date.parse(value);
+  return Number.isFinite(timestamp) ? new Intl.DateTimeFormat('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' }).format(new Date(timestamp)) : 'Data unavailable';
+};
 const dayDistance = (from, to) => Math.max(0, Math.floor((Date.parse(`${to}T12:00:00Z`) - Date.parse(`${from}T12:00:00Z`)) / 86_400_000));
+
+function emergencyPauseRows(state, ids) {
+  const wanted = new Set(ids || []);
+  return getUniqueEmergencyPauseRecords(state).filter((pause) => wanted.has(getEmergencyPauseRecordKey(pause)))
+    .sort((a, b) => Date.parse(a.startAt || 0) - Date.parse(b.startAt || 0));
+}
+
+function pauseElapsedDuration(pause, now = Date.now()) {
+  const start = Date.parse(pause?.startAt);
+  if (!Number.isFinite(start)) return 'Data unavailable';
+  let end = Date.parse(pause?.actualResumeAt);
+  if (!Number.isFinite(end)) {
+    const scheduledEnd = Date.parse(pause?.scheduledResumeAt);
+    if (pause?.status !== 'active' || !Number.isFinite(scheduledEnd) || now >= scheduledEnd) return 'Data unavailable';
+    end = now;
+  }
+  if (end < start) return 'Data unavailable';
+  const minutes = Math.floor((end - start) / 60_000);
+  const days = Math.floor(minutes / 1440);
+  const hours = Math.floor((minutes % 1440) / 60);
+  const remainder = minutes % 60;
+  return [days ? `${days}d` : null, hours ? `${hours}h` : null, `${remainder}m`].filter(Boolean).join(' ');
+}
+
+function pauseProtectedDateAttribution(pause, rangeStart, rangeEnd) {
+  const allDates = getEmergencyPauseDatesForRecord(pause);
+  const dates = allDates.filter((date) => (!rangeStart || date >= rangeStart) && (!rangeEnd || date <= rangeEnd));
+  if (!dates.length) return allDates.length ? 'No protected IST dates in this period' : 'Data unavailable';
+  const months = new Map();
+  dates.forEach((date) => months.set(date.slice(0, 7), [...(months.get(date.slice(0, 7)) || []), formatDateKey(date)]));
+  return [...months].map(([month, monthDates]) => `${formatMonthLabel(month)}: ${monthDates.join(', ')}`).join(' · ');
+}
+
+function pauseResumeLabel(pause) {
+  if (pause?.resumeReason === 'manual' || pause?.status === 'resumed-early') return 'Early';
+  if (pause?.resumeReason === 'automatic' || pause?.status === 'automatically-resumed') return 'Automatic';
+  if (pause?.status === 'active') return 'Active';
+  return 'Data unavailable';
+}
+
+function pauseSelectedDuration(pause) {
+  const days = Number(pause?.durationDays);
+  return pause?.durationDays !== null && pause?.durationDays !== undefined && Number.isInteger(days) && days > 0
+    ? `${days} day${days === 1 ? '' : 's'}`
+    : 'Data unavailable';
+}
 
 function recurringRewardRows(summary, disciplineState) {
   return rowsForIds(disciplineState?.dpEvents, summary.disciplineStats.recurringEventIds).map((event) => {
@@ -233,7 +283,7 @@ function PrintReport({ summaries, member, memberSince, generatedAt, disciplineSt
     {summaries.map((summary) => {
       const xpEvents = rowsForIds(disciplineState?.xpHistory, summary.sourceIds?.xpEventIds).sort((a, b) => a.date.localeCompare(b.date));
       const questRows = rowsForIds(recoveryState?.quests, summary.recoveryStats.questIds);
-      const pauses = rowsForIds(emergencyPauseState?.pauses, summary.sourceIds?.emergencyPauseIds);
+      const pauses = emergencyPauseRows(emergencyPauseState, summary.sourceIds?.emergencyPauseHistoryIds ?? summary.sourceIds?.emergencyPauseIds);
       const rankUps = rowsForIds(disciplineState?.rankEntryEvents, summary.rankStats.eventIds);
       const missedRows = missedTaskRows(summary, currentSchedule, recoveryState, todayKey, analysisRunBaseline, summary.progressionRunId === disciplineState?.progressionRunId);
       const redemptions = rowsForIds(disciplineState?.redemptionEvents, summary.sourceIds?.redemptionEventIds);
@@ -250,7 +300,8 @@ function PrintReport({ summaries, member, memberSince, generatedAt, disciplineSt
           <tr><th>Quests completed / expired / threshold-cleared</th><td>{summary.recoveryStats.completed} / {summary.recoveryStats.individuallyExpired} / {summary.recoveryStats.thresholdCleared}</td><th>Quest outcome rate</th><td>{summary.recoveryStats.resolvedCompletionRate === null ? 'No resolved Recovery Quests' : `${summary.recoveryStats.resolvedCompletionRate}%`}</td></tr>
           <tr><th>XP starting / ending</th><td>{valueOrUnavailable(summary.xpStats.startingXp)} / {valueOrUnavailable(summary.xpStats.endingXp)}</td><th>XP earned / drained / net</th><td>{decimal(summary.xpStats.earned)} / {decimal(summary.xpStats.drained)} / {signed(summary.xpStats.net)}</td></tr>
           <tr><th>Level starting / ending · lost / gained</th><td>{valueOrUnavailable(summary.xpStats.startingLevel)} / {valueOrUnavailable(summary.xpStats.endingLevel)} · {summary.xpStats.levelsLost} / Data unavailable</td><th>Rank start / end · Rank-ups</th><td>{summary.rankStats.startingRank?.name || 'Data unavailable'} / {summary.rankStats.endingRank?.name || 'Data unavailable'} · {summary.rankStats.rankUps}</td></tr>
-          <tr><th>Emergency Pauses / protected days</th><td>{summary.pauseStats.used} / {summary.pauseStats.totalPauseDays}</td><th>DP start / end · Grace Points start / end</th><td>{valueOrUnavailable(summary.dpStats.startingBalance)} / {valueOrUnavailable(summary.dpStats.endingBalance)} · {valueOrUnavailable(summary.graceStats.startingBalance)} / {valueOrUnavailable(summary.graceStats.endingBalance)}</td></tr>
+          <tr><th>Emergency Pause activations / protected days</th><td>{summary.pauseStats.used} / {summary.pauseStats.totalPauseDays}</td><th>Early / automatic resumes · Active</th><td>{summary.pauseStats.earlyResumeCount} / {summary.pauseStats.automaticResumeCount} · {summary.pauseStats.activeCount}</td></tr>
+          <tr><th>DP start / end · Grace Points start / end</th><td>{valueOrUnavailable(summary.dpStats.startingBalance)} / {valueOrUnavailable(summary.dpStats.endingBalance)} · {valueOrUnavailable(summary.graceStats.startingBalance)} / {valueOrUnavailable(summary.graceStats.endingBalance)}</td><th>Emergency Pause history detail</th><td>{summary.pauseStats.unavailableHistoryCount ? `${summary.pauseStats.unavailableHistoryCount} record(s) contain unavailable fields` : 'Available for recorded events'}</td></tr>
         </tbody></table>
         <h2>Task Performance</h2><p>Daily completion distribution: {Object.entries(summary.taskStats.distribution).map(([key, count]) => `${key === 'moreThanSeven' ? '>7' : key} completed: ${count}`).join(' · ')}</p>
         {summary.availability.detailedTaskHistory && <Table columns={[{ key: 'date', label: 'Date', render: (row) => formatDateKey(row.date) }, { key: 'taskName', label: 'Missed Task' }, { key: 'taskId', label: 'Task ID' }, { key: 'cycleDay', label: 'Cycle day' }, { key: 'actionTitle', label: 'Accountability Action' }]} rows={missedRows || []} empty="No retained missed-task details." />}
@@ -262,7 +313,7 @@ function PrintReport({ summaries, member, memberSince, generatedAt, disciplineSt
         <h2>Discipline Point History</h2><Table columns={[{ key: 'date', label: 'Date', render: (row) => formatDateKey(row.date) }, { key: 'title', label: 'Event' }, { key: 'amount', label: 'DP change', render: (row) => signed(row.amount) }, { key: 'balanceAfter', label: 'Balance after' }]} rows={dpEvents} />
         <h2>Rank Progression and Emergency Pause</h2><p>Recurring DP awarded: {decimal(summary.dpStats.recurringAwarded)} · Rank-entry DP awarded: {decimal(summary.dpStats.rankEntryAwarded)} · Rank-ups: {summary.rankStats.rankUps} · DP redeemed: {decimal(summary.dpStats.redeemed)}</p>
         <Table columns={[{ key: 'date', label: 'Rank-up date', render: (row) => formatDateKey(row.date) }, { key: 'rankNumber', label: 'Rank reached', render: (row) => `${row.rankNumber} · ${row.rankName}` }, { key: 'dpAwarded', label: 'Entry DP', render: (row) => decimal(row.dpAwarded) }]} rows={rankUps} />
-        <Table columns={[{ key: 'startAt', label: 'Started', render: (row) => istDateTime(row.startAt) }, { key: 'scheduledResumeAt', label: 'Scheduled resume', render: (row) => istDateTime(row.scheduledResumeAt) }, { key: 'actualResumeAt', label: 'Actual resume', render: (row) => istDateTime(row.actualResumeAt) }, { key: 'durationDays', label: 'Chosen duration', render: (row) => `${row.durationDays} day(s)` }, { key: 'resumeReason', label: 'Resume type', render: (row) => row.resumeReason || 'Still active' }]} rows={pauses} empty="No Emergency Pause starts were recorded during this month." />
+        <Table columns={[{ key: 'id', label: 'Pause ID', render: (row) => row.id || row.activationEventId || 'Data unavailable' }, { key: 'startAt', label: 'Activated · IST', render: (row) => istDateTime(row.startAt) }, { key: 'durationDays', label: 'Selected duration', render: (row) => pauseSelectedDuration(row) }, { key: 'scheduledResumeAt', label: 'Scheduled resume · IST', render: (row) => istDateTime(row.scheduledResumeAt) }, { key: 'actualResumeAt', label: 'Actual resume · IST', render: (row) => row.actualResumeAt ? istDateTime(row.actualResumeAt) : row.status === 'active' ? 'Active' : 'Data unavailable' }, { key: 'resumeReason', label: 'Resume type', render: (row) => pauseResumeLabel(row) }, { key: 'elapsed', label: 'Actual elapsed', render: (row) => pauseElapsedDuration(row, Date.parse(generatedAt)) }, { key: 'protectedDates', label: 'Protected IST dates · month attribution', render: (row) => pauseProtectedDateAttribution(row, summary.rangeStart, summary.rangeEnd) }]} rows={pauses} empty="No Emergency Pause records overlap this month." />
         <h2>Daily Performance Timeline</h2>
         {summary.timeline.length ? <table className="monthly-report-print__timeline"><thead><tr><th>Date</th><th>Tasks</th><th>Discipline</th><th>Quest events</th><th>XP earned / drained / net</th></tr></thead><tbody>{summary.timeline.map((day) => <tr key={day.date}><td>{formatDateKey(day.date)}</td><td>{day.task ? `${day.task.completed}/${day.task.scheduled} complete${day.task.finalized ? ` · ${day.task.missed} missed` : ` · ${day.task.pending} pending`}` : day.discipline.protected ? 'Protected' : 'Data unavailable'}</td><td>{day.discipline.status}</td><td>+{day.quests.generated} / ✓{day.quests.completed} / −{day.quests.expired} / cleared {day.quests.thresholdCleared}</td><td>{day.xp ? `${decimal(day.xp.earned)} / ${decimal(day.xp.drained)} / ${signed(day.xp.net)}` : 'Data unavailable'}</td></tr>)}</tbody></table> : <p>No daily records are available.</p>}
         {!summary.availability.detailedTaskHistory && <p className="monthly-report-print__notice">Aggregate historical report only. Detailed task-level records have expired; aggregate monthly statistics remain available.</p>}
@@ -298,7 +349,22 @@ export default function MonthlyAnalysisPage() {
     setComparisonMonths((current) => current.includes(currentMonth) ? current : [...current, currentMonth]);
   }, [currentRunId]);
 
-  const activeRunSummaries = useMemo(() => (monthlySummaries || []).filter((summary) => summary.progressionRunId === activeRunId).sort((a, b) => a.monthKey.localeCompare(b.monthKey)), [monthlySummaries, activeRunId]);
+  const activeRunSummaries = useMemo(() => (monthlySummaries || [])
+    .filter((summary) => summary.progressionRunId === activeRunId)
+    .sort((a, b) => a.monthKey.localeCompare(b.monthKey))
+    .map((summary) => {
+      const pauseStats = buildEmergencyPauseMonthlyStats(emergencyPauseState, {
+        rangeStart: summary.rangeStart,
+        rangeEnd: summary.rangeEnd,
+        now: new Date(),
+      });
+      return {
+        ...summary,
+        pauseStats,
+        availability: { ...summary.availability, hasData: Boolean(summary.availability?.hasData || pauseStats.used || pauseStats.totalPauseDays || pauseStats.activeCount) },
+        sourceIds: { ...summary.sourceIds, emergencyPauseIds: pauseStats.pauseEventIds, emergencyPauseHistoryIds: pauseStats.historyRecordIds },
+      };
+    }), [monthlySummaries, activeRunId, emergencyPauseState]);
   const availableMonths = activeRunSummaries.filter((summary) => summary.availability?.hasData || summary.monthKey === currentMonth);
   const selected = activeRunSummaries.find((summary) => summary.monthKey === monthKey) || availableMonths.at(-1) || null;
   const isCurrentRun = activeRunId === currentRunId;
@@ -351,7 +417,7 @@ export default function MonthlyAnalysisPage() {
     ...rowsForIds(disciplineState.dpEvents, sourceIds.disciplinePointEventIds),
     ...redemptionRows.map((event) => ({ ...event, kind: 'redemption', title: 'Grace Point redemption', amount: -Number(event.dpSpent || 0), balanceAfter: event.dpBalanceAfter })),
   ].sort((a, b) => a.date.localeCompare(b.date));
-  const pauseRows = rowsForIds(emergencyPauseState.pauses, sourceIds.emergencyPauseIds).sort((a, b) => a.startAt.localeCompare(b.startAt));
+  const pauseRows = emergencyPauseRows(emergencyPauseState, sourceIds.emergencyPauseHistoryIds ?? sourceIds.emergencyPauseIds);
   const rankDays = rankDaysInPeriod(selected, rankRows);
   const levelDownRows = rowsForIds(disciplineState.levelDownEvents, xp.levelEventIds).sort((a, b) => a.date.localeCompare(b.date));
   const redemptionCooldownHours = 72;
@@ -568,14 +634,22 @@ export default function MonthlyAnalysisPage() {
       </HistoryDisclosure>
 
       <HistoryDisclosure title="Rank and Daily Rank Benefit History" count={`${rankRows.length} Rank-ups · ${dailyRankRows.length} daily benefits`}>
-        <div className="monthly-rank-days-detail"><div><h3>Days spent at each Rank</h3>{rankDays ? <BarList items={rankDays} tone="blue" empty="No Rank-day history is available." /> : <p className="monthly-empty">Starting Rank is unavailable, so Rank days cannot be reconstructed accurately.</p>}</div><span>Starting / ending Rank <strong>{selected.rankStats.startingRank?.name || 'Unavailable'} → {selected.rankStats.endingRank?.name || 'Unavailable'}</strong></span></div>
+        <div className="monthly-rank-days-detail"><div className="monthly-rank-days-detail__chart"><h3>Days spent at each Rank</h3>{rankDays ? <BarList items={rankDays} tone="blue" empty="No Rank-day history is available." /> : <p className="monthly-empty">Starting Rank is unavailable, so Rank days cannot be reconstructed accurately.</p>}</div><div className="monthly-rank-days-detail__summary"><span>Starting / ending Rank</span><strong>{selected.rankStats.startingRank?.name || 'Unavailable'} → {selected.rankStats.endingRank?.name || 'Unavailable'}</strong></div></div>
         <Table columns={[{ key: 'date', label: 'Rank-up date', render: (row) => formatDateKey(row.date) }, { key: 'rankName', label: 'Rank reached', render: (row) => `${row.rankNumber} · ${row.rankName}` }, { key: 'dpAwarded', label: 'Entry DP', render: (row) => `+${decimal(row.dpAwarded)} DP` }, { key: 'xpStatus', label: 'Entry XP', render: (row) => row.xpStatus === 'pending' ? 'Pending configuration' : row.xpStatus }]} rows={rankRows} empty="No Rank-up events were recorded in this period." />
         <Table columns={[{ key: 'date', label: 'Date', render: (row) => formatDateKey(row.date) }, { key: 'rankName', label: 'Rank at reset' }, { key: 'percentage', label: 'Configured benefit', render: (row) => `${decimal(row.percentage)}%` }, { key: 'levelAtAward', label: 'Level at award' }, { key: 'levelRequirement', label: 'Level XP requirement', render: (row) => decimal(row.levelRequirement) }, { key: 'amount', label: 'XP awarded', render: (row) => `+${decimal(row.amount)}` }]} rows={dailyRankRows} empty="No daily Rank XP benefit events were stored in this period." />
       </HistoryDisclosure>
 
-      <HistoryDisclosure title="Emergency Pause History" count={`${pluralCount(selected.pauseStats.used, 'activation event')} · ${pluralCount(selected.pauseStats.totalPauseDays, 'protected day')}`}>
-        <Table columns={[{ key: 'startAt', label: 'Started', render: (row) => istDateTime(row.startAt) }, { key: 'scheduledResumeAt', label: 'Scheduled resume', render: (row) => istDateTime(row.scheduledResumeAt) }, { key: 'durationDays', label: 'Chosen duration', render: (row) => `${row.durationDays} day${row.durationDays === 1 ? '' : 's'}` }, { key: 'actualResumeAt', label: 'Actual resume', render: (row) => row.actualResumeAt ? istDateTime(row.actualResumeAt) : 'Still active' }, { key: 'resumeReason', label: 'Resume type', render: (row) => row.resumeReason === 'manual' ? 'Early resume' : row.resumeReason === 'automatic' ? 'Automatic' : row.status === 'active' ? 'Active' : 'Unavailable' }]} rows={pauseRows} empty="No Emergency Pause starts were recorded in this month." />
-        <p className="monthly-inline-note">Protected dates do not count as missed Tasks or failed Discipline days.</p>
+      <HistoryDisclosure title="Emergency Pause History" count={`${pluralCount(selected.pauseStats.used, 'activation')} · ${pluralCount(selected.pauseStats.totalPauseDays, 'protected day')}`}>
+        <div className="monthly-pause-summary" aria-label="Emergency Pause monthly summary">
+          <div><span>Activations</span><strong>{selected.pauseStats.used}</strong></div>
+          <div><span>Protected IST days</span><strong>{selected.pauseStats.totalPauseDays}</strong></div>
+          <div><span>Early resumes</span><strong>{selected.pauseStats.earlyResumeCount}</strong></div>
+          <div><span>Automatic resumes</span><strong>{selected.pauseStats.automaticResumeCount}</strong></div>
+          <div><span>Active in period</span><strong>{selected.pauseStats.activeCount}</strong></div>
+        </div>
+        <Table columns={[{ key: 'id', label: 'Pause ID', render: (row) => row.id || row.activationEventId || 'Data unavailable' }, { key: 'startAt', label: 'Activated · IST', render: (row) => istDateTime(row.startAt) }, { key: 'durationDays', label: 'Selected duration', render: (row) => pauseSelectedDuration(row) }, { key: 'scheduledResumeAt', label: 'Scheduled resume · IST', render: (row) => istDateTime(row.scheduledResumeAt) }, { key: 'actualResumeAt', label: 'Actual resume · IST', render: (row) => row.actualResumeAt ? istDateTime(row.actualResumeAt) : row.status === 'active' ? 'Active' : 'Data unavailable' }, { key: 'resumeReason', label: 'Resume type', render: (row) => pauseResumeLabel(row) }, { key: 'elapsed', label: 'Actual elapsed', render: (row) => pauseElapsedDuration(row) }, { key: 'protectedDates', label: 'Protected dates · IST month attribution', render: (row) => pauseProtectedDateAttribution(row, selected.rangeStart, selected.rangeEnd) }]} rows={pauseRows} empty="No Emergency Pause records overlap this month." />
+        {selected.pauseStats.unavailableHistoryCount > 0 && <p className="monthly-inline-note">{pluralCount(selected.pauseStats.unavailableHistoryCount, 'pause record')} contain missing historical fields. Missing dates or durations are shown as unavailable and are not inferred.</p>}
+        <p className="monthly-inline-note">Protected dates use the same unique IST dates as Discipline history. Dates appear under the calendar month they belong to and do not count as missed Tasks or failed Discipline days.</p>
       </HistoryDisclosure>
 
 

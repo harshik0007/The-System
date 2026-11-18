@@ -57,6 +57,50 @@ export function getLevelProgress(totalXp) {
   };
 }
 
+function rankAchievementRecord(rank, lastAchievedOn) {
+  if (!rank) return null;
+  return {
+    rankSlug: rank.id,
+    rankNumber: rank.number,
+    rankName: rank.name,
+    progressionOrder: rank.progressionOrder,
+    ...(lastAchievedOn ? { lastAchievedOn } : {}),
+  };
+}
+
+export function getHighestRankAchieved(state) {
+  const currentRank = RANK_DISCIPLINE_CONFIG[state?.currentRankSlug];
+  const savedRank = RANK_DISCIPLINE_CONFIG[state?.highestRankAchieved?.rankSlug];
+  const eventRanks = (state?.rankEntryEvents || [])
+    .map((event) => RANK_DISCIPLINE_CONFIG[event.rankSlug])
+    .filter(Boolean);
+  const candidates = [currentRank, savedRank, ...eventRanks].filter(Boolean);
+  const highestRank = candidates.reduce((highest, rank) => !highest || rank.progressionOrder > highest.progressionOrder ? rank : highest, null);
+  if (!highestRank) return null;
+
+  const lastEventDate = (state?.rankEntryEvents || [])
+    .filter((event) => event.rankSlug === highestRank.id && event.date)
+    .map((event) => event.date)
+    .sort()
+    .at(0);
+  const lastAchievedOn = (state?.highestRankAchieved?.rankSlug === highestRank.id
+    ? state.highestRankAchieved.lastAchievedOn
+    : null) || lastEventDate;
+  return rankAchievementRecord(highestRank, lastAchievedOn);
+}
+
+export function normalizeHighestRankAchieved(state) {
+  if (!state) return state;
+  const highestRankAchieved = getHighestRankAchieved(state);
+  if (!highestRankAchieved) return state;
+  const existing = state.highestRankAchieved;
+  if (existing?.rankSlug === highestRankAchieved.rankSlug
+    && existing?.rankNumber === highestRankAchieved.rankNumber
+    && existing?.rankName === highestRankAchieved.rankName
+    && existing?.progressionOrder === highestRankAchieved.progressionOrder) return state;
+  return { ...state, highestRankAchieved };
+}
+
 export function createDisciplineState({ now = new Date(), rankSlug = 'continuum', totalXp = 1240, dpBalance = DISCIPLINE_POINTS_START } = {}) {
   const rank = getRankDisciplineConfig(rankSlug);
   const dateKey = getIstDateKey(now);
@@ -67,6 +111,7 @@ export function createDisciplineState({ now = new Date(), rankSlug = 'continuum'
     lastProcessedDate: null,
     dailyRecords: {},
     currentRankSlug: rankSlug,
+    highestRankAchieved: rankAchievementRecord(RANK_DISCIPLINE_CONFIG[rankSlug]),
     progressionRunId: `run-${dateKey}-demo`,
     claimedRankEntryIds: [],
     currentStreak: 0,
@@ -235,7 +280,11 @@ export function enterHigherRank(state, rankSlug, dateKey = getIstDateKey()) {
 
   const claimId = `${state.progressionRunId}:${target.id}`;
   if (state.claimedRankEntryIds.includes(claimId)) return { state, event: null, reason: 'already-claimed' };
-  let next = { ...state, currentRankSlug: target.id, claimedRankEntryIds: [...state.claimedRankEntryIds, claimId] };
+  const highestRankAchieved = getHighestRankAchieved(state);
+  const nextHighestRank = !highestRankAchieved || target.progressionOrder > highestRankAchieved.progressionOrder
+    ? rankAchievementRecord(target, dateKey)
+    : highestRankAchieved;
+  let next = { ...state, currentRankSlug: target.id, highestRankAchieved: nextHighestRank, claimedRankEntryIds: [...state.claimedRankEntryIds, claimId] };
   const eventId = `rank-entry:${claimId}`;
   const beforeCount = next.dpEvents.length;
   if (target.entryDp > 0) {

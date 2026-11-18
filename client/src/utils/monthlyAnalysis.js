@@ -2,7 +2,12 @@ import { DISCIPLINE_TASK_MINIMUM, getRankDisciplineConfig, RANK_DISCIPLINE_CONFI
 import { RECOVERY_STATUS } from './recoveryQuestManager.js';
 import { getScheduleDaySnapshot } from './disciplineActivity.js';
 import { getIstDateKey } from './taskScheduleBuilder.js';
-import { getEmergencyPauseDates, isEmergencyPauseDate } from './emergencyPauseManager.js';
+import {
+  getEmergencyPauseDates,
+  getEmergencyPauseDatesForRecord,
+  getUniqueEmergencyPauseRecords,
+  isEmergencyPauseDate,
+} from './emergencyPauseManager.js';
 import { getLevelFromTotalXp } from './disciplineManager.js';
 
 const DAY_MS = 86_400_000;
@@ -73,6 +78,78 @@ function dateOfEvent(value) {
 
 function within(dateKey, start, end) {
   return Boolean(dateKey && dateKey >= start && dateKey <= end);
+}
+
+export function getEmergencyPauseRecordKey(pause) {
+  return pause?.id || pause?.activationEventId || (pause?.startAt ? `legacy-pause:${pause.startAt}` : null);
+}
+
+function emergencyPauseResumeType(pause) {
+  if (pause?.resumeReason === 'manual' || pause?.status === 'resumed-early') return 'early';
+  if (pause?.resumeReason === 'automatic' || pause?.status === 'automatically-resumed') return 'automatic';
+  return pause?.status === 'active' ? 'active' : 'unavailable';
+}
+
+/**
+ * Builds month-scoped Emergency Pause metrics from the same unique records and
+ * protected IST dates used by Discipline. Activation/resume events belong to
+ * the IST date on which their timestamps occurred; protected days belong to
+ * the IST dates intersected by each effective [start, resume) interval.
+ */
+export function buildEmergencyPauseMonthlyStats(state, { rangeStart, rangeEnd, now = new Date() }) {
+  const records = getUniqueEmergencyPauseRecords(state);
+  const nowMs = now instanceof Date ? now.getTime() : Date.parse(now);
+  const activationRecords = records.filter((pause) => within(dateOfEvent(pause.startAt), rangeStart, rangeEnd));
+  const protectedDatesByRecord = new Map(records.map((pause) => [pause, getEmergencyPauseDatesForRecord(pause)]));
+  const protectedDates = new Set([...protectedDatesByRecord.values()].flatMap((dates) => dates.filter((date) => within(date, rangeStart, rangeEnd))));
+  const earlyResumeRecords = records.filter((pause) => emergencyPauseResumeType(pause) === 'early'
+    && within(dateOfEvent(pause.actualResumeAt), rangeStart, rangeEnd));
+  const automaticResumeRecords = records.filter((pause) => emergencyPauseResumeType(pause) === 'automatic'
+    && within(dateOfEvent(pause.actualResumeAt), rangeStart, rangeEnd));
+  const todayKey = Number.isFinite(nowMs) ? getIstDateKey(new Date(nowMs)) : null;
+  const activeRecords = records.filter((pause) => {
+    if (emergencyPauseResumeType(pause) !== 'active') return false;
+    const scheduledEnd = Date.parse(pause.scheduledResumeAt);
+    if (Number.isFinite(nowMs) && Number.isFinite(scheduledEnd) && nowMs >= scheduledEnd) return false;
+    const dates = protectedDatesByRecord.get(pause) || [];
+    if (dates.some((date) => within(date, rangeStart, rangeEnd))) return true;
+    const startedAt = Date.parse(pause.startAt);
+    return within(todayKey, rangeStart, rangeEnd) && Number.isFinite(startedAt) && startedAt <= nowMs;
+  });
+  const historyRecords = records.filter((pause) => {
+    const dates = protectedDatesByRecord.get(pause) || [];
+    return within(dateOfEvent(pause.startAt), rangeStart, rangeEnd)
+      || within(dateOfEvent(pause.actualResumeAt), rangeStart, rangeEnd)
+      || dates.some((date) => within(date, rangeStart, rangeEnd))
+      || activeRecords.includes(pause);
+  });
+  const unavailableHistoryRecords = historyRecords.filter((pause) => {
+    const type = emergencyPauseResumeType(pause);
+    const ended = type === 'early' || type === 'automatic';
+    return !pause.startAt
+      || !Number.isFinite(Date.parse(pause.startAt))
+      || !Number.isInteger(Number(pause.durationDays))
+      || Number(pause.durationDays) <= 0
+      || !Number.isFinite(Date.parse(pause.scheduledResumeAt))
+      || (ended && !Number.isFinite(Date.parse(pause.actualResumeAt)));
+  });
+  const ids = (items) => items.map(getEmergencyPauseRecordKey).filter(Boolean);
+
+  return {
+    used: activationRecords.length,
+    monthlyUsage: activationRecords.length,
+    totalPauseDays: protectedDates.size,
+    pauseEventIds: ids(activationRecords),
+    activationEventIds: activationRecords.map((pause) => pause.activationEventId || getEmergencyPauseRecordKey(pause)).filter(Boolean),
+    earlyResumeCount: earlyResumeRecords.length,
+    earlyResumeEventIds: earlyResumeRecords.map((pause) => pause.resumeEventId || getEmergencyPauseRecordKey(pause)).filter(Boolean),
+    automaticResumeCount: automaticResumeRecords.length,
+    automaticResumeEventIds: automaticResumeRecords.map((pause) => pause.resumeEventId || getEmergencyPauseRecordKey(pause)).filter(Boolean),
+    activeCount: activeRecords.length,
+    activePauseIds: ids(activeRecords),
+    historyRecordIds: ids(historyRecords),
+    unavailableHistoryCount: unavailableHistoryRecords.length,
+  };
 }
 
 function filterRunEvents(items, excludedIds, progressionRunId, runStartDate, getDate = (item) => item.date) {
@@ -326,14 +403,7 @@ export function buildMonthlySummary({
   const dataSchedule = sources.schedule;
   const dataRecovery = sources.recovery;
   const rawPauseState = sources.emergencyPauseState;
-  const pauseRecords = new Map();
-  (rawPauseState?.pauses || []).forEach((pause, index) => {
-    const eventId = pause.activationEventId || pause.id || `legacy-pause:${pause.startAt || index}`;
-    // A persisted pause can be encountered more than once during state restoration;
-    // the last copy carries the most recent early/automatic resume information.
-    pauseRecords.set(eventId, pause);
-  });
-  const dataPauses = { ...rawPauseState, pauses: [...pauseRecords.values()] };
+  const dataPauses = { ...rawPauseState, pauses: getUniqueEmergencyPauseRecords(rawPauseState) };
   const dailyRecords = Object.values(dataDiscipline.dailyRecords || {}).filter((record) => within(record.date, rangeStart, rangeEnd));
   const pauseDates = new Set(getEmergencyPauseDates(dataPauses).filter((date) => within(date, rangeStart, rangeEnd)));
   const xpEvents = eventDaysInMonth(dataDiscipline.xpHistory || [], (event) => event.date, rangeStart, rangeEnd);
@@ -382,6 +452,7 @@ export function buildMonthlySummary({
   const startRankSlug = rankEventBefore?.rankSlug || (runBaseline?.rankSlug || (rangeStart === runStartDate ? disciplineState?.currentRankSlug : null));
   const startRank = startRankSlug ? getRankDisciplineConfig(startRankSlug) : null;
   const pauseEvents = (dataPauses?.pauses || []).filter((pause) => within(dateOfEvent(pause.startAt), rangeStart, rangeEnd));
+  const pauseStats = buildEmergencyPauseMonthlyStats(dataPauses, { rangeStart, rangeEnd, now: generatedAt });
   const xpStats = getXpStats(dataDiscipline, xpEvents, rangeStart, rangeEnd, monthKey === getIstMonthKey(todayKey) && !runEndDate, todayKey, runBaseline);
   const questGenerated = monthQuests.filter((quest) => within(quest.activationDate, rangeStart, rangeEnd)).length;
   const questCompleted = monthQuests.filter((quest) => within(quest.completedDate, rangeStart, rangeEnd)).length;
@@ -416,7 +487,7 @@ export function buildMonthlySummary({
   }
   const timeline = makeTimeline({ start: rangeStart, end: rangeEnd, disciplineState: dataDiscipline, schedule: dataSchedule, recoveryState: dataRecovery, emergencyPauseState: dataPauses, todayKey, xpEvents, dpEvents, redemptionEvents: redemptions, graceEvents });
   const activeRunTasks = taskStats.scheduled > 0 || dailyRecords.length > 0;
-  const hasData = activeRunTasks || monthQuests.length > 0 || xpEvents.length > 0 || dpEvents.length > 0 || graceEvents.length > 0 || pauseEvents.length > 0 || pauseDates.size > 0 || rankEvents.length > 0;
+  const hasData = activeRunTasks || monthQuests.length > 0 || xpEvents.length > 0 || dpEvents.length > 0 || graceEvents.length > 0 || pauseStats.used > 0 || pauseStats.totalPauseDays > 0 || pauseStats.activeCount > 0 || rankEvents.length > 0;
   const label = `${formatMonthLabel(monthKey)}${status === 'partial' ? ' · Partial' : ''}`;
 
   return {
@@ -449,7 +520,8 @@ export function buildMonthlySummary({
       recoveryActivityIds: (dataRecovery.activity || []).filter((event) => within(event.date, rangeStart, rangeEnd)).map((event) => event.id),
       xpDrainEventIds: (dataDiscipline.xpDrainEvents || []).filter((event) => within(event.date, rangeStart, rangeEnd)).map((event) => event.id),
       rankEventIds: rankEvents.map((event) => event.id),
-      emergencyPauseIds: pauseEvents.map((pause) => pause.id),
+      emergencyPauseIds: pauseEvents.map((pause) => getEmergencyPauseRecordKey(pause)).filter(Boolean),
+      emergencyPauseHistoryIds: pauseStats.historyRecordIds,
     },
     taskStats,
     disciplineStats: {
@@ -512,12 +584,7 @@ export function buildMonthlySummary({
       eventIds: rankEvents.map((event) => event.id),
       dailyRankEventIds: (dataDiscipline.dailyRankXpEvents || []).filter((event) => within(event.date, rangeStart, rangeEnd)).map((event) => event.id),
     },
-    pauseStats: {
-      used: pauseEvents.length,
-      monthlyUsage: pauseEvents.length,
-      totalPauseDays: pauseDates.size,
-      pauseEventIds: pauseEvents.map((pause) => pause.id),
-    },
+    pauseStats,
     timeline,
   };
 }

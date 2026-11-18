@@ -533,9 +533,29 @@
 .monthly-chart-empty strong { color: #d7e8f5; font-size: 14px; font-weight: 550; }
 .monthly-chart-empty p { margin: 5px 0 0; color: #91a6ba; font-size: 13px; line-height: 1.55; }
 
+.monthly-rank-days-detail { display: grid; gap: 16px; min-width: 0; }
+.monthly-rank-days-detail__chart { min-width: 0; }
+.monthly-rank-days-detail__chart > h3 { margin: 0 0 12px; color: #dceafa; font: 550 16px/1.35 var(--font-display); }
+.monthly-rank-days-detail .monthly-bar-row { grid-template-columns: minmax(150px, 185px) minmax(70px, 1fr) 36px; gap: 10px; }
+.monthly-rank-days-detail .monthly-bar-row__label { min-width: 150px; color: #b4c6d8; text-align: left; white-space: nowrap; overflow-wrap: normal; }
+.monthly-rank-days-detail__summary { display: grid; gap: 6px; min-width: 0; padding: 12px 14px; border: 1px solid rgb(139 181 225 / 11%); border-radius: 8px; background: rgb(10 21 35 / 58%); color: #9aafc2; font-size: 12px; line-height: 1.45; }
+.monthly-rank-days-detail__summary strong { color: #e0edf8; font: 550 15px/1.4 var(--font-display); overflow-wrap: anywhere; }
+
+.monthly-pause-summary { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
+.monthly-pause-summary > div { display: grid; gap: 6px; min-width: 0; padding: 12px 13px; border: 1px solid rgb(139 181 225 / 11%); border-radius: 8px; background: rgb(10 21 35 / 58%); }
+.monthly-pause-summary span { color: #92a8bd; font-size: 12px; line-height: 1.4; }
+.monthly-pause-summary strong { color: #dceafa; font: 600 20px/1.1 var(--font-display); }
+
 @media (max-width: 640px) {
   .monthly-analysis-page { --monthly-nav-top: 69px; --monthly-anchor-offset: 142px; }
   .monthly-daily-chart--single { grid-template-columns: minmax(0, 190px); }
+  .monthly-rank-days-detail .monthly-bar-row { grid-template-columns: minmax(132px, 142px) minmax(45px, 1fr) 30px; gap: 7px; }
+  .monthly-rank-days-detail .monthly-bar-row__label { min-width: 132px; font-size: 11px; }
+  .monthly-pause-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (min-width: 641px) and (max-width: 900px) {
+  .monthly-pause-summary { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 
 @media (max-width: 900px) { .monthly-task-count-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

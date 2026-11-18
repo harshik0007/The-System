@@ -4,7 +4,6 @@ export const EMERGENCY_PAUSES_PER_MONTH = 2;
 export const EMERGENCY_PAUSE_MIN_DAYS = 1;
 export const EMERGENCY_PAUSE_MAX_DAYS = 7;
 export const EMERGENCY_PAUSE_DAY_MS = 24 * 60 * 60 * 1000;
-const IST_OFFSET_MS = (5 * 60 + 30) * 60 * 1000;
 
 export function createEmergencyPauseState() {
   return { version: 1, pauses: [] };
@@ -18,16 +17,39 @@ export function getIstMonthKey(value = new Date()) {
   return `${values.year}-${values.month}`;
 }
 
+export function getUniqueEmergencyPauseRecords(state) {
+  const records = [];
+  const indexByIdentity = new Map();
+  (state?.pauses || []).forEach((pause) => {
+    const identities = [pause.id && `pause:${pause.id}`, pause.activationEventId && `activation:${pause.activationEventId}`].filter(Boolean);
+    const matchedIndexes = [...new Set(identities.map((identity) => indexByIdentity.get(identity)).filter((index) => index !== undefined))];
+    if (!matchedIndexes.length) {
+      const index = records.push(pause) - 1;
+      identities.forEach((identity) => indexByIdentity.set(identity, index));
+      return;
+    }
+
+    const targetIndex = Math.max(...matchedIndexes);
+    records[targetIndex] = pause;
+    for (const [identity, index] of indexByIdentity) {
+      if (matchedIndexes.includes(index)) indexByIdentity.set(identity, targetIndex);
+    }
+    matchedIndexes.filter((index) => index !== targetIndex).forEach((index) => { records[index] = null; });
+    identities.forEach((identity) => indexByIdentity.set(identity, targetIndex));
+  });
+  return records.filter(Boolean);
+}
+
 export function getEmergencyPauseMonthlyUsage(state, now = Date.now()) {
   const month = getIstMonthKey(now);
-  return new Set((state?.pauses || [])
+  return new Set(getUniqueEmergencyPauseRecords(state)
     .filter((pause) => pause.activationMonth === month && pause.activationEventId)
     .map((pause) => pause.activationEventId)).size;
 }
 
 export function getActiveEmergencyPause(state, now = Date.now()) {
   const nowMs = now instanceof Date ? now.getTime() : Number(now);
-  return (state?.pauses || []).find((pause) => pause.status === 'active'
+  return getUniqueEmergencyPauseRecords(state).find((pause) => pause.status === 'active'
     && Number.isFinite(Date.parse(pause.scheduledResumeAt))
     && nowMs < Date.parse(pause.scheduledResumeAt)) || null;
 }
@@ -137,40 +159,37 @@ export function reconcileEmergencyPause(state, recoveryState, now = new Date()) 
   };
 }
 
-function istDayStart(dateKey) {
-  const [year, month, day] = dateKey.split('-').map(Number);
-  return Date.UTC(year, month - 1, day) - IST_OFFSET_MS;
-}
-
 export function isEmergencyPauseDate(state, dateKey) {
   if (!dateKey) return false;
-  const dayStart = istDayStart(dateKey);
-  const dayEnd = dayStart + EMERGENCY_PAUSE_DAY_MS;
-  return (state?.pauses || []).some((pause) => {
-    if (!pause.startAt || !pause.scheduledResumeAt) return false;
-    const start = Date.parse(pause.startAt);
-    const end = Date.parse(pause.actualResumeAt || pause.scheduledResumeAt);
-    return Number.isFinite(start) && Number.isFinite(end) && start < dayEnd && end > dayStart;
-  });
+  return getUniqueEmergencyPauseRecords(state).some((pause) => getEmergencyPauseDatesForRecord(pause).includes(dateKey));
+}
+
+export function getEmergencyPauseDatesForRecord(pause) {
+  if (!pause?.startAt) return [];
+  // If a completed pause lost its actual resume timestamp, the scheduled end
+  // cannot stand in for a known early or automatic resume.
+  const resumeTypeIsRecorded = pause.status === 'resumed-early' || pause.status === 'automatically-resumed'
+    || pause.resumeReason === 'manual' || pause.resumeReason === 'automatic';
+  if (resumeTypeIsRecorded && !pause.actualResumeAt) return [];
+  const start = Date.parse(pause.startAt);
+  const end = Date.parse(pause.actualResumeAt || pause.scheduledResumeAt);
+  if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) return [];
+
+  // Pause intervals are half-open [start, end): a resume at IST midnight does not protect the new date.
+  const dates = [];
+  let dateKey = getIstDateKey(new Date(start));
+  const finalDateKey = getIstDateKey(new Date(end - 1));
+  let guard = 0;
+  while (dateKey <= finalDateKey && guard < 9) {
+    dates.push(dateKey);
+    const date = new Date(`${dateKey}T12:00:00Z`);
+    date.setUTCDate(date.getUTCDate() + 1);
+    dateKey = getIstDateKey(date);
+    guard += 1;
+  }
+  return dates;
 }
 
 export function getEmergencyPauseDates(state) {
-  const dates = new Set();
-  (state?.pauses || []).forEach((pause) => {
-    if (!pause.startAt || !pause.scheduledResumeAt) return;
-    const start = Date.parse(pause.startAt);
-    const end = Date.parse(pause.actualResumeAt || pause.scheduledResumeAt);
-    if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) return;
-    let dateKey = getIstDateKey(new Date(start));
-    const finalDateKey = getIstDateKey(new Date(Math.max(start, end - 1)));
-    let guard = 0;
-    while (dateKey <= finalDateKey && guard < 9) {
-      dates.add(dateKey);
-      const date = new Date(`${dateKey}T12:00:00Z`);
-      date.setUTCDate(date.getUTCDate() + 1);
-      dateKey = getIstDateKey(date);
-      guard += 1;
-    }
-  });
-  return [...dates].sort();
+  return [...new Set(getUniqueEmergencyPauseRecords(state).flatMap(getEmergencyPauseDatesForRecord))].sort();
 }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import AppSidebar from './AppSidebar.jsx';
 import AppTopbar from './AppTopbar.jsx';
@@ -6,11 +6,18 @@ import AppPageContainer from './AppPageContainer.jsx';
 import { Link } from 'react-router-dom';
 import AppIcon from './AppIcon.jsx';
 import { useTaskSchedule } from '../../context/TaskScheduleContext.jsx';
+import { dashboardDemo } from '../../data/dashboardDemo.js';
+import { leaderboardDemoMembers } from '../../data/leaderboardDemo.js';
+import useCurrentMemberPersonalBest from '../../hooks/useCurrentMemberPersonalBest.js';
+import { createCurrentMemberEntry, mergeLeaderboardMembers } from '../../utils/leaderboard.js';
 import '../../styles/app-shell.css';
 import '../../styles/discipline.css';
 
 export default function AppLayout() {
-  const { rankUpNotice, dismissRankUpNotice } = useTaskSchedule();
+  const { rankUpNotice, dismissRankUpNotice, disciplineState } = useTaskSchedule();
+  const currentMember = useMemo(() => createCurrentMemberEntry(dashboardDemo.member, disciplineState), [disciplineState]);
+  const leaderboardMembers = useMemo(() => mergeLeaderboardMembers(leaderboardDemoMembers, currentMember), [currentMember]);
+  useCurrentMemberPersonalBest(currentMember, leaderboardMembers);
   const [isMobile, setIsMobile] = useState(() => window.matchMedia('(max-width: 760px)').matches);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => window.matchMedia('(max-width: 1100px)').matches);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);

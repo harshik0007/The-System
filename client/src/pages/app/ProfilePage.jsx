@@ -1,10 +1,15 @@
+import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import AppIcon from '../../components/app/AppIcon.jsx';
 import DisciplineActivityMap from '../../components/app/DisciplineActivityMap.jsx';
+import PersonalBestRecords from '../../components/app/PersonalBestRecords.jsx';
 import { dashboardDemo } from '../../data/dashboardDemo.js';
+import { leaderboardDemoMembers } from '../../data/leaderboardDemo.js';
 import { DISCIPLINE_POINTS_CAP, getRankDisciplineConfig } from '../../data/disciplineConfig.js';
 import { useTaskSchedule } from '../../context/TaskScheduleContext.jsx';
+import useCurrentMemberPersonalBest from '../../hooks/useCurrentMemberPersonalBest.js';
 import { getScheduleDaySnapshot } from '../../utils/disciplineActivity.js';
+import { createCurrentMemberEntry, mergeLeaderboardMembers } from '../../utils/leaderboard.js';
 import { getIstDateKey } from '../../utils/taskScheduleBuilder.js';
 import '../../styles/discipline.css';
 
@@ -15,6 +20,9 @@ function formatMemberSince(dateKey) {
 export default function ProfilePage() {
   const { disciplineState, recoveryState, currentSchedule } = useTaskSchedule();
   const rank = getRankDisciplineConfig(disciplineState.currentRankSlug);
+  const currentMember = useMemo(() => createCurrentMemberEntry(dashboardDemo.member, disciplineState), [disciplineState]);
+  const leaderboardMembers = useMemo(() => mergeLeaderboardMembers(leaderboardDemoMembers, currentMember), [currentMember]);
+  const personalBestRecords = useCurrentMemberPersonalBest(currentMember, leaderboardMembers);
   const todayKey = getIstDateKey();
   const totalCompleted = disciplineState.totalCompletedScheduledTasks + getScheduleDaySnapshot(currentSchedule, todayKey, { todayKey }).completedTaskCount;
 
@@ -39,8 +47,9 @@ export default function ProfilePage() {
           <div><dt>Completed scheduled tasks</dt><dd>{totalCompleted}</dd></div>
         </dl>
       </section>
+      <PersonalBestRecords records={personalBestRecords} isCurrentMember />
       <DisciplineActivityMap compact disciplineState={disciplineState} schedule={currentSchedule} />
-      <p className="discipline-disclosure"><AppIcon name="activity" />Profile and Discipline read the same task history and shared browser-session balances. Member Since is held through a Progression Reset, but is not permanent across browser sessions in this frontend preview.</p>
+      <p className="discipline-disclosure"><AppIcon name="activity" />Profile and Discipline read the same task history and shared browser-session balances. Member Since and Personal Best Records persist through a Progression Reset, but permanent account storage requires backend persistence.</p>
     </div>
   );
 }

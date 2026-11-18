@@ -23,6 +23,8 @@ const routeLoaders = {
   recoveryQuests: () => import('./pages/app/RecoveryQuestsPage.jsx'),
   discipline: () => import('./pages/app/DisciplinePage.jsx'),
   profile: () => import('./pages/app/ProfilePage.jsx'),
+  publicMemberProfile: () => import('./pages/app/PublicMemberProfilePage.jsx'),
+  leaderboard: () => import('./pages/app/LeaderboardPage.jsx'),
   createTasks: () => import('./pages/app/CreateTaskSchedulePage.jsx'),
   monthlyAnalysis: () => import('./pages/app/MonthlyAnalysisPage.jsx'),
   appPlaceholder: () => import('./pages/app/AppPlaceholderPage.jsx'),
@@ -44,6 +46,8 @@ const DailyTasksPage = lazy(routeLoaders.dailyTasks);
 const RecoveryQuestsPage = lazy(routeLoaders.recoveryQuests);
 const DisciplinePage = lazy(routeLoaders.discipline);
 const ProfilePage = lazy(routeLoaders.profile);
+const PublicMemberProfilePage = lazy(routeLoaders.publicMemberProfile);
+const LeaderboardPage = lazy(routeLoaders.leaderboard);
 const CreateTaskSchedulePage = lazy(routeLoaders.createTasks);
 const MonthlyAnalysisPage = lazy(routeLoaders.monthlyAnalysis);
 const AppPlaceholderPage = lazy(routeLoaders.appPlaceholder);
@@ -55,9 +59,11 @@ function getRouteLoaders(pathname) {
   if (pathname === '/app/recovery-quests') return [routeLoaders.appShell, routeLoaders.recoveryQuests];
   if (pathname === '/app/discipline') return [routeLoaders.appShell, routeLoaders.discipline];
   if (pathname === '/app/profile') return [routeLoaders.appShell, routeLoaders.profile];
+  if (/^\/app\/profile\/[^/]+\/?$/.test(pathname)) return [routeLoaders.appShell, routeLoaders.publicMemberProfile];
   if (pathname === '/app/tasks/create') return [routeLoaders.appShell, routeLoaders.createTasks];
   if (pathname === '/app/monthly-analysis') return [routeLoaders.appShell, routeLoaders.monthlyAnalysis];
-  if (/^\/app\/(leaderboard|settings)\/?$/.test(pathname)) return [routeLoaders.appShell, routeLoaders.appPlaceholder];
+  if (pathname === '/app/leaderboard') return [routeLoaders.appShell, routeLoaders.leaderboard];
+  if (pathname === '/app/settings') return [routeLoaders.appShell, routeLoaders.appPlaceholder];
   if (pathname === '/signup') return [routeLoaders.signup];
   if (pathname === '/login') return [routeLoaders.login];
   if (pathname === '/verify-email') return [routeLoaders.verifyEmail];
@@ -142,9 +148,11 @@ export default function App() {
           <Route path="recovery-quests" element={<RouteView><RecoveryQuestsPage /></RouteView>} />
           <Route path="discipline" element={<RouteView><DisciplinePage /></RouteView>} />
           <Route path="profile" element={<RouteView><ProfilePage /></RouteView>} />
+          <Route path="profile/:memberId" element={<RouteView><PublicMemberProfilePage /></RouteView>} />
+          <Route path="leaderboard" element={<RouteView><LeaderboardPage /></RouteView>} />
           <Route path="monthly-analysis" element={<RouteView><MonthlyAnalysisPage /></RouteView>} />
           <Route path="tasks/create" element={<RouteView><CreateTaskSchedulePage /></RouteView>} />
-          {applicationNavigationItems.filter((item) => !['dashboard', 'tasks', 'recovery-quests', 'discipline', 'profile', 'monthly-analysis'].includes(item.id)).map((item) => (
+          {applicationNavigationItems.filter((item) => !['dashboard', 'tasks', 'recovery-quests', 'discipline', 'profile', 'leaderboard', 'monthly-analysis'].includes(item.id)).map((item) => (
             <Route key={item.id} path={item.path.replace('/app/', '')} element={<RouteView><AppPlaceholderPage /></RouteView>} />
           ))}
         </Route>

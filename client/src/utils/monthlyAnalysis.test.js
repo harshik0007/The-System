@@ -9,6 +9,7 @@ import {
   hasDetailedTaskHistory,
   shiftIstMonth,
 } from './monthlyAnalysis.js';
+import { getEmergencyPauseDatesForRecord, isEmergencyPauseDate } from './emergencyPauseManager.js';
 
 const RUN = 'run-2026-10-01-test';
 
@@ -149,6 +150,128 @@ test('a pause crossing an IST month boundary attributes starts and protected dat
   assert.equal(november.availability.hasData, true);
   assert.deepEqual(november.pauseStats.pauseEventIds, []);
   assert.deepEqual(november.timeline.filter((day) => day.discipline.protected).map((day) => day.date), ['2026-11-01']);
+  assert.deepEqual(november.sourceIds.emergencyPauseHistoryIds, ['pause-boundary']);
+  assert.equal(november.pauseStats.earlyResumeCount, 1);
+});
+
+function summaryWithPauses(pauses, monthKey = '2026-10', generatedAt = '2026-11-18T06:00:00.000Z') {
+  const fixture = makeFixture();
+  fixture.emergencyPauseState.pauses = pauses;
+  return buildMonthlySummary({ monthKey, todayKey: '2026-11-18', generatedAt, runStartDate: '2026-10-01', progressionRunId: RUN, ...fixture });
+}
+
+function pauseRecord(id, startAt, actualResumeAt, extras = {}) {
+  return {
+    id,
+    activationEventId: `activation:${id}`,
+    startAt,
+    durationDays: 1,
+    scheduledResumeAt: actualResumeAt,
+    actualResumeAt,
+    status: 'automatically-resumed',
+    resumeReason: 'automatic',
+    resumeEventId: `resume:${id}`,
+    ...extras,
+  };
+}
+
+test('three valid activations can share one unique protected IST date without conflating the metrics', () => {
+  const summary = summaryWithPauses([
+    pauseRecord('same-day-1', '2026-10-04T03:00:00.000Z', '2026-10-04T04:00:00.000Z'),
+    pauseRecord('same-day-2', '2026-10-04T05:00:00.000Z', '2026-10-04T06:00:00.000Z'),
+    pauseRecord('same-day-3', '2026-10-04T07:00:00.000Z', '2026-10-04T08:00:00.000Z'),
+  ]);
+  assert.equal(summary.pauseStats.used, 3);
+  assert.equal(summary.pauseStats.totalPauseDays, 1);
+  assert.equal(summary.pauseStats.automaticResumeCount, 3);
+});
+
+test('one-day and multi-day protected intervals use unique dates from the canonical IST interval helper', () => {
+  const oneDay = pauseRecord('one-day', '2026-10-04T18:30:00.000Z', '2026-10-05T18:30:00.000Z');
+  const multiDay = pauseRecord('multi-day', '2026-10-04T18:30:00.000Z', '2026-10-06T18:30:00.000Z');
+  assert.deepEqual(getEmergencyPauseDatesForRecord(oneDay), ['2026-10-05']);
+  assert.deepEqual(getEmergencyPauseDatesForRecord(multiDay), ['2026-10-05', '2026-10-06']);
+  assert.equal(summaryWithPauses([oneDay]).pauseStats.totalPauseDays, 1);
+  assert.equal(summaryWithPauses([multiDay]).pauseStats.totalPauseDays, 2);
+});
+
+test('early resume shortens protection and is attributed to its actual IST resume month', () => {
+  const early = pauseRecord('early-boundary', '2026-10-31T12:00:00.000Z', '2026-11-01T18:00:00.000Z', {
+    scheduledResumeAt: '2026-11-03T12:00:00.000Z',
+    status: 'resumed-early',
+    resumeReason: 'manual',
+  });
+  const october = summaryWithPauses([early], '2026-10');
+  const november = summaryWithPauses([early], '2026-11');
+  assert.equal(october.pauseStats.totalPauseDays, 1);
+  assert.equal(october.pauseStats.earlyResumeCount, 0);
+  assert.equal(november.pauseStats.used, 0);
+  assert.equal(november.pauseStats.totalPauseDays, 1);
+  assert.equal(november.pauseStats.earlyResumeCount, 1);
+  assert.equal(isEmergencyPauseDate({ pauses: [early] }, '2026-11-02'), false);
+});
+
+test('automatic resume is counted once on its actual IST date and uses the recorded end', () => {
+  const automatic = pauseRecord('automatic', '2026-10-05T03:00:00.000Z', '2026-10-06T03:00:00.000Z');
+  const summary = summaryWithPauses([automatic]);
+  assert.equal(summary.pauseStats.used, 1);
+  assert.equal(summary.pauseStats.automaticResumeCount, 1);
+  assert.equal(summary.pauseStats.earlyResumeCount, 0);
+  assert.deepEqual(getEmergencyPauseDatesForRecord(automatic), ['2026-10-05', '2026-10-06']);
+});
+
+test('overlapping intervals count each activation but only one protected date', () => {
+  const first = pauseRecord('overlap-1', '2026-10-04T03:30:00.000Z', '2026-10-04T05:30:00.000Z');
+  const second = pauseRecord('overlap-2', '2026-10-04T06:00:00.000Z', '2026-10-04T07:00:00.000Z');
+  const summary = summaryWithPauses([first, second]);
+  assert.equal(summary.pauseStats.used, 2);
+  assert.equal(summary.pauseStats.totalPauseDays, 1);
+});
+
+test('empty and incomplete pause records do not fabricate resumes, durations or protected dates', () => {
+  const empty = summaryWithPauses([]);
+  const incomplete = summaryWithPauses([{
+    id: 'missing-resume',
+    activationEventId: 'activation:missing-resume',
+    startAt: '2026-10-04T03:00:00.000Z',
+    durationDays: 1,
+    scheduledResumeAt: '2026-10-05T03:00:00.000Z',
+    actualResumeAt: null,
+    status: 'resumed-early',
+    resumeReason: 'manual',
+  }]);
+  assert.equal(empty.pauseStats.used, 0);
+  assert.equal(empty.pauseStats.totalPauseDays, 0);
+  assert.equal(incomplete.pauseStats.used, 1);
+  assert.equal(incomplete.pauseStats.earlyResumeCount, 0);
+  assert.equal(incomplete.pauseStats.totalPauseDays, 0);
+  assert.equal(incomplete.pauseStats.unavailableHistoryCount, 1);
+});
+
+test('monthly pause details include pauses overlapping a month even when activated earlier', () => {
+  const pause = pauseRecord('cross-month-detail', '2026-10-31T12:00:00.000Z', '2026-11-01T18:00:00.000Z');
+  const november = summaryWithPauses([pause], '2026-11');
+  assert.equal(november.pauseStats.used, 0);
+  assert.equal(november.pauseStats.totalPauseDays, 1);
+  assert.deepEqual(november.sourceIds.emergencyPauseIds, []);
+  assert.deepEqual(november.sourceIds.emergencyPauseHistoryIds, ['cross-month-detail']);
+});
+
+test('an active pause is counted only in the selected period it currently overlaps', () => {
+  const active = {
+    id: 'active-current',
+    activationEventId: 'activation:active-current',
+    startAt: '2026-11-18T00:00:00.000Z',
+    durationDays: 2,
+    scheduledResumeAt: '2026-11-20T00:00:00.000Z',
+    actualResumeAt: null,
+    status: 'active',
+  };
+  const summary = summaryWithPauses([active], '2026-11');
+  assert.equal(summary.pauseStats.used, 1);
+  assert.equal(summary.pauseStats.activeCount, 1);
+  assert.equal(summary.pauseStats.totalPauseDays, 1);
+  assert.deepEqual(summary.sourceIds.emergencyPauseHistoryIds, ['active-current']);
 });
 
 test('unfinalized current-day incomplete tasks remain pending, not missed', () => {

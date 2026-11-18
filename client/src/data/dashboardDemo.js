@@ -1,5 +1,5 @@
 export const dashboardDemo = {
-  member: { displayName: 'Demo Member', email: 'demo.member@example.com', accountLabel: 'Demonstration account' },
+  member: { memberId: 'member-demo-current', displayName: 'Demo Member', email: 'demo.member@example.com', accountLabel: 'Demonstration account' },
   notifications: [
     { id: 'notification-01', title: 'Your dashboard is ready', detail: 'This notification is part of the interface preview.', time: 'Just now' },
     { id: 'notification-02', title: 'Demonstration data is active', detail: 'No activity here is connected to an account.', time: 'Today' },

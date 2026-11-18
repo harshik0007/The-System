@@ -1,10 +1,12 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { dailyTasksDemo, dailyTaskScheduleDemo } from '../data/dailyTasksDemo.js';
+import { dashboardDemo } from '../data/dashboardDemo.js';
 import { getWeeklyChangePeriod } from '../utils/weeklyTaskChanges.js';
 import { completeRecoveryQuest, createRecoveryQuestState, expireRecoveryQuest, generateRecoveryQuest } from '../utils/recoveryQuestManager.js';
-import { createDisciplineState, enterHigherRank, getLevelFromTotalXp, processDailyReset as applyDailyReset, redeemGracePoint as redeemGracePointState, startProgressionRun } from '../utils/disciplineManager.js';
+import { createDisciplineState, enterHigherRank, getLevelFromTotalXp, normalizeHighestRankAchieved, processDailyReset as applyDailyReset, redeemGracePoint as redeemGracePointState, startProgressionRun } from '../utils/disciplineManager.js';
 import { addIstCalendarDays, countRecoveryQuestsActiveOnDate, getScheduleDaySnapshot } from '../utils/disciplineActivity.js';
 import { getIstDateKey } from '../utils/taskScheduleBuilder.js';
+import { updateMemberPersonalBestRecord } from '../utils/personalBestRecords.js';
 import { getIstMonthKey, listIstMonths, buildMonthlySummary, createHistoryExpiryReminders, shiftIstMonth } from '../utils/monthlyAnalysis.js';
 import {
   activateEmergencyPause as activatePauseState,
@@ -84,9 +86,8 @@ export function TaskScheduleProvider({ children }) {
     weekStartDate: getWeeklyChangePeriod(dailyTaskScheduleDemo.taskChangesWeekDate).weekStartDate,
   }));
   const [recoveryState, setRecoveryState] = useState(() => initialState?.recoveryState || createInitialRecoveryState());
-  const [disciplineState, setDisciplineState] = useState(() => initialState?.disciplineState || ({
-    ...createInitialDiscipline(),
-  }));
+  const [disciplineState, setDisciplineState] = useState(() => normalizeHighestRankAchieved(initialState?.disciplineState || createInitialDiscipline()));
+  const [personalBestRecords, setPersonalBestRecords] = useState(() => initialState?.personalBestRecords || {});
   const [emergencyPauseState, setEmergencyPauseState] = useState(() => initialState?.emergencyPauseState || createEmergencyPauseState());
   const [monthlySummaries, setMonthlySummaries] = useState(() => initialState?.monthlySummaries || []);
   const [historyExpiryReminders, setHistoryExpiryReminders] = useState(() => initialState?.historyExpiryReminders || []);
@@ -103,11 +104,11 @@ export function TaskScheduleProvider({ children }) {
 
   useEffect(() => {
     try {
-      window.sessionStorage.setItem(SESSION_KEY, JSON.stringify({ currentSchedule, weeklyAllowance, recoveryState, disciplineState, emergencyPauseState, monthlySummaries, historyExpiryReminders, analysisRunBaseline }));
+      window.sessionStorage.setItem(SESSION_KEY, JSON.stringify({ currentSchedule, weeklyAllowance, recoveryState, disciplineState, personalBestRecords, emergencyPauseState, monthlySummaries, historyExpiryReminders, analysisRunBaseline }));
     } catch {
       // Session storage can be unavailable in private browsing; the app remains usable in memory.
     }
-  }, [currentSchedule, weeklyAllowance, recoveryState, disciplineState, emergencyPauseState, monthlySummaries, historyExpiryReminders, analysisRunBaseline]);
+  }, [currentSchedule, weeklyAllowance, recoveryState, disciplineState, personalBestRecords, emergencyPauseState, monthlySummaries, historyExpiryReminders, analysisRunBaseline]);
 
   useEffect(() => {
     const todayKey = getIstDateKey();
@@ -279,15 +280,20 @@ export function TaskScheduleProvider({ children }) {
     return result;
   }, []);
 
+  const updatePersonalBestRecords = useCallback((memberId, snapshot) => {
+    setPersonalBestRecords((current) => updateMemberPersonalBestRecord(current, memberId, snapshot));
+  }, []);
+
   const processRankUp = useCallback((rankSlug) => {
     const result = enterHigherRank(disciplineRef.current, rankSlug, getIstDateKey());
     if (result.event) {
       disciplineRef.current = result.state;
       setDisciplineState(result.state);
+      updatePersonalBestRecords(dashboardDemo.member.memberId, { highestRankAchieved: result.state.highestRankAchieved });
       setRankUpNotice(result.event);
     }
     return result;
-  }, []);
+  }, [updatePersonalBestRecords]);
   const beginProgressionRun = useCallback((options) => {
     const nextState = startProgressionRun(disciplineRef.current, options);
     const endedAt = getIstDateKey();
@@ -341,7 +347,7 @@ export function TaskScheduleProvider({ children }) {
   const value = useMemo(() => ({
     currentSchedule, setCurrentSchedule, weeklyAllowance, setWeeklyAllowance,
     recoveryState, addRecoveryQuest, completeQuest, expireQuest,
-    disciplineState, processResetDate, processRankUp, beginProgressionRun,
+    disciplineState, personalBestRecords, updatePersonalBestRecords, processResetDate, processRankUp, beginProgressionRun,
     monthlySummaries, historyExpiryReminders,
     analysisRunBaseline,
     emergencyPauseState,
@@ -352,7 +358,7 @@ export function TaskScheduleProvider({ children }) {
     resumeEmergencyPauseEarly,
     redeemGracePoint, rankUpNotice, dismissRankUpNotice: () => setRankUpNotice(null),
   }), [currentSchedule, weeklyAllowance, recoveryState, addRecoveryQuest, completeQuest, expireQuest,
-    disciplineState, processResetDate, processRankUp, beginProgressionRun, monthlySummaries, historyExpiryReminders, analysisRunBaseline, redeemGracePoint, rankUpNotice,
+    disciplineState, personalBestRecords, updatePersonalBestRecords, processResetDate, processRankUp, beginProgressionRun, monthlySummaries, historyExpiryReminders, analysisRunBaseline, redeemGracePoint, rankUpNotice,
     emergencyPauseState, activateEmergencyPause, resumeEmergencyPauseEarly, isScheduledTaskActivitySuspended]);
 
   return <TaskScheduleContext.Provider value={value}>{children}</TaskScheduleContext.Provider>;
