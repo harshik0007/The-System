@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createFreshSystemData, isResetConfirmationReady, persistFreshSystemData, RESET_CONFIRMATION_PHRASE, TASK_SCHEDULE_SESSION_KEY } from './systemDataReset.js';
 import { USER_PREFERENCES_SESSION_KEY } from './userPreferences.js';
+import { NOTIFICATIONS_SESSION_KEY } from './notificationCenter.js';
 import { getLevelFromTotalXp } from './disciplineManager.js';
 
 const resetNow = new Date('2026-11-18T06:30:00.000Z');
@@ -62,6 +63,9 @@ test('reset persistence replaces only THE SYSTEM progress and preference keys', 
   assert.equal(storage.getItem('unrelated-session'), 'keep-me');
   assert.equal(storage.getItem('auth-session-preview'), 'account-session');
   assert.equal(JSON.parse(storage.getItem(TASK_SCHEDULE_SESSION_KEY)).disciplineState.progressionRunId, 'reset-session-run');
+  const notificationStore = JSON.parse(storage.getItem(NOTIFICATIONS_SESSION_KEY));
+  assert.equal(notificationStore.progressionRunId, 'reset-session-run');
+  assert.deepEqual(notificationStore.notifications, []);
   const preferences = JSON.parse(storage.getItem(USER_PREFERENCES_SESSION_KEY));
   assert.equal(preferences.profile.displayName, 'Demo Member');
   assert.equal(preferences.appearance.voidShardCursor, true);

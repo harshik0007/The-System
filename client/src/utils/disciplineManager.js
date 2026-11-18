@@ -178,6 +178,7 @@ export function processDailyReset(state, {
   const rankAtReset = getRankDisciplineConfig(state.currentRankSlug);
   let recurringRewardAwarded = 0;
   let next = { ...state, dailyRecords: { ...state.dailyRecords } };
+  const streakBefore = state.currentStreak;
   next.totalCompletedScheduledTasks += completed;
 
   if (qualified) {
@@ -264,6 +265,9 @@ export function processDailyReset(state, {
     qualifies: qualified,
     qualificationStatus: protectedDay ? 'emergency-pause-protected' : qualified ? 'qualified' : 'not-qualified',
     emergencyPause: protectedDay,
+    streakBefore,
+    streakAfter: next.currentStreak,
+    streakBroken: !qualified && !protectedDay && streakBefore > 0,
     xpDrained: drainEvent.amount,
     dailyRankXpAwarded: dailyXpAmount,
     dpRewardAwarded: recurringRewardAwarded,

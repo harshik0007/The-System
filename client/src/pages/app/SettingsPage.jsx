@@ -111,7 +111,10 @@ export default function SettingsPage() {
   const { disciplineState, isEmergencyPauseActive, resetSystemProgress } = useTaskSchedule();
   const { requestLogout } = useAccountActions();
   const systemReducedMotion = useSystemReducedMotion();
-  const [activeCategory, setActiveCategory] = useState('profile');
+  const [activeCategory, setActiveCategory] = useState(() => {
+    const requested = new URLSearchParams(location.search).get('category');
+    return CATEGORIES.some((item) => item.id === requested) ? requested : 'profile';
+  });
   const [draft, setDraft] = useState(() => normalizeUserPreferences(preferences));
   const [nameError, setNameError] = useState('');
   const [status, setStatus] = useState('');
@@ -122,6 +125,11 @@ export default function SettingsPage() {
   const currentRank = ranks.find((rank) => rank.slug === disciplineState.currentRankSlug) || ranks[0];
 
   useEffect(() => setDraft(normalizeUserPreferences(preferences)), [preferences]);
+
+  useEffect(() => {
+    const requested = new URLSearchParams(location.search).get('category');
+    if (CATEGORIES.some((item) => item.id === requested)) setActiveCategory(requested);
+  }, [location.search]);
 
   useEffect(() => {
     if (!dirty) return undefined;

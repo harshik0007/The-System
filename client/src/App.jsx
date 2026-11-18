@@ -29,6 +29,7 @@ const routeLoaders = {
   leaderboard: () => import('./pages/app/LeaderboardPage.jsx'),
   createTasks: () => import('./pages/app/CreateTaskSchedulePage.jsx'),
   monthlyAnalysis: () => import('./pages/app/MonthlyAnalysisPage.jsx'),
+  notifications: () => import('./pages/app/NotificationsPage.jsx'),
   appPlaceholder: () => import('./pages/app/AppPlaceholderPage.jsx'),
 };
 const prefetchedRoutes = new Set();
@@ -53,6 +54,7 @@ const PublicMemberProfilePage = lazy(routeLoaders.publicMemberProfile);
 const LeaderboardPage = lazy(routeLoaders.leaderboard);
 const CreateTaskSchedulePage = lazy(routeLoaders.createTasks);
 const MonthlyAnalysisPage = lazy(routeLoaders.monthlyAnalysis);
+const NotificationsPage = lazy(routeLoaders.notifications);
 const AppPlaceholderPage = lazy(routeLoaders.appPlaceholder);
 
 function getRouteLoaders(pathname) {
@@ -65,6 +67,7 @@ function getRouteLoaders(pathname) {
   if (/^\/app\/profile\/[^/]+\/?$/.test(pathname)) return [routeLoaders.appShell, routeLoaders.publicMemberProfile];
   if (pathname === '/app/tasks/create') return [routeLoaders.appShell, routeLoaders.createTasks];
   if (pathname === '/app/monthly-analysis') return [routeLoaders.appShell, routeLoaders.monthlyAnalysis];
+  if (pathname === '/app/notifications') return [routeLoaders.appShell, routeLoaders.notifications];
   if (pathname === '/app/leaderboard') return [routeLoaders.appShell, routeLoaders.leaderboard];
   if (pathname === '/app/settings') return [routeLoaders.appShell, routeLoaders.settings];
   if (pathname === '/signup') return [routeLoaders.signup];
@@ -157,8 +160,9 @@ export default function App() {
           <Route path="leaderboard" element={<RouteView><LeaderboardPage /></RouteView>} />
           <Route path="settings" element={<RouteView><SettingsPageRoute /></RouteView>} />
           <Route path="monthly-analysis" element={<RouteView><MonthlyAnalysisPage /></RouteView>} />
+          <Route path="notifications" element={<RouteView><NotificationsPage /></RouteView>} />
           <Route path="tasks/create" element={<RouteView><CreateTaskSchedulePage /></RouteView>} />
-          {applicationNavigationItems.filter((item) => !['dashboard', 'tasks', 'recovery-quests', 'discipline', 'profile', 'leaderboard', 'monthly-analysis', 'settings'].includes(item.id)).map((item) => (
+          {applicationNavigationItems.filter((item) => !['dashboard', 'tasks', 'recovery-quests', 'discipline', 'profile', 'leaderboard', 'monthly-analysis', 'settings', 'notifications'].includes(item.id)).map((item) => (
             <Route key={item.id} path={item.path.replace('/app/', '')} element={<RouteView><AppPlaceholderPage /></RouteView>} />
           ))}
         </Route>

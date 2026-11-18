@@ -1,35 +1,34 @@
-import { dashboardDemo } from '../../data/dashboardDemo.js';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import AppIcon from './AppIcon.jsx';
-import { formatDateKey } from '../../utils/monthlyAnalysis.js';
+import NotificationItem from './NotificationItem.jsx';
+import { useNotificationCenter } from '../../context/NotificationCenterContext.jsx';
 
-export default function AppNotificationPanel({ onClose, historyExpiryReminders = [] }) {
+export default function AppNotificationPanel({ onClose }) {
+  const { notifications, unreadCount, markRead, markAllRead } = useNotificationCenter();
+  const [feedback, setFeedback] = useState('');
+  const recent = notifications.slice(0, 5);
+  const handleMarkAll = () => {
+    markAllRead();
+    setFeedback('All notifications marked as read.');
+  };
+
   return (
-    <section className="app-popover app-notifications" id="app-notifications" aria-label="Notifications">
+    <section className="app-popover app-notifications" id="app-notifications" aria-label="Recent notifications">
       <div className="app-popover__heading">
-        <div><p className="app-eyebrow">IN-APP UPDATES</p><h2>Notifications</h2></div>
+        <div><p className="app-eyebrow">IN-APP UPDATES</p><h2>Notifications {unreadCount > 0 && <span>{unreadCount} unread</span>}</h2></div>
         <button className="app-icon-button" type="button" aria-label="Close notifications" onClick={onClose}><AppIcon name="close" /></button>
       </div>
-      {historyExpiryReminders.length > 0 && <>
-        <p className="app-notifications__group-label">HISTORY RETENTION</p>
-        <ul className="app-notifications__list app-notifications__list--system">
-          {[...historyExpiryReminders].reverse().map((notice) => (
-            <li key={notice.id}>
-              <span className="app-notifications__dot app-notifications__dot--system" aria-hidden="true" />
-              <div><strong>{notice.title}</strong><p>{notice.detail}</p><small>{notice.timingLabel} before expiry · {formatDateKey(notice.createdDate)}</small></div>
-            </li>
-          ))}
-        </ul>
-      </>}
-      <p className="app-notifications__group-label">PREVIEW ITEMS</p>
-      <ul className="app-notifications__list">
-        {dashboardDemo.notifications.map((notice) => (
-          <li key={notice.id}>
-            <span className="app-notifications__dot" aria-hidden="true" />
-            <div><strong>{notice.title}</strong><p>{notice.detail}</p><small>{notice.time}</small></div>
-          </li>
-        ))}
-      </ul>
-      <p className="app-popover__footnote">History reminders are saved in this browser tab's session. Other notification items are examples only.</p>
+      {unreadCount > 0 && <div className="app-notifications__actions"><button type="button" onClick={handleMarkAll}>Mark all as read</button></div>}
+      {feedback && <p className="app-notifications__feedback" role="status">{feedback}</p>}
+      {recent.length > 0 ? (
+        <div className="app-notifications__preview-list">
+          {recent.map((notice) => <NotificationItem key={notice.id} notification={notice} compact onMarkRead={markRead} onNavigate={onClose} />)}
+        </div>
+      ) : (
+        <div className="app-notifications__empty"><span><AppIcon name="bell" /></span><strong>You're All Caught Up</strong><p>Important system updates will appear here.</p></div>
+      )}
+      <Link className="app-notifications__view-all" to="/app/notifications" onClick={onClose}>View All Notifications <AppIcon name="arrow" /></Link>
     </section>
   );
 }

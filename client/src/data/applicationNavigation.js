@@ -1,7 +1,10 @@
 export const applicationNavigation = [
   {
     title: 'Overview',
-    items: [{ id: 'dashboard', label: 'Dashboard', path: '/app/dashboard', icon: 'dashboard', description: 'Your current progress at a glance.' }],
+    items: [
+      { id: 'dashboard', label: 'Dashboard', path: '/app/dashboard', icon: 'dashboard', description: 'Your current progress at a glance.' },
+      { id: 'notifications', label: 'Notifications', path: '/app/notifications', icon: 'bell', description: 'Review system updates about Tasks, Recovery Quests and progress.' },
+    ],
   },
   {
     title: 'My Progress',

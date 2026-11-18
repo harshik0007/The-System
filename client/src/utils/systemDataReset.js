@@ -5,6 +5,7 @@ import { createDisciplineState, getLevelFromTotalXp } from './disciplineManager.
 import { createRecoveryQuestState } from './recoveryQuestManager.js';
 import { getIstDateKey } from './taskScheduleBuilder.js';
 import { getWeeklyChangePeriod } from './weeklyTaskChanges.js';
+import { createEmptyNotificationStore, NOTIFICATIONS_SESSION_KEY } from './notificationCenter.js';
 
 export const TASK_SCHEDULE_SESSION_KEY = 'the-system-discipline-demo-v1';
 export const RESET_CONFIRMATION_PHRASE = 'RESET MY SYSTEM';
@@ -88,6 +89,7 @@ export function persistFreshSystemData(storage, freshData) {
   try {
     storage.setItem(TASK_SCHEDULE_SESSION_KEY, JSON.stringify(freshData));
     storage.setItem(USER_PREFERENCES_SESSION_KEY, JSON.stringify(createDefaultUserPreferences()));
+    storage.setItem(NOTIFICATIONS_SESSION_KEY, JSON.stringify(createEmptyNotificationStore(freshData.disciplineState.progressionRunId)));
     return true;
   } catch {
     return false;

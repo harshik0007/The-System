@@ -1,30 +1,30 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { applicationNavigationItems } from '../../data/applicationNavigation.js';
-import { dashboardDemo } from '../../data/dashboardDemo.js';
 import AppIcon from './AppIcon.jsx';
 import AppNotificationPanel from './AppNotificationPanel.jsx';
 import MemberProfileMenu from './MemberProfileMenu.jsx';
 import { Link } from 'react-router-dom';
 import { useTaskSchedule } from '../../context/TaskScheduleContext.jsx';
 import { DISCIPLINE_POINTS_CAP } from '../../data/disciplineConfig.js';
-import { getIstDateKey } from '../../utils/taskScheduleBuilder.js';
 import { useAccountActions } from '../../context/AccountActionsContext.jsx';
+import { useNotificationCenter } from '../../context/NotificationCenterContext.jsx';
 
 const titles = new Map(applicationNavigationItems.map((item) => [item.path, item.label]));
 
 export default function AppTopbar({ isMobile, sidebarExpanded, onNavigationToggle }) {
   const location = useLocation();
-  const { recoveryState, disciplineState, historyExpiryReminders } = useTaskSchedule();
+  const { recoveryState, disciplineState } = useTaskSchedule();
+  const { unreadCount } = useNotificationCenter();
   const { requestLogout } = useAccountActions();
-  const todayKey = getIstDateKey();
-  const activeHistoryReminders = historyExpiryReminders.filter((item) => item.createdDate === todayKey && item.expiryDate > todayKey);
   const [openPanel, setOpenPanel] = useState(null);
   const topbarRef = useRef(null);
   const notificationTriggerRef = useRef(null);
   const profileTriggerRef = useRef(null);
   const title = location.pathname === '/app/tasks/create'
     ? 'Create Schedule'
+    : location.pathname === '/app/notifications'
+      ? 'Notifications'
     : titles.get(location.pathname) || 'Dashboard';
 
   useEffect(() => {
@@ -82,13 +82,13 @@ export default function AppTopbar({ isMobile, sidebarExpanded, onNavigationToggl
           ref={notificationTriggerRef}
           className={`app-icon-button app-topbar__notification${openPanel === 'notifications' ? ' is-active' : ''}`}
           type="button"
-          aria-label={`Notifications, ${dashboardDemo.notifications.length + activeHistoryReminders.length} items`}
+          aria-label={unreadCount ? `Notifications, ${unreadCount} unread` : 'Notifications, no unread items'}
           aria-expanded={openPanel === 'notifications'}
           aria-controls="app-notifications"
           onClick={() => togglePanel('notifications')}
         >
           <AppIcon name="bell" />
-          {dashboardDemo.notifications.length + activeHistoryReminders.length > 0 && <span className="app-topbar__notification-count" aria-hidden="true">{dashboardDemo.notifications.length + activeHistoryReminders.length}</span>}
+          {unreadCount > 0 && <><span className="app-topbar__notification-count" aria-hidden="true">{unreadCount > 99 ? '99+' : unreadCount}</span><span className="app-topbar__notification-unread-dot" aria-hidden="true" /></>}
         </button>
         <MemberProfileMenu
           open={openPanel === 'profile'}
@@ -97,7 +97,7 @@ export default function AppTopbar({ isMobile, sidebarExpanded, onNavigationToggl
           onClose={() => setOpenPanel(null)}
           onSignOut={handleSignOut}
         />
-        {openPanel === 'notifications' && <AppNotificationPanel historyExpiryReminders={activeHistoryReminders} onClose={() => setOpenPanel(null)} />}
+        {openPanel === 'notifications' && <AppNotificationPanel onClose={() => setOpenPanel(null)} />}
       </div>
     </header>
   );

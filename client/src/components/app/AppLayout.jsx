@@ -8,6 +8,7 @@ import AppIcon from './AppIcon.jsx';
 import { useTaskSchedule } from '../../context/TaskScheduleContext.jsx';
 import { useUserPreferences } from '../../context/UserPreferencesContext.jsx';
 import { AccountActionsProvider } from '../../context/AccountActionsContext.jsx';
+import { NotificationCenterProvider } from '../../context/NotificationCenterContext.jsx';
 import { dashboardDemo } from '../../data/dashboardDemo.js';
 import { leaderboardDemoMembers } from '../../data/leaderboardDemo.js';
 import useCurrentMemberPersonalBest from '../../hooks/useCurrentMemberPersonalBest.js';
@@ -55,6 +56,7 @@ export default function AppLayout() {
 
   return (
     <AccountActionsProvider>
+    <NotificationCenterProvider>
     <div className={`app-layout${sidebarCollapsed && !isMobile ? ' app-layout--collapsed' : ''}`}>
       <AppSidebar
         collapsed={sidebarCollapsed}
@@ -71,6 +73,7 @@ export default function AppLayout() {
         </main>
       </div>
     </div>
+    </NotificationCenterProvider>
     </AccountActionsProvider>
   );
 }
