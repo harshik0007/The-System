@@ -96,6 +96,18 @@ body.emergency-pause-atmosphere-running .recovery-quest-card--threshold-cleared 
   inset: 0;
 }
 
+.emergency-pause-atmosphere.is-effects-reduced .emergency-pause-atmosphere__leaf,
+.emergency-pause-atmosphere.is-effects-reduced .emergency-pause-atmosphere__particle {
+  display: none;
+  animation: none !important;
+}
+
+.emergency-pause-atmosphere.is-effects-reduced .emergency-pause-atmosphere__aura::before,
+.emergency-pause-atmosphere.is-effects-reduced .emergency-pause-atmosphere__aura::after {
+  animation: none !important;
+  opacity: .74;
+}
+
 .emergency-pause-atmosphere__leaf {
   position: absolute;
   top: -9vh;

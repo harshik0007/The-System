@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { dailyTasksDemo, dailyTaskScheduleDemo } from '../data/dailyTasksDemo.js';
 import { dashboardDemo } from '../data/dashboardDemo.js';
 import { getWeeklyChangePeriod } from '../utils/weeklyTaskChanges.js';
+import { createFreshSystemData, persistFreshSystemData, TASK_SCHEDULE_SESSION_KEY } from '../utils/systemDataReset.js';
 import { completeRecoveryQuest, createRecoveryQuestState, expireRecoveryQuest, generateRecoveryQuest } from '../utils/recoveryQuestManager.js';
 import { createDisciplineState, enterHigherRank, getLevelFromTotalXp, normalizeHighestRankAchieved, processDailyReset as applyDailyReset, redeemGracePoint as redeemGracePointState, startProgressionRun } from '../utils/disciplineManager.js';
 import { addIstCalendarDays, countRecoveryQuestsActiveOnDate, getScheduleDaySnapshot } from '../utils/disciplineActivity.js';
@@ -18,7 +19,7 @@ import {
 } from '../utils/emergencyPauseManager.js';
 
 const TaskScheduleContext = createContext(null);
-const SESSION_KEY = 'the-system-discipline-demo-v1';
+const SESSION_KEY = TASK_SCHEDULE_SESSION_KEY;
 
 function createInitialSchedule() {
   return {
@@ -209,11 +210,11 @@ export function TaskScheduleProvider({ children }) {
       activeRecoveryQuestCount,
       emergencyPause: isEmergencyPauseDate(emergencyPauseRef.current, dateKey),
     });
-    if (!result.duplicate) {
-      disciplineRef.current = result.state;
-      setDisciplineState(result.state);
-    }
-    return result;
+    if (result.duplicate) return result;
+    const nextState = { ...result.state, personalBestCaptureEnabled: true };
+    disciplineRef.current = nextState;
+    setDisciplineState(nextState);
+    return { ...result, state: nextState };
   }, []);
 
   const catchUpDailyReset = useCallback(() => {
@@ -287,17 +288,19 @@ export function TaskScheduleProvider({ children }) {
   const processRankUp = useCallback((rankSlug) => {
     const result = enterHigherRank(disciplineRef.current, rankSlug, getIstDateKey());
     if (result.event) {
-      disciplineRef.current = result.state;
-      setDisciplineState(result.state);
-      updatePersonalBestRecords(dashboardDemo.member.memberId, { highestRankAchieved: result.state.highestRankAchieved });
+      const nextState = { ...result.state, personalBestCaptureEnabled: true };
+      disciplineRef.current = nextState;
+      setDisciplineState(nextState);
+      updatePersonalBestRecords(dashboardDemo.member.memberId, { highestRankAchieved: nextState.highestRankAchieved });
       setRankUpNotice(result.event);
+      return { ...result, state: nextState };
     }
     return result;
   }, [updatePersonalBestRecords]);
   const beginProgressionRun = useCallback((options) => {
-    const nextState = startProgressionRun(disciplineRef.current, options);
     const endedAt = getIstDateKey();
     const oldState = disciplineRef.current;
+    const nextState = { ...startProgressionRun(oldState, options), currentRunStartedDate: endedAt };
     const oldRunId = oldState.progressionRunId;
     const oldStartDate = analysisRunBaseline?.date || oldState.memberSince || endedAt;
     const now = new Date().toISOString();
@@ -333,6 +336,34 @@ export function TaskScheduleProvider({ children }) {
     setAnalysisRunBaseline(captureAnalysisRunBaseline(nextState, recoveryRef.current, scheduleRef.current, endedAt));
     return nextState;
   }, [analysisRunBaseline]);
+
+  const resetSystemProgress = useCallback(() => {
+    const freshData = createFreshSystemData({ currentDisciplineState: disciplineRef.current });
+    let persisted = false;
+    try {
+      persisted = persistFreshSystemData(window.sessionStorage, freshData);
+    } catch {
+      // Reset still takes effect in shared application memory if browser storage is unavailable.
+    }
+
+    scheduleRef.current = freshData.currentSchedule;
+    recoveryRef.current = freshData.recoveryState;
+    disciplineRef.current = freshData.disciplineState;
+    emergencyPauseRef.current = freshData.emergencyPauseState;
+
+    setCurrentSchedule(freshData.currentSchedule);
+    setWeeklyAllowance(freshData.weeklyAllowance);
+    setRecoveryState(freshData.recoveryState);
+    setDisciplineState(freshData.disciplineState);
+    setPersonalBestRecords(freshData.personalBestRecords);
+    setEmergencyPauseState(freshData.emergencyPauseState);
+    setMonthlySummaries(freshData.monthlySummaries);
+    setHistoryExpiryReminders(freshData.historyExpiryReminders);
+    setAnalysisRunBaseline(freshData.analysisRunBaseline);
+    setRankUpNotice(null);
+
+    return { success: true, persisted, progressionRunId: freshData.disciplineState.progressionRunId };
+  }, []);
   const redeemGracePoint = useCallback(() => {
     const result = redeemGracePointState(disciplineRef.current, recoveryRef.current, Date.now());
     if (result.success) {
@@ -348,6 +379,7 @@ export function TaskScheduleProvider({ children }) {
     currentSchedule, setCurrentSchedule, weeklyAllowance, setWeeklyAllowance,
     recoveryState, addRecoveryQuest, completeQuest, expireQuest,
     disciplineState, personalBestRecords, updatePersonalBestRecords, processResetDate, processRankUp, beginProgressionRun,
+    resetSystemProgress,
     monthlySummaries, historyExpiryReminders,
     analysisRunBaseline,
     emergencyPauseState,
@@ -358,7 +390,7 @@ export function TaskScheduleProvider({ children }) {
     resumeEmergencyPauseEarly,
     redeemGracePoint, rankUpNotice, dismissRankUpNotice: () => setRankUpNotice(null),
   }), [currentSchedule, weeklyAllowance, recoveryState, addRecoveryQuest, completeQuest, expireQuest,
-    disciplineState, personalBestRecords, updatePersonalBestRecords, processResetDate, processRankUp, beginProgressionRun, monthlySummaries, historyExpiryReminders, analysisRunBaseline, redeemGracePoint, rankUpNotice,
+    disciplineState, personalBestRecords, updatePersonalBestRecords, processResetDate, processRankUp, beginProgressionRun, resetSystemProgress, monthlySummaries, historyExpiryReminders, analysisRunBaseline, redeemGracePoint, rankUpNotice,
     emergencyPauseState, activateEmergencyPause, resumeEmergencyPauseEarly, isScheduledTaskActivitySuspended]);
 
   return <TaskScheduleContext.Provider value={value}>{children}</TaskScheduleContext.Provider>;

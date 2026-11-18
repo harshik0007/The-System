@@ -107,11 +107,13 @@ export function createDisciplineState({ now = new Date(), rankSlug = 'continuum'
   const cycle = { rankSlug, requiredDays: rank.cycleDays, rewardDp: rank.recurringDp, progress: 0, completedCycles: 0 };
   return {
     memberSince: dateKey,
+    currentRunStartedDate: dateKey,
     lastObservedDate: dateKey,
     lastProcessedDate: null,
     dailyRecords: {},
     currentRankSlug: rankSlug,
     highestRankAchieved: rankAchievementRecord(RANK_DISCIPLINE_CONFIG[rankSlug]),
+    personalBestCaptureEnabled: true,
     progressionRunId: `run-${dateKey}-demo`,
     claimedRankEntryIds: [],
     currentStreak: 0,

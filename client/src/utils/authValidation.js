@@ -16,3 +16,16 @@ export function passwordRules(value) {
 export function isStrongPassword(value) {
   return passwordRules(value).every((rule) => rule.passed);
 }
+
+export function validatePasswordChange({ currentPassword = '', newPassword = '', confirmPassword = '' } = {}) {
+  const errors = {};
+  if (!currentPassword) errors.currentPassword = 'Enter your current password.';
+  if (!newPassword) errors.newPassword = 'Enter a new password.';
+  else if (!isStrongPassword(newPassword)) errors.newPassword = 'Meet each password requirement.';
+  if (!confirmPassword) errors.confirmPassword = 'Confirm your new password.';
+  else if (confirmPassword !== newPassword) errors.confirmPassword = 'Passwords do not match.';
+  if (currentPassword && newPassword && currentPassword === newPassword) {
+    errors.newPassword = 'Your new password must differ from your current password.';
+  }
+  return errors;
+}

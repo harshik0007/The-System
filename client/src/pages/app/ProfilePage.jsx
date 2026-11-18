@@ -3,10 +3,12 @@ import { Link } from 'react-router-dom';
 import AppIcon from '../../components/app/AppIcon.jsx';
 import DisciplineActivityMap from '../../components/app/DisciplineActivityMap.jsx';
 import PersonalBestRecords from '../../components/app/PersonalBestRecords.jsx';
+import MemberAvatar from '../../components/app/MemberAvatar.jsx';
 import { dashboardDemo } from '../../data/dashboardDemo.js';
 import { leaderboardDemoMembers } from '../../data/leaderboardDemo.js';
 import { DISCIPLINE_POINTS_CAP, getRankDisciplineConfig } from '../../data/disciplineConfig.js';
 import { useTaskSchedule } from '../../context/TaskScheduleContext.jsx';
+import { useUserPreferences } from '../../context/UserPreferencesContext.jsx';
 import useCurrentMemberPersonalBest from '../../hooks/useCurrentMemberPersonalBest.js';
 import { getScheduleDaySnapshot } from '../../utils/disciplineActivity.js';
 import { createCurrentMemberEntry, mergeLeaderboardMembers } from '../../utils/leaderboard.js';
@@ -19,8 +21,10 @@ function formatMemberSince(dateKey) {
 
 export default function ProfilePage() {
   const { disciplineState, recoveryState, currentSchedule } = useTaskSchedule();
+  const { preferences } = useUserPreferences();
   const rank = getRankDisciplineConfig(disciplineState.currentRankSlug);
-  const currentMember = useMemo(() => createCurrentMemberEntry(dashboardDemo.member, disciplineState), [disciplineState]);
+  const identity = useMemo(() => ({ ...dashboardDemo.member, ...preferences.profile }), [preferences.profile]);
+  const currentMember = useMemo(() => createCurrentMemberEntry(identity, disciplineState), [identity, disciplineState]);
   const leaderboardMembers = useMemo(() => mergeLeaderboardMembers(leaderboardDemoMembers, currentMember), [currentMember]);
   const personalBestRecords = useCurrentMemberPersonalBest(currentMember, leaderboardMembers);
   const todayKey = getIstDateKey();
@@ -30,11 +34,11 @@ export default function ProfilePage() {
     <div className="profile-page">
       <header className="discipline-page__header profile-page__header">
         <div><p className="app-eyebrow">ACCOUNT · MEMBER PROFILE</p><h1>Member Profile</h1><p>Your identity and Discipline record in one place.</p></div>
-        <Link className="profile-page__discipline-link" to="/app/discipline">Open Discipline <AppIcon name="arrow" /></Link>
+        <Link className="profile-page__discipline-link" to="/app/settings">Edit settings <AppIcon name="arrow" /></Link>
       </header>
       <section className="profile-identity app-panel">
-        <span className="profile-identity__avatar">{dashboardDemo.member.displayName.slice(0, 1)}</span>
-        <div><p className="app-eyebrow">DEMONSTRATION MEMBER</p><h2>{dashboardDemo.member.displayName}</h2><p>{dashboardDemo.member.email}</p></div>
+        <MemberAvatar name={preferences.profile.displayName} mark={preferences.profile.avatarMark} className="profile-identity__avatar" />
+        <div><p className="app-eyebrow">DEMONSTRATION MEMBER</p><h2>{preferences.profile.displayName}</h2><p>{dashboardDemo.member.email}</p></div>
         <div className="profile-identity__since"><small>MEMBER SINCE</small><strong>{formatMemberSince(disciplineState.memberSince)}</strong></div>
       </section>
       <section className="profile-discipline app-panel" aria-labelledby="profile-discipline-title">

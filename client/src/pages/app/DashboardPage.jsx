@@ -11,6 +11,7 @@ import GracePointSummary from '../../components/app/GracePointSummary.jsx';
 import DisciplinePointsSummary from '../../components/app/DisciplinePointsSummary.jsx';
 import EmergencyPauseControls from '../../components/app/EmergencyPauseControls.jsx';
 import { useTaskSchedule } from '../../context/TaskScheduleContext.jsx';
+import { useUserPreferences } from '../../context/UserPreferencesContext.jsx';
 import { RECOVERY_STATUS } from '../../utils/recoveryQuestManager.js';
 import { getIstDateKey } from '../../utils/taskScheduleBuilder.js';
 import { getRankDisciplineConfig } from '../../data/disciplineConfig.js';
@@ -35,6 +36,7 @@ function buildRecentEvents(schedule, recoveryState, disciplineState) {
 
 export default function DashboardPage() {
   const { recoveryState, disciplineState, currentSchedule } = useTaskSchedule();
+  const { preferences } = useUserPreferences();
   const pageRef = useRef(null);
   const reduceMotion = useReducedMotion();
   const rank = ranks.find((item) => item.slug === disciplineState.currentRankSlug) || ranks[0];
@@ -91,7 +93,7 @@ export default function DashboardPage() {
           <div className="dashboard-rank-panel__badge"><RankBadge rank={rank} serialNumber={rank.demo.exampleSerial} size="medium" /></div>
           <div className="dashboard-rank-panel__details">
             <div className="dashboard-rank-panel__member">
-              <strong>{dashboardDemo.member.displayName}</strong>
+              <strong>{preferences.profile.displayName}</strong>
               <span>{dashboardDemo.member.email}</span>
             </div>
             <p className="app-eyebrow">CURRENT RANK · EXAMPLE</p>

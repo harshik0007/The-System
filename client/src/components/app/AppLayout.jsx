@@ -6,6 +6,8 @@ import AppPageContainer from './AppPageContainer.jsx';
 import { Link } from 'react-router-dom';
 import AppIcon from './AppIcon.jsx';
 import { useTaskSchedule } from '../../context/TaskScheduleContext.jsx';
+import { useUserPreferences } from '../../context/UserPreferencesContext.jsx';
+import { AccountActionsProvider } from '../../context/AccountActionsContext.jsx';
 import { dashboardDemo } from '../../data/dashboardDemo.js';
 import { leaderboardDemoMembers } from '../../data/leaderboardDemo.js';
 import useCurrentMemberPersonalBest from '../../hooks/useCurrentMemberPersonalBest.js';
@@ -15,9 +17,11 @@ import '../../styles/discipline.css';
 
 export default function AppLayout() {
   const { rankUpNotice, dismissRankUpNotice, disciplineState } = useTaskSchedule();
-  const currentMember = useMemo(() => createCurrentMemberEntry(dashboardDemo.member, disciplineState), [disciplineState]);
+  const { preferences } = useUserPreferences();
+  const identity = useMemo(() => ({ ...dashboardDemo.member, ...preferences.profile }), [preferences.profile]);
+  const currentMember = useMemo(() => createCurrentMemberEntry(identity, disciplineState), [identity, disciplineState]);
   const leaderboardMembers = useMemo(() => mergeLeaderboardMembers(leaderboardDemoMembers, currentMember), [currentMember]);
-  useCurrentMemberPersonalBest(currentMember, leaderboardMembers);
+  useCurrentMemberPersonalBest(currentMember, leaderboardMembers, { enabled: disciplineState.personalBestCaptureEnabled !== false });
   const [isMobile, setIsMobile] = useState(() => window.matchMedia('(max-width: 760px)').matches);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => window.matchMedia('(max-width: 1100px)').matches);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
@@ -50,6 +54,7 @@ export default function AppLayout() {
   const sidebarExpanded = isMobile ? mobileNavOpen : !sidebarCollapsed;
 
   return (
+    <AccountActionsProvider>
     <div className={`app-layout${sidebarCollapsed && !isMobile ? ' app-layout--collapsed' : ''}`}>
       <AppSidebar
         collapsed={sidebarCollapsed}
@@ -66,5 +71,6 @@ export default function AppLayout() {
         </main>
       </div>
     </div>
+    </AccountActionsProvider>
   );
 }

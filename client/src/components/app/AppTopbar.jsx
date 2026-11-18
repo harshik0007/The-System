@@ -9,16 +9,17 @@ import { Link } from 'react-router-dom';
 import { useTaskSchedule } from '../../context/TaskScheduleContext.jsx';
 import { DISCIPLINE_POINTS_CAP } from '../../data/disciplineConfig.js';
 import { getIstDateKey } from '../../utils/taskScheduleBuilder.js';
+import { useAccountActions } from '../../context/AccountActionsContext.jsx';
 
 const titles = new Map(applicationNavigationItems.map((item) => [item.path, item.label]));
 
 export default function AppTopbar({ isMobile, sidebarExpanded, onNavigationToggle }) {
   const location = useLocation();
   const { recoveryState, disciplineState, historyExpiryReminders } = useTaskSchedule();
+  const { requestLogout } = useAccountActions();
   const todayKey = getIstDateKey();
   const activeHistoryReminders = historyExpiryReminders.filter((item) => item.createdDate === todayKey && item.expiryDate > todayKey);
   const [openPanel, setOpenPanel] = useState(null);
-  const [previewMessage, setPreviewMessage] = useState('');
   const topbarRef = useRef(null);
   const notificationTriggerRef = useRef(null);
   const profileTriggerRef = useRef(null);
@@ -46,13 +47,12 @@ export default function AppTopbar({ isMobile, sidebarExpanded, onNavigationToggl
   }, [openPanel]);
 
   const togglePanel = (panel) => {
-    setPreviewMessage('');
     setOpenPanel((current) => current === panel ? null : panel);
   };
 
-  const handleSignOutPreview = () => {
+  const handleSignOut = () => {
     setOpenPanel(null);
-    setPreviewMessage('Sign out is a preview action. No account session is connected.');
+    requestLogout();
   };
 
   return (
@@ -95,10 +95,9 @@ export default function AppTopbar({ isMobile, sidebarExpanded, onNavigationToggl
           triggerRef={profileTriggerRef}
           onToggle={() => togglePanel('profile')}
           onClose={() => setOpenPanel(null)}
-          onSignOutPreview={handleSignOutPreview}
+          onSignOut={handleSignOut}
         />
         {openPanel === 'notifications' && <AppNotificationPanel historyExpiryReminders={activeHistoryReminders} onClose={() => setOpenPanel(null)} />}
-        {previewMessage && <p className="app-topbar__status" role="status">{previewMessage}</p>}
       </div>
     </header>
   );

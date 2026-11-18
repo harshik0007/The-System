@@ -423,3 +423,6 @@
   box-shadow: none !important;
   animation: none !important;
 }
+
+.leaderboard-profile-card__avatar { width: 112px; height: 112px; border: 1px solid rgb(102 197 226 / 35%); border-radius: 50%; background: linear-gradient(145deg, #193a53, #091522); color: #b4f0ff; font: 600 2rem var(--font-display); box-shadow: 0 0 28px rgb(75 190 222 / 14%); }
+.leaderboard-profile-card__avatar .app-icon { width: 48%; height: 48%; }

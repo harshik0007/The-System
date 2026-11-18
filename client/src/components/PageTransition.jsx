@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { Routes, useLocation } from 'react-router-dom';
+import { useReducedMotion } from '../hooks/useReducedMotion.js';
 
 const FORM_REVEALS = [
   '.auth-form > .auth-field',
@@ -82,6 +83,7 @@ function revealPublicPage(timeline, page, isInitial) {
 
 export default function PageTransition({ children }) {
   const location = useLocation();
+  const reducedMotion = useReducedMotion();
   const [activeLocation, setActiveLocation] = useState(location);
   const [outgoingLocation, setOutgoingLocation] = useState(null);
   const stageRef = useRef(null);
@@ -128,7 +130,6 @@ export default function PageTransition({ children }) {
 
     const runId = ++animationRunRef.current;
     const outgoingKey = outgoingLocation?.key;
-    const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
     const isCurrentRun = () => animationRunRef.current === runId;
     const finishExit = () => {
       if (outgoingKey && isCurrentRun()) {
@@ -142,7 +143,7 @@ export default function PageTransition({ children }) {
 
     const runEntrance = () => {
       if (!isCurrentRun()) return;
-      if (motionPreference.matches) {
+      if (reducedMotion) {
         finishExit();
         return;
       }
@@ -172,17 +173,7 @@ export default function PageTransition({ children }) {
       }, stageRef);
     };
 
-    const stopForReducedMotion = (event) => {
-      if (!event.matches || !isCurrentRun()) return;
-      animationRunRef.current += 1;
-      observer?.disconnect();
-      context?.revert();
-      gsap.set(entering, { clearProps: 'opacity,transform' });
-      if (outgoingKey) setOutgoingLocation((current) => (current?.key === outgoingKey ? null : current));
-    };
-    motionPreference.addEventListener('change', stopForReducedMotion);
-
-    if (motionPreference.matches) {
+    if (reducedMotion) {
       finishExit();
     } else if (hasPageContent()) {
       runEntrance();
@@ -197,12 +188,11 @@ export default function PageTransition({ children }) {
     }
 
     return () => {
-      motionPreference.removeEventListener('change', stopForReducedMotion);
       observer?.disconnect();
       if (isCurrentRun()) animationRunRef.current += 1;
       context?.revert();
     };
-  }, [activeLocation.key]);
+  }, [activeLocation.key, reducedMotion]);
 
   return (
     <div className="page-transition__stage" ref={stageRef}>

@@ -3,8 +3,11 @@ import BrandLogo from '../BrandLogo.jsx';
 import { dashboardDemo } from '../../data/dashboardDemo.js';
 import AppNavigation from './AppNavigation.jsx';
 import AppIcon from './AppIcon.jsx';
+import MemberAvatar from './MemberAvatar.jsx';
+import { useUserPreferences } from '../../context/UserPreferencesContext.jsx';
 
 export default function AppSidebar({ collapsed, mobileOpen, isMobile, onClose, onExpand }) {
+  const { preferences } = useUserPreferences();
   return (
     <>
       {isMobile && mobileOpen && (
@@ -26,8 +29,8 @@ export default function AppSidebar({ collapsed, mobileOpen, isMobile, onClose, o
         <AppNavigation collapsed={collapsed && !isMobile} onNavigate={isMobile ? onClose : undefined} />
 
         <div className="app-sidebar__account">
-          <span className="app-sidebar__member-mark" aria-hidden="true">M</span>
-          <span className="app-sidebar__member-copy"><strong>{dashboardDemo.member.displayName}</strong><small>{dashboardDemo.member.accountLabel}</small></span>
+          <MemberAvatar name={preferences.profile.displayName} mark={preferences.profile.avatarMark} className="app-sidebar__member-mark" />
+          <span className="app-sidebar__member-copy"><strong>{preferences.profile.displayName}</strong><small>{dashboardDemo.member.accountLabel}</small></span>
           <Link className="app-sidebar__account-link" to="/app/profile" aria-label="View Member Profile" title={collapsed && !isMobile ? 'Member Profile' : undefined} onClick={isMobile ? onClose : undefined}>
             <AppIcon name="profile" />
           </Link>

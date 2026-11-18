@@ -3,7 +3,7 @@ import { useTaskSchedule } from '../context/TaskScheduleContext.jsx';
 import { buildLeaderboardResults, LEADERBOARD_CATEGORIES } from '../utils/leaderboard.js';
 import { createPersonalBestRecord } from '../utils/personalBestRecords.js';
 
-export default function useCurrentMemberPersonalBest(member, members) {
+export default function useCurrentMemberPersonalBest(member, members, { enabled = true } = {}) {
   const { personalBestRecords, updatePersonalBestRecords } = useTaskSchedule();
   const currentPositions = useMemo(() => {
     if (!member?.id || !members?.length) return null;
@@ -14,12 +14,12 @@ export default function useCurrentMemberPersonalBest(member, members) {
   }, [member?.id, members]);
 
   useEffect(() => {
-    if (!member?.isCurrentMember || !currentPositions) return;
+    if (!enabled || !member?.isCurrentMember || !currentPositions) return;
     updatePersonalBestRecords(member.id, {
       positions: currentPositions,
       highestRankAchieved: member.highestRankAchieved,
     });
-  }, [member?.id, member?.isCurrentMember, member?.highestRankAchieved, currentPositions, updatePersonalBestRecords]);
+  }, [enabled, member?.id, member?.isCurrentMember, member?.highestRankAchieved, currentPositions, updatePersonalBestRecords]);
 
   return useMemo(() => {
     if (!member?.id) return null;

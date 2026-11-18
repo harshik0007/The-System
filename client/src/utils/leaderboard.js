@@ -57,6 +57,7 @@ export function createCurrentMemberEntry(identity, disciplineState) {
   return {
     id: identity.memberId,
     displayName: identity.displayName,
+    avatarMark: identity.avatarMark || 'initials',
     avatarInitials: initials || identity.displayName.slice(0, 1).toUpperCase(),
     rankId: rank.slug,
     rankName: rank.name,

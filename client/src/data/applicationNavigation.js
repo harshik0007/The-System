@@ -20,7 +20,7 @@ export const applicationNavigation = [
     title: 'Account',
     items: [
       { id: 'profile', label: 'Member Profile', path: '/app/profile', icon: 'profile', description: 'Member profile controls are planned for a future milestone.' },
-      { id: 'settings', label: 'Settings', path: '/app/settings', icon: 'settings', description: 'Account settings are planned for a future milestone.' },
+      { id: 'settings', label: 'Settings', path: '/app/settings', icon: 'settings', description: 'Manage your account details, privacy and application preferences.' },
     ],
   },
 ];

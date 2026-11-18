@@ -6,7 +6,9 @@ import { ranks } from '../../data/ranks.js';
 import { useTaskSchedule } from '../../context/TaskScheduleContext.jsx';
 import RankBadge from '../../components/ranks/RankBadge.jsx';
 import AppIcon from '../../components/app/AppIcon.jsx';
+import ProfileAvatar from '../../components/app/MemberAvatar.jsx';
 import useCurrentMemberPersonalBest from '../../hooks/useCurrentMemberPersonalBest.js';
+import { useUserPreferences } from '../../context/UserPreferencesContext.jsx';
 import {
   buildLeaderboardResults,
   createCurrentMemberEntry,
@@ -23,12 +25,7 @@ const formatNumber = (value) => Number(value || 0).toLocaleString('en-IN');
 
 function MemberAvatar({ member, position, compact = false }) {
   return (
-    <span
-      className={`leaderboard-avatar${compact ? ' leaderboard-avatar--compact' : ''}${position ? ` leaderboard-avatar--place-${position}` : ''}`}
-      aria-hidden="true"
-    >
-      {member.avatarInitials}
-    </span>
+    <ProfileAvatar name={member.displayName} mark={member.isCurrentMember ? member.avatarMark : 'initials'} className={`leaderboard-avatar${compact ? ' leaderboard-avatar--compact' : ''}${position ? ` leaderboard-avatar--place-${position}` : ''}`} />
   );
 }
 
@@ -156,10 +153,12 @@ function CurrentMemberSummary({ member, overallPosition }) {
 
 export default function LeaderboardPage() {
   const { disciplineState } = useTaskSchedule();
+  const { preferences } = useUserPreferences();
   const [category, setCategory] = useState('overall');
   const [rankId, setRankId] = useState('all');
   const [query, setQuery] = useState('');
-  const currentMember = useMemo(() => createCurrentMemberEntry(dashboardDemo.member, disciplineState), [disciplineState]);
+  const identity = useMemo(() => ({ ...dashboardDemo.member, ...preferences.profile }), [preferences.profile]);
+  const currentMember = useMemo(() => createCurrentMemberEntry(identity, disciplineState), [identity, disciplineState]);
   const members = useMemo(() => mergeLeaderboardMembers(leaderboardDemoMembers, currentMember), [currentMember]);
   const currentMemberBestRecord = useCurrentMemberPersonalBest(currentMember, members);
   const membersWithRecords = useMemo(() => members.map((member) => member.isCurrentMember

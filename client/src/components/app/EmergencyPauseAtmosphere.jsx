@@ -90,7 +90,7 @@ function Leaf({ leaf, index }) {
   );
 }
 
-export default function EmergencyPauseAtmosphere({ active }) {
+export default function EmergencyPauseAtmosphere({ active, reduceDecorativeEffects = false }) {
   const reducedMotion = useReducedMotion();
   const [visible, setVisible] = useState(Boolean(active));
   const [phase, setPhase] = useState(active ? 'entering' : 'idle');
@@ -134,7 +134,7 @@ export default function EmergencyPauseAtmosphere({ active }) {
 
   return createPortal(
     <div
-      className={`emergency-pause-atmosphere emergency-pause-atmosphere--${phase}${reducedMotion ? ' is-reduced-motion' : ''}`}
+      className={`emergency-pause-atmosphere emergency-pause-atmosphere--${phase}${reducedMotion ? ' is-reduced-motion' : ''}${reduceDecorativeEffects ? ' is-effects-reduced' : ''}`}
       data-document-visible={documentVisible ? 'true' : 'false'}
       aria-hidden="true"
     >

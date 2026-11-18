@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useReducedMotion } from '../hooks/useReducedMotion.js';
+import { useUserPreferences } from '../context/UserPreferencesContext.jsx';
 
 const INTERACTIVE_SELECTOR = 'a[href], button:not(:disabled), [role="button"], [role="tab"], [data-cursor-hover]';
 const EXCLUDED_TEXT_SELECTOR = 'button, [role="button"], [role="tab"], input, textarea, select, [contenteditable="true"], a[href]';
@@ -13,6 +15,8 @@ function isTextSelectable(target) {
 }
 
 export default function VoidShardCursor() {
+  const { preferences } = useUserPreferences();
+  const reducedMotion = useReducedMotion();
   const cursorRef = useRef(null);
   const mainRef = useRef(null);
   const fragmentARef = useRef(null);
@@ -29,32 +33,34 @@ export default function VoidShardCursor() {
     lastX: 0, lastY: 0, lastTime: 0, initialized: false,
     hovering: false, selecting: false, selectedText: false,
   });
-  const [enabled, setEnabled] = useState(false);
+  const [pointerSupported, setPointerSupported] = useState(false);
+  const systemRequestsReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const motionAllowed = !reducedMotion && !systemRequestsReducedMotion;
+  const cursorEnabled = pointerSupported && preferences.appearance.voidShardCursor && motionAllowed;
+  const rippleEnabled = pointerSupported && preferences.appearance.clickRipple && motionAllowed;
+  const active = cursorEnabled || rippleEnabled;
 
   useEffect(() => {
     const pointerQuery = window.matchMedia('(hover: hover) and (pointer: fine) and (min-width: 769px)');
-    const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const root = document.documentElement;
-
     const syncSupport = () => {
-      const canShowCursor = pointerQuery.matches && !motionQuery.matches;
-      setEnabled(canShowCursor);
-      root.classList.toggle('has-void-shard-cursor', canShowCursor);
+      setPointerSupported(pointerQuery.matches);
     };
 
     syncSupport();
     pointerQuery.addEventListener('change', syncSupport);
-    motionQuery.addEventListener('change', syncSupport);
 
     return () => {
       pointerQuery.removeEventListener('change', syncSupport);
-      motionQuery.removeEventListener('change', syncSupport);
-      root.classList.remove('has-void-shard-cursor');
     };
   }, []);
 
   useEffect(() => {
-    if (!enabled) return undefined;
+    document.documentElement.classList.toggle('has-void-shard-cursor', cursorEnabled);
+    return () => document.documentElement.classList.remove('has-void-shard-cursor');
+  }, [cursorEnabled]);
+
+  useEffect(() => {
+    if (!active) return undefined;
 
     const root = cursorRef.current;
     const main = mainRef.current;
@@ -62,9 +68,10 @@ export default function VoidShardCursor() {
     const fragmentB = fragmentBRef.current;
     const ripple = rippleRef.current;
     const motion = motionRef.current;
-    if (!root || !main || !fragmentA || !fragmentB || !ripple) return undefined;
+    if (!root || !ripple || (cursorEnabled && (!main || !fragmentA || !fragmentB))) return undefined;
 
     const syncHover = (target) => {
+      if (!cursorEnabled) return;
       if (motion.selecting || motion.selectedText) return;
       const hoverable = Boolean(closestElement(target, INTERACTIVE_SELECTOR));
       if (hoverable !== motion.hovering) {
@@ -165,6 +172,7 @@ export default function VoidShardCursor() {
     document.addEventListener('toggle', handleTopLayerToggle, true);
 
     const handlePointerMove = (event) => {
+      if (!cursorEnabled) return;
       if (event.pointerType === 'touch') return;
       const now = performance.now();
       if (!motion.initialized) {
@@ -201,6 +209,7 @@ export default function VoidShardCursor() {
     };
 
     const handleScroll = () => {
+      if (!cursorEnabled) return;
       const now = performance.now();
       const currentScrollY = window.scrollY;
       const elapsed = Math.max(16, now - (motion.lastScrollTime || now));
@@ -212,18 +221,22 @@ export default function VoidShardCursor() {
 
     const handlePointerDown = (event) => {
       if (event.pointerType === 'touch') return;
-      motion.selecting = isTextSelectable(event.target);
+      if (cursorEnabled) motion.selecting = isTextSelectable(event.target);
 
-      if (!motion.selecting) {
+      if (cursorEnabled && !motion.selecting) {
         root.classList.add('is-pressed');
         window.clearTimeout(pressTimerRef.current);
         pressTimerRef.current = window.setTimeout(() => root.classList.remove('is-pressed'), 150);
       }
 
+      if (!rippleEnabled) return;
+      if (!cursorEnabled) root.classList.remove('is-offscreen');
+
       root.classList.add('is-rippling');
       window.clearTimeout(rippleTimerRef.current);
       rippleTimerRef.current = window.setTimeout(() => {
         root.classList.remove('is-rippling');
+        if (!cursorEnabled) root.classList.add('is-offscreen');
         rippleTimerRef.current = 0;
       }, 360);
 
@@ -246,6 +259,7 @@ export default function VoidShardCursor() {
     };
 
     const handlePointerUp = () => {
+      if (!cursorEnabled) return;
       motion.selecting = false;
       motion.selectedText = Boolean(window.getSelection()?.toString());
       if (!motion.selectedText) {
@@ -254,6 +268,7 @@ export default function VoidShardCursor() {
     };
 
     const handlePointerOut = (event) => {
+      if (!cursorEnabled) return;
       if (event.relatedTarget !== null) return;
       suspendCursor();
     };
@@ -287,19 +302,24 @@ export default function VoidShardCursor() {
     const handlePointerCancel = () => suspendCursor();
 
     const handleSelectionChange = () => {
+      if (!cursorEnabled) return;
       motion.selectedText = Boolean(window.getSelection()?.toString());
       if (!motion.selectedText) syncHover(document.elementFromPoint(motion.targetX, motion.targetY));
     };
 
-    document.addEventListener('pointermove', handlePointerMove, { passive: true });
-    window.addEventListener('scroll', handleScroll, { passive: true });
+    if (cursorEnabled) {
+      document.addEventListener('pointermove', handlePointerMove, { passive: true });
+      window.addEventListener('scroll', handleScroll, { passive: true });
+    }
     document.addEventListener('pointerdown', handlePointerDown, { passive: true });
-    document.addEventListener('pointerup', handlePointerUp, { passive: true });
-    document.addEventListener('pointercancel', handlePointerCancel, { passive: true });
-    document.addEventListener('pointerout', handlePointerOut, { passive: true });
-    window.addEventListener('blur', suspendCursor);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    document.addEventListener('selectionchange', handleSelectionChange);
+    if (cursorEnabled) {
+      document.addEventListener('pointerup', handlePointerUp, { passive: true });
+      document.addEventListener('pointercancel', handlePointerCancel, { passive: true });
+      document.addEventListener('pointerout', handlePointerOut, { passive: true });
+      window.addEventListener('blur', suspendCursor);
+      document.addEventListener('visibilitychange', handleVisibilityChange);
+      document.addEventListener('selectionchange', handleSelectionChange);
+    }
 
     return () => {
       document.removeEventListener('pointermove', handlePointerMove);
@@ -323,12 +343,12 @@ export default function VoidShardCursor() {
       ripple.classList.remove('is-active');
       root.className = 'void-shard-cursor is-offscreen';
     };
-  }, [enabled]);
+  }, [active, cursorEnabled, rippleEnabled]);
 
-  if (!enabled) return null;
+  if (!active) return null;
 
   return createPortal((
-    <div className="void-shard-cursor is-offscreen" popover="manual" ref={cursorRef} aria-hidden="true">
+    <div className={`void-shard-cursor is-offscreen${cursorEnabled ? '' : ' is-ripple-only'}`} popover="manual" ref={cursorRef} aria-hidden="true">
       <span className="void-shard-position void-shard-position--main" ref={mainRef}>
         <svg className="void-shard-art void-shard-art--pointer" viewBox="0 0 34 42" fill="none">
           <defs>

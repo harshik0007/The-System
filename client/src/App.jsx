@@ -6,6 +6,7 @@ import EmergencyPauseAtmosphere from './components/app/EmergencyPauseAtmosphere.
 import LandingPage from './pages/LandingPage.jsx';
 import { applicationNavigationItems } from './data/applicationNavigation.js';
 import { TaskScheduleProvider, useTaskSchedule } from './context/TaskScheduleContext.jsx';
+import { UserPreferencesProvider, useUserPreferences } from './context/UserPreferencesContext.jsx';
 
 const routeLoaders = {
   signup: () => import('./pages/auth/SignUpPage.jsx'),
@@ -18,6 +19,7 @@ const routeLoaders = {
   legal: () => import('./pages/public/LegalPage.jsx'),
   rankDetail: () => import('./pages/public/RankDetailPage.jsx'),
   appShell: () => import('./components/app/AppLayout.jsx'),
+  settings: () => import('./pages/app/SettingsPage.jsx'),
   dashboard: () => import('./pages/app/DashboardPage.jsx'),
   dailyTasks: () => import('./pages/app/DailyTasksPage.jsx'),
   recoveryQuests: () => import('./pages/app/RecoveryQuestsPage.jsx'),
@@ -41,6 +43,7 @@ const PublicInfoPage = lazy(routeLoaders.publicInfo);
 const LegalPage = lazy(routeLoaders.legal);
 const RankDetailPage = lazy(routeLoaders.rankDetail);
 const AppLayout = lazy(routeLoaders.appShell);
+const SettingsPageRoute = lazy(routeLoaders.settings);
 const DashboardPage = lazy(routeLoaders.dashboard);
 const DailyTasksPage = lazy(routeLoaders.dailyTasks);
 const RecoveryQuestsPage = lazy(routeLoaders.recoveryQuests);
@@ -63,7 +66,7 @@ function getRouteLoaders(pathname) {
   if (pathname === '/app/tasks/create') return [routeLoaders.appShell, routeLoaders.createTasks];
   if (pathname === '/app/monthly-analysis') return [routeLoaders.appShell, routeLoaders.monthlyAnalysis];
   if (pathname === '/app/leaderboard') return [routeLoaders.appShell, routeLoaders.leaderboard];
-  if (pathname === '/app/settings') return [routeLoaders.appShell, routeLoaders.appPlaceholder];
+  if (pathname === '/app/settings') return [routeLoaders.appShell, routeLoaders.settings];
   if (pathname === '/signup') return [routeLoaders.signup];
   if (pathname === '/login') return [routeLoaders.login];
   if (pathname === '/verify-email') return [routeLoaders.verifyEmail];
@@ -112,15 +115,17 @@ function RouteView({ children }) {
 function EmergencyPauseAtmosphereGate() {
   const { pathname } = useLocation();
   const { isEmergencyPauseActive } = useTaskSchedule();
+  const { preferences } = useUserPreferences();
 
   if (pathname !== '/app' && !pathname.startsWith('/app/')) return null;
-  return <EmergencyPauseAtmosphere active={isEmergencyPauseActive} />;
+  return <EmergencyPauseAtmosphere active={isEmergencyPauseActive} reduceDecorativeEffects={preferences.appearance.reduceDecorativeEffects} />;
 }
 
 export default function App() {
   return (
     <BrowserRouter>
       <TaskScheduleProvider>
+      <UserPreferencesProvider>
       <RoutePrefetch />
       <EmergencyPauseAtmosphereGate />
       <PageTransition>
@@ -150,15 +155,17 @@ export default function App() {
           <Route path="profile" element={<RouteView><ProfilePage /></RouteView>} />
           <Route path="profile/:memberId" element={<RouteView><PublicMemberProfilePage /></RouteView>} />
           <Route path="leaderboard" element={<RouteView><LeaderboardPage /></RouteView>} />
+          <Route path="settings" element={<RouteView><SettingsPageRoute /></RouteView>} />
           <Route path="monthly-analysis" element={<RouteView><MonthlyAnalysisPage /></RouteView>} />
           <Route path="tasks/create" element={<RouteView><CreateTaskSchedulePage /></RouteView>} />
-          {applicationNavigationItems.filter((item) => !['dashboard', 'tasks', 'recovery-quests', 'discipline', 'profile', 'leaderboard', 'monthly-analysis'].includes(item.id)).map((item) => (
+          {applicationNavigationItems.filter((item) => !['dashboard', 'tasks', 'recovery-quests', 'discipline', 'profile', 'leaderboard', 'monthly-analysis', 'settings'].includes(item.id)).map((item) => (
             <Route key={item.id} path={item.path.replace('/app/', '')} element={<RouteView><AppPlaceholderPage /></RouteView>} />
           ))}
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </PageTransition>
       <VoidShardCursor />
+      </UserPreferencesProvider>
       </TaskScheduleProvider>
     </BrowserRouter>
   );

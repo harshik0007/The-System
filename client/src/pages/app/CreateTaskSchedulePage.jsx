@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import AppIcon from '../../components/app/AppIcon.jsx';
 import { useTaskSchedule } from '../../context/TaskScheduleContext.jsx';
 import { createCycleDays, getScheduleValidation, getScheduledTasksForDay } from '../../utils/taskScheduleBuilder.js';
@@ -190,6 +190,10 @@ function ScheduleReview({ cycleLength, cycleDays, tasks, validation, attempted, 
 
 export default function CreateTaskSchedulePage() {
   const { currentSchedule, setCurrentSchedule } = useTaskSchedule();
+  const location = useLocation();
+  const [resetNotice, setResetNotice] = useState(() => location.state?.systemResetSuccess
+    ? { persisted: location.state.systemResetPersisted !== false }
+    : null);
   const reducedMotion = useReducedMotion();
   const [step, setStep] = useState(1);
   const [cycleLength, setCycleLength] = useState(null);
@@ -239,6 +243,7 @@ export default function CreateTaskSchedulePage() {
 
   return (
     <div className={`task-creation-page${reducedMotion ? ' is-reduced-motion' : ''}`}>
+      {resetNotice && <aside className="task-builder-reset-success" role="status" aria-live="polite"><span aria-hidden="true">✓</span><div><strong>THE SYSTEM has been reset. Your new journey begins now.</strong>{!resetNotice.persisted && <p>This tab was reset in memory, but browser storage was unavailable. Refreshing could restore earlier demonstration data.</p>}</div><button type="button" onClick={() => setResetNotice(null)} aria-label="Dismiss reset confirmation">×</button></aside>}
       <header className="task-creation-header"><div><p className="app-eyebrow">MY PROGRESS · SCHEDULE BUILDER</p><h1>Create your Daily Schedule</h1><p>Set a repeating cycle, build its Tasks and choose a personal Accountability Action for each one.</p></div><span className="app-demo-label"><i aria-hidden="true" />FRONTEND PREVIEW</span></header>
 
       <nav className="task-builder-progress" aria-label="Schedule creation progress">
