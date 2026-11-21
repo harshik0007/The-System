@@ -38,15 +38,14 @@ function HighestRankRecord({ record }) {
   );
 }
 
-export default function PersonalBestRecords({ records, isCurrentMember = false, isDemonstration = false }) {
+export default function PersonalBestRecords({ records, isCurrentMember = false }) {
   return (
     <section className="personal-best-records" aria-labelledby="personal-best-records-title">
       <header className="personal-best-records__heading">
         <div><p className="app-eyebrow">LIFETIME ACHIEVEMENTS</p><h2 id="personal-best-records-title">Personal Best Records</h2></div>
         <p>Leaderboard positions and THE SYSTEM Rank are tracked separately.</p>
       </header>
-      {isCurrentMember && <p className="personal-best-records__notice">Saved in this browser session. Permanent account records will require backend persistence.</p>}
-      {isDemonstration && <p className="personal-best-records__notice">Illustrative records for a fictional demonstration member.</p>}
+      {isCurrentMember && <p className="personal-best-records__notice">Saved with the member account. A Personal Best updates only after a valid server ranking improves the previous best.</p>}
       <div className="personal-best-records__grid">
         <PositionRecord recordKey="overall" title="BEST OVERALL POSITION" record={records?.overall} />
         <PositionRecord recordKey="discipline" title="BEST DISCIPLINE POSITION" record={records?.discipline} />

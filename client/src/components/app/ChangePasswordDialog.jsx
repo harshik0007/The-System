@@ -4,12 +4,13 @@ import AuthNotice from '../auth/AuthNotice.jsx';
 import PasswordInput from '../auth/PasswordInput.jsx';
 import PasswordStrengthIndicator from '../auth/PasswordStrengthIndicator.jsx';
 import AppIcon from './AppIcon.jsx';
-import { changePassword } from '../../services/authService.js';
+import { useAuth } from '../../context/AuthContext.jsx';
 import { validatePasswordChange } from '../../utils/authValidation.js';
 
 const emptyForm = () => ({ currentPassword: '', newPassword: '', confirmPassword: '' });
 
 export default function ChangePasswordDialog({ open, onClose }) {
+  const { changePassword } = useAuth();
   const dialogRef = useRef(null);
   const requestRef = useRef(false);
   const [form, setForm] = useState(emptyForm);
@@ -63,17 +64,13 @@ export default function ChangePasswordDialog({ open, onClose }) {
 
     requestRef.current = true;
     setBusy(true);
-    const submitted = { currentPassword: form.currentPassword, newPassword: form.newPassword };
-    setForm(emptyForm());
+    const submitted = { currentPassword: form.currentPassword, newPassword: form.newPassword, confirmPassword: form.confirmPassword };
     try {
       const result = await changePassword(submitted);
-      if (result.success) {
-        setNotice(result.message || 'Your password was updated.');
-      } else {
-        setNotice(result.message || 'Password changes are not available in this preview. No password was changed.');
-      }
-    } catch {
-      setNotice('Password changes could not be completed. No password was changed.');
+      setForm(emptyForm());
+      setNotice(result.message || 'Your password was updated.');
+    } catch (error) {
+      setNotice(error?.message || 'Password changes could not be completed. No password was changed.');
     } finally {
       requestRef.current = false;
       setBusy(false);
@@ -88,7 +85,7 @@ export default function ChangePasswordDialog({ open, onClose }) {
         <span className="settings-dialog__icon"><AppIcon name="shield" /></span>
         <p className="app-eyebrow">SECURE ACCOUNT ACTION</p>
         <h2 id="change-password-title">Change password</h2>
-        <p className="settings-dialog__intro">Enter your current password and choose a new one. This preview cannot verify or update credentials.</p>
+        <p className="settings-dialog__intro">Enter your current password and choose a new one. Other active sessions will be revoked.</p>
         <form className="settings-password-form" onSubmit={submit} noValidate>
           <PasswordInput id="settings-current-password" label="Current password" name="current-password" value={form.currentPassword} onChange={handleField('currentPassword')} error={errors.currentPassword} autoComplete="current-password" />
           <PasswordInput id="settings-new-password" label="New password" name="new-password" value={form.newPassword} onChange={handleField('newPassword')} error={errors.newPassword} autoComplete="new-password" />

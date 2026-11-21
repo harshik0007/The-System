@@ -2,11 +2,14 @@ import { createContext, useCallback, useContext, useEffect, useRef, useState } f
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import AppIcon from '../components/app/AppIcon.jsx';
-import { signOut } from '../services/authService.js';
+import GalaxionMark from '../components/GalaxionMark.jsx';
+import { useAuth } from './AuthContext.jsx';
+import { useFlashMessages } from './FlashMessageContext.jsx';
 
 const AccountActionsContext = createContext(null);
 
-function SignOutDialog({ open, onClose, onConfirm }) {
+function SignOutDialog({ open, onClose, onConfirm, logout }) {
+  const { notifyError } = useFlashMessages();
   const dialogRef = useRef(null);
   const [busy, setBusy] = useState(false);
   const [feedback, setFeedback] = useState('');
@@ -15,6 +18,9 @@ function SignOutDialog({ open, onClose, onConfirm }) {
   useEffect(() => {
     if (!open) return undefined;
     const previousFocus = document.activeElement;
+    const appRoot = document.getElementById('root');
+    const previousInert = appRoot?.inert ?? false;
+    if (appRoot) appRoot.inert = true;
     const getFocusable = () => [...(dialogRef.current?.querySelectorAll('button:not(:disabled), [href], input:not(:disabled), [tabindex]:not([tabindex="-1"])') || [])];
     getFocusable()[0]?.focus();
     const handleKeyDown = (event) => {
@@ -30,8 +36,9 @@ function SignOutDialog({ open, onClose, onConfirm }) {
     document.addEventListener('keydown', handleKeyDown);
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
+      if (appRoot) appRoot.inert = previousInert;
       if (previousFocus instanceof HTMLElement && previousFocus.isConnected && previousFocus !== document.body) previousFocus.focus();
-      else document.getElementById('app-profile-menu-trigger')?.focus();
+      else document.getElementById('app-navigation-toggle')?.focus();
     };
   }, [open, busy, onClose]);
 
@@ -40,17 +47,19 @@ function SignOutDialog({ open, onClose, onConfirm }) {
   }, [open]);
 
   if (!open) return null;
+  const isGalaxionTheme = document.documentElement.dataset.systemTheme === 'galaxion';
   const submit = async () => {
     if (requestRef.current) return;
     requestRef.current = true;
     setBusy(true);
     setFeedback('');
     try {
-      const result = await signOut();
-      if (result.success) onConfirm();
-      else setFeedback(result.message || 'Sign out could not be completed.');
-    } catch {
-      setFeedback('Sign out could not be completed. No progress data was changed.');
+      await logout();
+      onConfirm();
+    } catch (error) {
+      const message = error?.message || 'The server could not end this session. It may still be active; please retry.';
+      setFeedback(message);
+      notifyError(message);
     } finally {
       requestRef.current = false;
       setBusy(false);
@@ -68,7 +77,10 @@ function SignOutDialog({ open, onClose, onConfirm }) {
         {feedback && <p className="account-action-dialog__feedback" role="status">{feedback}</p>}
         <div className="account-action-dialog__actions">
           <button type="button" className="account-action-dialog__cancel" onClick={onClose} disabled={busy}>Cancel</button>
-          <button type="button" className="account-action-dialog__confirm" onClick={submit} disabled={busy}>{busy ? 'Checking…' : 'Confirm log out'}</button>
+          <button type="button" className="account-action-dialog__confirm" onClick={submit} disabled={busy} aria-busy={busy}>
+            {isGalaxionTheme && <span className="account-action-dialog__loading-mark" aria-hidden="true">{busy && <GalaxionMark className="galaxion-signout-mark" />}</span>}
+            {busy ? 'Signing out…' : 'Confirm log out'}
+          </button>
         </div>
       </section>
     </div>,
@@ -78,18 +90,21 @@ function SignOutDialog({ open, onClose, onConfirm }) {
 
 export function AccountActionsProvider({ children }) {
   const navigate = useNavigate();
+  const { logout } = useAuth();
+  const { notifySuccess } = useFlashMessages();
   const [logoutOpen, setLogoutOpen] = useState(false);
   const requestLogout = useCallback(() => setLogoutOpen(true), []);
   const closeLogout = useCallback(() => setLogoutOpen(false), []);
   const confirmLogout = useCallback(() => {
     setLogoutOpen(false);
+    notifySuccess('You have been signed out. Your progress and history are saved.');
     navigate('/login', { replace: true });
-  }, [navigate]);
+  }, [navigate, notifySuccess]);
 
   return (
     <AccountActionsContext.Provider value={{ requestLogout }}>
       {children}
-      <SignOutDialog open={logoutOpen} onClose={closeLogout} onConfirm={confirmLogout} />
+      <SignOutDialog open={logoutOpen} onClose={closeLogout} onConfirm={confirmLogout} logout={logout} />
     </AccountActionsContext.Provider>
   );
 }
