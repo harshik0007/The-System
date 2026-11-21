@@ -1,10 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useReducedMotion } from '../hooks/useReducedMotion.js';
-import { useUserPreferences } from '../context/UserPreferencesContext.jsx';
+import { useOptionalUserPreferences } from '../context/UserPreferencesContext.jsx';
+import { useAuth } from '../context/AuthContext.jsx';
+import { createDefaultUserPreferences } from '../utils/userPreferences.js';
+import useCursorTopLayer, { isViewportPoint, subscribeCursorRuntimeEvent } from '../hooks/useCursorTopLayer.js';
 
 const INTERACTIVE_SELECTOR = 'a[href], button:not(:disabled), [role="button"], [role="tab"], [data-cursor-hover]';
 const EXCLUDED_TEXT_SELECTOR = 'button, [role="button"], [role="tab"], input, textarea, select, [contenteditable="true"], a[href]';
+const NATIVE_POINTER_SELECTOR = '[data-native-cursor]';
 
 function closestElement(target, selector) {
   return target instanceof Element ? target.closest(selector) : null;
@@ -14,17 +18,22 @@ function isTextSelectable(target) {
   return target instanceof Element && !closestElement(target, EXCLUDED_TEXT_SELECTOR);
 }
 
-export default function VoidShardCursor() {
-  const { preferences } = useUserPreferences();
+export default function VoidShardCursor({ initialPointer = null }) {
+  const preferenceContext = useOptionalUserPreferences();
+  const { loading: authLoading } = useAuth();
+  const preferences = preferenceContext?.preferences || createDefaultUserPreferences();
   const reducedMotion = useReducedMotion();
   const cursorRef = useRef(null);
   const mainRef = useRef(null);
   const fragmentARef = useRef(null);
   const fragmentBRef = useRef(null);
   const rippleRef = useRef(null);
+  const impactRef = useRef(null);
   const frameRef = useRef(0);
+  const pointerPositionRef = useRef({ x: 0, y: 0, inside: false });
   const pressTimerRef = useRef(0);
   const rippleTimerRef = useRef(0);
+  const impactTimerRef = useRef(0);
   const motionRef = useRef({
     x: 0, y: 0, targetX: 0, targetY: 0,
     fragmentAX: 0, fragmentAY: 0, fragmentBX: 0, fragmentBY: 0,
@@ -36,9 +45,15 @@ export default function VoidShardCursor() {
   const [pointerSupported, setPointerSupported] = useState(false);
   const systemRequestsReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const motionAllowed = !reducedMotion && !systemRequestsReducedMotion;
-  const cursorEnabled = pointerSupported && preferences.appearance.voidShardCursor && motionAllowed;
-  const rippleEnabled = pointerSupported && preferences.appearance.clickRipple && motionAllowed;
-  const active = cursorEnabled || rippleEnabled;
+  const obsidianTheme = preferences.appearance.theme === 'obsidian';
+  const preferencesReady = preferenceContext?.ready ?? true;
+  const cursorEnabled = pointerSupported && preferencesReady && !authLoading && preferences.appearance.voidShardCursor && motionAllowed;
+  const rippleEnabled = pointerSupported && preferencesReady && !authLoading && preferences.appearance.clickRipple && motionAllowed;
+  const clickEffectEnabled = rippleEnabled && (!obsidianTheme || !preferences.appearance.reduceDecorativeEffects);
+  const active = cursorEnabled || clickEffectEnabled;
+  if (initialPointer) pointerPositionRef.current = initialPointer;
+
+  useCursorTopLayer(cursorRef, active);
 
   useEffect(() => {
     const pointerQuery = window.matchMedia('(hover: hover) and (pointer: fine) and (min-width: 769px)');
@@ -67,12 +82,21 @@ export default function VoidShardCursor() {
     const fragmentA = fragmentARef.current;
     const fragmentB = fragmentBRef.current;
     const ripple = rippleRef.current;
+    const impact = impactRef.current;
     const motion = motionRef.current;
-    if (!root || !ripple || (cursorEnabled && (!main || !fragmentA || !fragmentB))) return undefined;
+    if (!root || (!obsidianTheme && clickEffectEnabled && !ripple) || (obsidianTheme && clickEffectEnabled && !impact) || (cursorEnabled && (!main || !fragmentA || !fragmentB))) return undefined;
 
     const syncHover = (target) => {
       if (!cursorEnabled) return;
-      if (motion.selecting || motion.selectedText) return;
+      const nativeTarget = Boolean(closestElement(target, NATIVE_POINTER_SELECTOR));
+      root.classList.toggle('is-native-mode', nativeTarget);
+      if (nativeTarget) {
+        if (motion.hovering) {
+          motion.hovering = false;
+          root.classList.remove('is-hovering');
+        }
+        return;
+      }
       const hoverable = Boolean(closestElement(target, INTERACTIVE_SELECTOR));
       if (hoverable !== motion.hovering) {
         motion.hovering = hoverable;
@@ -137,44 +161,11 @@ export default function VoidShardCursor() {
       if (!frameRef.current) frameRef.current = window.requestAnimationFrame(renderFrame);
     }
 
-    // Native modal dialogs live in the browser top layer, above every document
-    // stacking context. Keep the cursor in that same layer and move it to the
-    // front whenever another top-layer surface opens.
-    let promoting = false;
-    const promoteCursor = () => {
-      if (promoting || !root.isConnected || typeof root.showPopover !== 'function') return;
-      promoting = true;
-      try {
-        if (root.matches(':popover-open')) root.hidePopover();
-        root.showPopover();
-      } catch {
-        // Keep the fixed, high-z-index fallback for browsers without full
-        // Popover API support or while the page is being torn down.
-      } finally {
-        promoting = false;
-      }
-    };
-
-    promoteCursor();
-    const topLayerObserver = new MutationObserver((records) => {
-      if (records.some(({ target }) => target instanceof HTMLDialogElement && target.open)) {
-        promoteCursor();
-      }
-    });
-    topLayerObserver.observe(document.documentElement, {
-      subtree: true,
-      attributes: true,
-      attributeFilter: ['open'],
-    });
-    const handleTopLayerToggle = (event) => {
-      if (event.target !== root && event.newState === 'open') promoteCursor();
-    };
-    document.addEventListener('toggle', handleTopLayerToggle, true);
-
     const handlePointerMove = (event) => {
       if (!cursorEnabled) return;
-      if (event.pointerType === 'touch') return;
+      if (event.pointerType === 'touch' || !isViewportPoint(event.clientX, event.clientY)) return;
       const now = performance.now();
+      pointerPositionRef.current = { x: event.clientX, y: event.clientY, inside: true };
       if (!motion.initialized) {
         motion.x = event.clientX;
         motion.y = event.clientY;
@@ -208,10 +199,11 @@ export default function VoidShardCursor() {
       queueFrame();
     };
 
-    const handleScroll = () => {
+    const handleScroll = (event) => {
       if (!cursorEnabled) return;
       const now = performance.now();
-      const currentScrollY = window.scrollY;
+      const scrollSource = event.target === document ? document.scrollingElement : event.target;
+      const currentScrollY = Number(scrollSource?.scrollTop ?? window.scrollY);
       const elapsed = Math.max(16, now - (motion.lastScrollTime || now));
       motion.nextScrollVelocity = Math.max(-1, Math.min(1, (currentScrollY - motion.lastScrollY) / elapsed * 0.5));
       motion.lastScrollY = currentScrollY;
@@ -229,8 +221,23 @@ export default function VoidShardCursor() {
         pressTimerRef.current = window.setTimeout(() => root.classList.remove('is-pressed'), 150);
       }
 
-      if (!rippleEnabled) return;
+      if (!clickEffectEnabled) return;
       if (!cursorEnabled) root.classList.remove('is-offscreen');
+
+      if (obsidianTheme && impact) {
+        impact.style.setProperty('--impact-x', `${event.clientX - 41}px`);
+        impact.style.setProperty('--impact-y', `${event.clientY - 41}px`);
+        impact.classList.remove('is-active');
+        void impact.offsetWidth;
+        impact.classList.add('is-active');
+        window.clearTimeout(impactTimerRef.current);
+        impactTimerRef.current = window.setTimeout(() => {
+          impact.classList.remove('is-active');
+          if (!cursorEnabled) root.classList.add('is-offscreen');
+          impactTimerRef.current = 0;
+        }, 680);
+        return;
+      }
 
       root.classList.add('is-rippling');
       window.clearTimeout(rippleTimerRef.current);
@@ -267,13 +274,19 @@ export default function VoidShardCursor() {
       }
     };
 
-    const handlePointerOut = (event) => {
+    const handleWindowPointerEnter = (event) => {
+      if (!cursorEnabled || event.pointerType === 'touch') return;
+      if (!isViewportPoint(event.clientX, event.clientY)) return;
+      handlePointerMove(event);
+    };
+
+    const handleWindowPointerLeave = () => {
       if (!cursorEnabled) return;
-      if (event.relatedTarget !== null) return;
       suspendCursor();
     };
 
     const suspendCursor = () => {
+      pointerPositionRef.current.inside = false;
       root.classList.add('is-offscreen');
       root.classList.remove('is-hovering', 'is-pressed');
       motion.hovering = false;
@@ -290,16 +303,28 @@ export default function VoidShardCursor() {
       frameRef.current = 0;
       window.clearTimeout(pressTimerRef.current);
       window.clearTimeout(rippleTimerRef.current);
+      window.clearTimeout(impactTimerRef.current);
       pressTimerRef.current = 0;
       rippleTimerRef.current = 0;
+      impactTimerRef.current = 0;
       root.classList.remove('is-rippling');
     };
 
     const handleVisibilityChange = () => {
-      if (document.hidden) suspendCursor();
+      if (document.hidden) {
+        window.cancelAnimationFrame(frameRef.current);
+        frameRef.current = 0;
+      } else if (motion.initialized) {
+        queueFrame();
+      }
     };
 
-    const handlePointerCancel = () => suspendCursor();
+    const handlePointerCancel = (event) => {
+      if (!cursorEnabled || event.pointerType === 'touch') return;
+      motion.selecting = false;
+      root.classList.remove('is-pressed');
+      if (isViewportPoint(event.clientX, event.clientY)) handlePointerMove(event);
+    };
 
     const handleSelectionChange = () => {
       if (!cursorEnabled) return;
@@ -307,50 +332,60 @@ export default function VoidShardCursor() {
       if (!motion.selectedText) syncHover(document.elementFromPoint(motion.targetX, motion.targetY));
     };
 
-    if (cursorEnabled) {
-      document.addEventListener('pointermove', handlePointerMove, { passive: true });
-      window.addEventListener('scroll', handleScroll, { passive: true });
-    }
-    document.addEventListener('pointerdown', handlePointerDown, { passive: true });
-    if (cursorEnabled) {
-      document.addEventListener('pointerup', handlePointerUp, { passive: true });
-      document.addEventListener('pointercancel', handlePointerCancel, { passive: true });
-      document.addEventListener('pointerout', handlePointerOut, { passive: true });
-      window.addEventListener('blur', suspendCursor);
-      document.addEventListener('visibilitychange', handleVisibilityChange);
-      document.addEventListener('selectionchange', handleSelectionChange);
+    const unsubscribeMove = cursorEnabled ? subscribeCursorRuntimeEvent('move', handlePointerMove) : () => {};
+    const unsubscribeScroll = cursorEnabled ? subscribeCursorRuntimeEvent('scroll', handleScroll) : () => {};
+    const unsubscribeEnter = cursorEnabled ? subscribeCursorRuntimeEvent('enter', handleWindowPointerEnter) : () => {};
+    const unsubscribeLeave = cursorEnabled ? subscribeCursorRuntimeEvent('leave', handleWindowPointerLeave) : () => {};
+    const unsubscribeDown = subscribeCursorRuntimeEvent('down', handlePointerDown);
+    const unsubscribeUp = cursorEnabled ? subscribeCursorRuntimeEvent('up', handlePointerUp) : () => {};
+    const unsubscribeCancel = cursorEnabled ? subscribeCursorRuntimeEvent('cancel', handlePointerCancel) : () => {};
+    const unsubscribeVisibility = cursorEnabled ? subscribeCursorRuntimeEvent('visibility', handleVisibilityChange) : () => {};
+    if (cursorEnabled) document.addEventListener('selectionchange', handleSelectionChange);
+
+    const lastPointer = pointerPositionRef.current;
+    if (cursorEnabled && lastPointer.inside && isViewportPoint(lastPointer.x, lastPointer.y)) {
+      handlePointerMove({
+        clientX: lastPointer.x,
+        clientY: lastPointer.y,
+        pointerType: 'mouse',
+        target: document.elementFromPoint(lastPointer.x, lastPointer.y),
+      });
     }
 
     return () => {
-      document.removeEventListener('pointermove', handlePointerMove);
-      window.removeEventListener('scroll', handleScroll);
-      document.removeEventListener('pointerdown', handlePointerDown);
-      document.removeEventListener('pointerup', handlePointerUp);
-      document.removeEventListener('pointercancel', handlePointerCancel);
-      document.removeEventListener('pointerout', handlePointerOut);
-      window.removeEventListener('blur', suspendCursor);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      unsubscribeMove();
+      unsubscribeScroll();
+      unsubscribeEnter();
+      unsubscribeLeave();
+      unsubscribeDown();
+      unsubscribeUp();
+      unsubscribeCancel();
+      unsubscribeVisibility();
       document.removeEventListener('selectionchange', handleSelectionChange);
-      document.removeEventListener('toggle', handleTopLayerToggle, true);
-      topLayerObserver.disconnect();
       window.cancelAnimationFrame(frameRef.current);
       window.clearTimeout(pressTimerRef.current);
       window.clearTimeout(rippleTimerRef.current);
+      window.clearTimeout(impactTimerRef.current);
       motion.initialized = false;
-      if (typeof ripple.getAnimations === 'function') {
+      if (ripple && typeof ripple.getAnimations === 'function') {
         ripple.getAnimations().forEach((animation) => animation.cancel());
       }
-      ripple.classList.remove('is-active');
+      ripple?.classList.remove('is-active');
+      impact?.classList.remove('is-active');
       root.className = 'void-shard-cursor is-offscreen';
     };
-  }, [active, cursorEnabled, rippleEnabled]);
+  }, [active, clickEffectEnabled, cursorEnabled, obsidianTheme]);
 
   if (!active) return null;
 
   return createPortal((
     <div className={`void-shard-cursor is-offscreen${cursorEnabled ? '' : ' is-ripple-only'}`} popover="manual" ref={cursorRef} aria-hidden="true">
       <span className="void-shard-position void-shard-position--main" ref={mainRef}>
-        <svg className="void-shard-art void-shard-art--pointer" viewBox="0 0 34 42" fill="none">
+        {obsidianTheme ? <svg className="obsidian-cursor-art" viewBox="0 0 34 42" fill="none">
+          <path className="obsidian-cursor-edge" d="M1 1 2 36 10 27 16 41 22 38 16 24 32 25Z" />
+          <path className="obsidian-cursor-inner" d="M4 6 5 30 11 23 17 37 19 36 13 21 27 22Z" />
+          <path className="obsidian-cursor-core" d="m11 16 3-3 3 3-3 3z" />
+        </svg> : <svg className="void-shard-art void-shard-art--pointer" viewBox="0 0 34 42" fill="none">
           <defs>
             <linearGradient id="void-shard-pointer-fill" x1="2" y1="1" x2="28" y2="39" gradientUnits="userSpaceOnUse">
               <stop stopColor="#15385b" stopOpacity=".96" />
@@ -366,21 +401,31 @@ export default function VoidShardCursor() {
           <path className="void-shard-pointer-edge" d="M0 0 0.45 34.5 9.3 25.1 15.1 40.3 20.7 38 14.8 23.7 29.8 24.2Z" />
           <path className="void-shard-pointer-light" d="M2.5 4.5 2.85 28.4 8.7 22.1 12.4 22.8Z" />
           <path className="void-shard-pointer-glint" d="m2.2 5.8.3 23.1 5.2-5.6" />
-        </svg>
+        </svg>}
+        {obsidianTheme && <>
+          <i className="obsidian-cursor-spark obsidian-cursor-spark--one" />
+          <i className="obsidian-cursor-spark obsidian-cursor-spark--two" />
+          <i className="obsidian-cursor-spark obsidian-cursor-spark--three" />
+        </>}
       </span>
       <span className="void-shard-position void-shard-position--fragment-a" ref={fragmentARef}>
-        <svg className="void-shard-art void-shard-art--fragment-a" viewBox="0 0 20 22" fill="none">
+        {obsidianTheme ? <svg className="void-shard-art obsidian-cursor-art" viewBox="0 0 20 22" fill="none"><path className="obsidian-cursor-fragment" d="m2 3 15 2-4 6 5 4-12 5 2-8Z" /></svg> : <svg className="void-shard-art void-shard-art--fragment-a" viewBox="0 0 20 22" fill="none">
           <path d="m2 3 15 2-4 6 5 4-12 5 2-8Z" />
-        </svg>
+        </svg>}
       </span>
       <span className="void-shard-position void-shard-position--fragment-b" ref={fragmentBRef}>
-        <svg className="void-shard-art void-shard-art--fragment-b" viewBox="0 0 18 20" fill="none">
+        {obsidianTheme ? <svg className="void-shard-art obsidian-cursor-art" viewBox="0 0 18 20" fill="none"><path className="obsidian-cursor-fragment obsidian-cursor-fragment--b" d="m3 1 12 7-4 4 4 5-11 2 2-9Z" /></svg> : <svg className="void-shard-art void-shard-art--fragment-b" viewBox="0 0 18 20" fill="none">
           <path d="m3 1 12 7-4 4 4 5-11 2 2-9Z" />
-        </svg>
+        </svg>}
       </span>
-      <svg className="void-shard-ripple" ref={rippleRef} viewBox="0 0 42 42" fill="none">
+      {obsidianTheme && clickEffectEnabled && <div ref={impactRef} className="obsidian-click-impact" aria-hidden="true">
+        {[32, 48, 64].map((size) => <span className="obsidian-impact-ring" key={`ring-${size}`} style={{ '--ring-size': `${size}px` }} />)}
+        {[-150, -105, -60, -15, 30, 75, 120, 165].map((angle) => <span className="obsidian-impact-fragment" key={`fragment-${angle}`} style={{ '--fragment-angle': `${angle}deg` }} />)}
+        {[-135, -90, -45, 0, 45, 90, 135, 180].map((angle) => <span className="obsidian-impact-particle" key={`particle-${angle}`} style={{ '--fragment-angle': `${angle}deg` }} />)}
+      </div>}
+      {!obsidianTheme && clickEffectEnabled && <svg className="void-shard-ripple" ref={rippleRef} viewBox="0 0 42 42" fill="none">
         <path d="m12 2 27 16-10 21L2 26Z" />
-      </svg>
+      </svg>}
     </div>
   ), document.body);
 }
