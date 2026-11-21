@@ -151,7 +151,12 @@ export function loadConfig(env = process.env) {
     googleCallbackUrl,
     googleOAuthEnabled,
     authSessionCookieName: nodeEnv === 'production' ? '__Host-the-system.sid' : 'the-system.sid',
-    trustProxyHops: parseNonNegativeInteger(env.AUTH_TRUST_PROXY_HOPS, 'AUTH_TRUST_PROXY_HOPS'),
+    // Render terminates TLS at its edge. Production must trust at least that
+    // proxy hop so Express recognizes HTTPS and express-session emits its
+    // Secure cookie; local development remains unproxied by default.
+    trustProxyHops: nodeEnv === 'production'
+      ? Math.max(1, parseNonNegativeInteger(env.AUTH_TRUST_PROXY_HOPS, 'AUTH_TRUST_PROXY_HOPS', 1))
+      : parseNonNegativeInteger(env.AUTH_TRUST_PROXY_HOPS, 'AUTH_TRUST_PROXY_HOPS', 0),
     jsonLimit: '100kb',
   });
 }

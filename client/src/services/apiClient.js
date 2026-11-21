@@ -1,6 +1,7 @@
 const API_ROOT = '/api/v1';
 let csrfToken = null;
 let csrfRequest = null;
+let csrfGeneration = 0;
 
 export class ApiError extends Error {
   constructor(status, code, message, details = [], requestId = null) {
@@ -15,7 +16,7 @@ export class ApiError extends Error {
 
 export function invalidateCsrfToken() {
   csrfToken = null;
-  csrfRequest = null;
+  csrfGeneration += 1;
 }
 
 function isSafeMethod(method) {
@@ -23,9 +24,27 @@ function isSafeMethod(method) {
 }
 
 async function getCsrfToken(signal) {
-  if (csrfToken) return csrfToken;
-  if (!csrfRequest) {
-    csrfRequest = fetch(`${API_ROOT}/auth/csrf`, {
+  while (true) {
+    const generation = csrfGeneration;
+    if (csrfToken?.generation === generation) return csrfToken.value;
+
+    if (csrfRequest) {
+      const pendingRequest = csrfRequest;
+      try {
+        await pendingRequest.promise;
+      } catch (error) {
+        if (pendingRequest.generation !== generation || generation !== csrfGeneration) continue;
+        throw error;
+      }
+      // A concurrent request may have invalidated the shared token while the
+      // bootstrap was in flight. Re-read the current generation before use.
+      if (pendingRequest.generation !== generation || generation !== csrfGeneration) continue;
+      if (csrfToken?.generation === generation) return csrfToken.value;
+      continue;
+    }
+
+    const request = { generation, promise: null };
+    request.promise = fetch(`${API_ROOT}/auth/csrf`, {
       method: 'GET',
       credentials: 'include',
       headers: { Accept: 'application/json' },
@@ -35,11 +54,23 @@ async function getCsrfToken(signal) {
       if (!response.ok || typeof payload?.csrfToken !== 'string') {
         throw apiErrorFromResponse(response, payload, 'A secure request token could not be loaded. Retry the action.');
       }
-      csrfToken = payload.csrfToken;
-      return csrfToken;
-    }).finally(() => { csrfRequest = null; });
+      if (request.generation === csrfGeneration) {
+        csrfToken = { value: payload.csrfToken, generation: request.generation };
+      }
+      return payload.csrfToken;
+    }).finally(() => {
+      if (csrfRequest === request) csrfRequest = null;
+    });
+    csrfRequest = request;
+
+    try {
+      await request.promise;
+    } catch (error) {
+      if (generation !== csrfGeneration) continue;
+      throw error;
+    }
+    if (generation === csrfGeneration && csrfToken?.generation === generation) return csrfToken.value;
   }
-  return csrfRequest;
 }
 
 async function readJson(response) {
@@ -72,7 +103,7 @@ function announceUnauthorized(path, response) {
   }
 }
 
-async function fetchWithCsrf(path, { method, body, headers, signal }, retry = true) {
+async function fetchWithCsrf(path, { method, body, headers, signal }) {
   const requestHeaders = { ...headers };
   if (!isSafeMethod(method)) requestHeaders['X-CSRF-Token'] = await getCsrfToken(signal);
   let response;
@@ -88,11 +119,27 @@ async function fetchWithCsrf(path, { method, body, headers, signal }, retry = tr
     if (error?.name === 'AbortError') throw error;
     throw new ApiError(0, 'NETWORK_ERROR', 'THE SYSTEM could not reach the service. Check that the server and database are running.');
   }
-  if (response.status === 403 && retry && !isSafeMethod(method)) {
+  if (response.status === 403 && !isSafeMethod(method)) {
     const payload = await readJson(response.clone());
     if (['CSRF_INVALID', 'CSRF_VALIDATION_FAILED', 'INVALID_CSRF_TOKEN'].includes(payload?.error?.code)) {
       invalidateCsrfToken();
-      return fetchWithCsrf(path, { method, body, headers, signal }, false);
+      let refreshed = false;
+      try {
+        await getCsrfToken(signal);
+        refreshed = true;
+      } catch (error) {
+        if (error?.name === 'AbortError') throw error;
+      }
+      const originalError = apiErrorFromResponse(response, payload);
+      throw new ApiError(
+        originalError.status,
+        originalError.code,
+        refreshed
+          ? 'Your secure request token was refreshed. Submit again to retry this action.'
+          : 'Your secure session could not be refreshed. Refresh the page, then try again.',
+        originalError.details,
+        originalError.requestId,
+      );
     }
   }
   announceUnauthorized(path, response);

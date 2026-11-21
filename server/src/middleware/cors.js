@@ -13,6 +13,12 @@ export function createCorsMiddleware(allowedOrigins = []) {
       response.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Request-Id, X-CSRF-Token, Idempotency-Key');
       response.setHeader('Access-Control-Expose-Headers', 'X-Request-Id');
     } else if (origin && allowlist.size > 0) {
+      console.warn('[cors-rejected]', JSON.stringify({
+        requestId: request.requestId || 'unknown',
+        method: request.method || 'UNKNOWN',
+        path: request.path || 'unknown',
+        category: 'origin_not_allowed',
+      }));
       return next(new HttpError(403, 'ORIGIN_NOT_ALLOWED', 'This request origin is not allowed.'));
     }
 
