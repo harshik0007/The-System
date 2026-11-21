@@ -1,0 +1,13 @@
+:root[data-system-theme='galaxion'] .app-layout :is(.settings-content, .settings-nav, .settings-toggle-list, .settings-notification-group, .settings-theme-card, .settings-readonly, .settings-accessibility-grid article, .settings-avatar-choice, .leaderboard-list, .monthly-panel, .monthly-retention-panel, .monthly-balance-card, .recovery-quest-card, .discipline-reward, .task-builder-panel, .task-builder-form, .task-builder-schedule, .task-builder-task, .task-builder-existing-day, .task-review-day) { border-color: var(--color-line); background-color: var(--surface-card); color: var(--color-text); }
+:root[data-system-theme='galaxion'] .app-layout :is(.task-accountability-action, .task-change-action-fields, .task-change-comparison__row, .task-change-type, .task-change-allowance-summary > div, .task-submission__review > p, .recovery-count-grid > div, .recovery-quest-card__source, .recovery-quest-card__action, .monthly-task-count-strip > span, .monthly-rank-days-detail__summary, .monthly-pause-summary > div) { border-color: var(--color-line); background: var(--surface-card-nested); }
+:root[data-system-theme='galaxion'] .app-layout :is(.settings-readonly > span, .settings-theme-card__heading h3, .settings-accessibility-grid h3) { color: var(--color-text); }
+:root[data-system-theme='galaxion'] .app-layout :is(.settings-readonly small, .settings-accessibility-grid p, .settings-theme-card__heading p, .settings-theme-intro) { color: var(--color-muted); }
+:root[data-system-theme='galaxion'] .app-layout :is(.app-panel, .settings-content, .settings-nav, .settings-toggle-list, .settings-notification-group, .settings-theme-card, .settings-readonly, .settings-accessibility-grid article, .settings-avatar-choice) { box-shadow: inset 0 1px rgb(255 255 255 / 2%); }
+:root[data-system-theme='galaxion'] .settings-theme-card { --theme-card-accent: var(--color-accent); background: linear-gradient(145deg, var(--surface-card-nested), var(--surface-card)); }
+:root[data-system-theme='galaxion'] .settings-theme-card__active { color: var(--color-teal); }
+:root[data-system-theme='galaxion'] .settings-theme-card__requirement { color: var(--color-muted); }
+:root[data-system-theme='galaxion'] .settings-theme-card__actions button { border-color: var(--color-line); color: var(--color-muted); }
+:root[data-system-theme='galaxion'] .settings-theme-card__actions button:hover:not(:disabled) { border-color: var(--color-accent); color: var(--color-text); background: var(--accent-soft); }
+:root[data-system-theme='galaxion'] .settings-theme-card__apply-button:not(:disabled) { color: var(--color-accent); }
+
+

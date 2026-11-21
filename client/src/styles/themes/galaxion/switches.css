@@ -1,0 +1,39 @@
+:root[data-system-theme='galaxion'] .settings-toggle-list,
+:root[data-system-theme='galaxion'] .settings-notification-group,
+:root[data-system-theme='galaxion'] .settings-accessibility-motion { border-color: var(--color-line); background: var(--surface-card); }
+:root[data-system-theme='galaxion'] .settings-toggle { border-color: var(--border-divider); }
+:root[data-system-theme='galaxion'] .settings-toggle:hover { background: var(--surface-hover); }
+:root[data-system-theme='galaxion'] .settings-toggle__copy strong { color: var(--color-text); }
+:root[data-system-theme='galaxion'] .settings-toggle__copy small { color: var(--color-muted); }
+:root[data-system-theme='galaxion'] .settings-toggle__track {
+  width: 44px;
+  height: 26px;
+  border-color: #444550;
+  background: linear-gradient(145deg, #111217, #22232C);
+  box-shadow: inset 0 2px 5px rgb(0 0 0 / 48%), inset 0 1px rgb(233 233 241 / 5%);
+}
+:root[data-system-theme='galaxion'] .settings-toggle__track > span {
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  background: linear-gradient(145deg, #D5D9E7, #858BA1);
+  box-shadow: 0 1px 4px rgb(0 0 0 / 52%), inset 0 1px rgb(255 255 255 / 64%);
+}
+:root[data-system-theme='galaxion'] .settings-toggle input:checked + .settings-toggle__track {
+  border-color: #8EA8E4;
+  background: linear-gradient(110deg, #355483, #5540A0 68%, #71523F);
+  box-shadow: inset 0 1px rgb(255 255 255 / 12%), 0 0 14px rgb(82 125 205 / 27%), 0 0 22px rgb(85 64 160 / 12%);
+}
+:root[data-system-theme='galaxion'] .settings-toggle input:checked + .settings-toggle__track > span {
+  transform: translateX(18px);
+  background: linear-gradient(145deg, #F1EEE9, #C4CADB 64%, #D3A477);
+  box-shadow: 0 0 9px rgb(211 164 119 / 36%), inset 0 1px rgb(255 255 255 / 88%);
+}
+:root[data-system-theme='galaxion'] .settings-toggle.is-disabled .settings-toggle__track { filter: saturate(.45); }
+:root[data-system-theme='galaxion'] .settings-notification-group__items .settings-toggle__track { width: 34px; height: 20px; }
+:root[data-system-theme='galaxion'] .settings-notification-group__items .settings-toggle__track > span { top: 2px; left: 2px; width: 14px; height: 14px; }
+:root[data-system-theme='galaxion'] .settings-notification-group__items .settings-toggle input:checked + .settings-toggle__track > span { transform: translateX(14px); }
+:root[data-system-theme='galaxion'] .settings-toggle input:focus-visible + .settings-toggle__track { outline: 2px solid var(--focus-ring); outline-offset: 3px; }
+
+

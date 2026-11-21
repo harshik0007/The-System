@@ -1,0 +1,285 @@
+.galaxion-ambient {
+  position: fixed;
+  z-index: 0;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  pointer-events: none;
+  contain: strict;
+  background:
+    radial-gradient(ellipse 46rem 32rem at 82% 4%, rgb(82 125 205 / 9%), transparent 74%),
+    radial-gradient(ellipse 38rem 34rem at 3% 48%, rgb(85 64 160 / 7%), transparent 76%),
+    radial-gradient(ellipse 42rem 24rem at 72% 96%, rgb(180 92 169 / 4%), transparent 78%),
+    linear-gradient(155deg, #0C0D12 0%, #050507 68%, #09090D 100%);
+}
+.galaxion-ambient::before {
+  position: absolute;
+  inset: 0;
+  content: '';
+  opacity: .34;
+  background-image:
+    radial-gradient(1px 1px at 12% 21%, rgb(233 233 241 / 62%) 50%, transparent 100%),
+    radial-gradient(1px 1px at 38% 67%, rgb(168 185 220 / 50%) 50%, transparent 100%),
+    radial-gradient(1px 1px at 74% 34%, rgb(233 233 241 / 46%) 50%, transparent 100%),
+    radial-gradient(1px 1px at 88% 78%, rgb(180 92 169 / 42%) 50%, transparent 100%);
+}
+.galaxion-emergency {
+  --galaxion-hole-size: clamp(360px, 68vmin, 760px);
+  position: fixed;
+  z-index: 1;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  contain: strict;
+  isolation: isolate;
+  background:
+    radial-gradient(ellipse 86% 68% at 50% 50%, rgb(82 125 205 / 9%), transparent 76%),
+    radial-gradient(ellipse 44% 82% at 0% 52%, rgb(82 125 205 / 13%), transparent 80%),
+    radial-gradient(ellipse 43% 82% at 100% 48%, rgb(85 64 160 / 12%), transparent 80%),
+    radial-gradient(ellipse 76% 40% at 50% 0%, rgb(233 233 241 / 6%), transparent 78%),
+    linear-gradient(180deg, rgb(5 5 7 / 8%), rgb(5 5 7 / 14%));
+}
+.galaxion-emergency::before {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  content: '';
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 48%, rgb(82 125 205 / 7%), transparent 74%),
+    radial-gradient(ellipse 36% 72% at 0% 50%, rgb(168 185 220 / 7%), transparent 82%),
+    radial-gradient(ellipse 36% 72% at 100% 50%, rgb(85 64 160 / 8%), transparent 82%);
+  box-shadow: inset 0 0 150px rgb(82 125 205 / 9%), inset 0 0 64px rgb(85 64 160 / 7%);
+  opacity: .82;
+}
+.galaxion-emergency__particles {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.galaxion-emergency__particles--background { z-index: 2; opacity: .58; }
+.galaxion-emergency__foreground-layer {
+  position: fixed;
+  z-index: 3;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  contain: strict;
+}
+.galaxion-emergency__particles--foreground { z-index: 1; opacity: .94; }
+.galaxion-emergency__foreground-layer.is-ending .galaxion-emergency__particles { opacity: 1; transition: none; }
+.galaxion-emergency__foreground-layer.is-reduced-motion .galaxion-emergency__particles,
+.galaxion-emergency__foreground-layer.is-effects-reduced .galaxion-emergency__particles { display: none; }
+.galaxion-emergency.is-ending .galaxion-emergency__particles { opacity: 1; transition: none; }
+.galaxion-emergency.is-reduced-motion .galaxion-emergency__particles,
+.galaxion-emergency.is-effects-reduced .galaxion-emergency__particles { display: none; }
+.galaxion-emergency.is-reduced-motion.is-ending .galaxion-emergency__nebula,
+.galaxion-emergency.is-effects-reduced.is-ending .galaxion-emergency__nebula { transition: opacity 240ms ease; }
+.galaxion-emergency.is-paused .galaxion-emergency__particles { animation-play-state: paused; }
+.galaxion-emergency__nebula {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  pointer-events: none;
+  transform-origin: center;
+}
+.galaxion-emergency__nebula::before,
+.galaxion-emergency__nebula::after {
+  position: absolute;
+  top: -12vh;
+  width: 67vw;
+  height: 124vh;
+  border-radius: 50%;
+  content: '';
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 68%, transparent 100%);
+  mask-image: linear-gradient(90deg, #000 0%, #000 68%, transparent 100%);
+}
+.galaxion-emergency__nebula::before {
+  left: -24vw;
+  background:
+    radial-gradient(ellipse 24vw 30vh at 58% 19%, rgb(82 125 205 / 30%) 0%, rgb(85 64 160 / 22%) 34%, transparent 76%),
+    radial-gradient(ellipse 29vw 39vh at 45% 43%, rgb(82 125 205 / 36%) 0%, rgb(85 64 160 / 29%) 38%, transparent 78%),
+    radial-gradient(ellipse 21vw 31vh at 67% 65%, rgb(180 92 169 / 24%) 0%, rgb(82 125 205 / 19%) 40%, transparent 78%),
+    radial-gradient(ellipse 27vw 34vh at 41% 88%, rgb(85 64 160 / 31%) 0%, rgb(211 164 119 / 13%) 38%, transparent 77%);
+}
+.galaxion-emergency__nebula::after {
+  right: -25vw;
+  transform: scaleX(-1);
+  background:
+    radial-gradient(ellipse 25vw 33vh at 58% 14%, rgb(85 64 160 / 34%) 0%, rgb(180 92 169 / 18%) 36%, transparent 76%),
+    radial-gradient(ellipse 30vw 42vh at 47% 38%, rgb(85 64 160 / 38%) 0%, rgb(82 125 205 / 28%) 39%, transparent 79%),
+    radial-gradient(ellipse 22vw 30vh at 68% 66%, rgb(82 125 205 / 29%) 0%, rgb(180 92 169 / 17%) 40%, transparent 78%),
+    radial-gradient(ellipse 28vw 36vh at 42% 91%, rgb(85 64 160 / 32%) 0%, rgb(211 164 119 / 13%) 39%, transparent 79%);
+}
+.galaxion-emergency.is-ending .galaxion-emergency__nebula {
+  opacity: 0;
+  transform: scale(.04);
+  transition: opacity 6s ease-in, transform 6s cubic-bezier(.6, 0, .9, .25);
+}
+
+.galaxion-emergency__galaxy {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 3;
+  width: min(96vmin, 1080px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+  transform-origin: center;
+  will-change: transform, opacity;
+}
+.galaxion-emergency__galaxy::before,
+.galaxion-emergency__galaxy::after {
+  position: absolute;
+  inset: 4%;
+  border-radius: inherit;
+  content: '';
+  pointer-events: none;
+}
+.galaxion-emergency__galaxy::before {
+  background:
+    radial-gradient(ellipse 49% 10% at 50% 50%, rgb(233 233 241 / 17%), transparent 70%),
+    radial-gradient(ellipse 47% 20% at 50% 50%, rgb(82 125 205 / 24%), transparent 74%),
+    radial-gradient(ellipse 40% 39% at 50% 50%, rgb(85 64 160 / 16%), transparent 78%);
+  filter: blur(9px);
+}
+.galaxion-emergency__galaxy::after {
+  inset: 12%;
+  background: radial-gradient(ellipse at center, transparent 16%, rgb(5 5 7 / 8%) 42%, transparent 76%);
+  opacity: .68;
+}
+
+/* A narrow, luminous accretion plane. Its silhouette stays put while the
+   pearl, blue and violet flow travels around the disc in place. */
+.galaxion-emergency__accretion-disc {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(110%, 100vmin);
+  aspect-ratio: 2.12;
+  border-radius: 50%;
+  pointer-events: none;
+  transform: translate(-50%, -50%) rotate(-17deg);
+  -webkit-mask: radial-gradient(ellipse, transparent 0 51%, #000 54% 69%, transparent 73%);
+  mask: radial-gradient(ellipse, transparent 0 51%, #000 54% 69%, transparent 73%);
+  background:
+    conic-gradient(from 14deg,
+      rgb(82 125 205 / 32%) 0deg,
+      rgb(233 233 241 / 78%) 36deg,
+      rgb(85 64 160 / 66%) 78deg,
+      rgb(180 92 169 / 48%) 122deg,
+      rgb(82 125 205 / 34%) 172deg,
+      rgb(211 164 119 / 42%) 214deg,
+      rgb(233 233 241 / 72%) 256deg,
+      rgb(85 64 160 / 55%) 310deg,
+      rgb(82 125 205 / 32%) 360deg);
+  filter: drop-shadow(0 0 5px rgb(82 125 205 / 42%)) drop-shadow(0 0 13px rgb(85 64 160 / 22%));
+}
+.galaxion-emergency__accretion-disc::before,
+.galaxion-emergency__accretion-disc::after {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  content: '';
+  pointer-events: none;
+  -webkit-mask: radial-gradient(ellipse, transparent 0 51%, #000 54% 69%, transparent 73%);
+  mask: radial-gradient(ellipse, transparent 0 51%, #000 54% 69%, transparent 73%);
+}
+.galaxion-emergency__accretion-disc::before {
+  background: conic-gradient(from 0deg,
+    transparent 0deg 34deg,
+    rgb(233 233 241 / 88%) 48deg,
+    rgb(168 185 220 / 76%) 59deg,
+    transparent 78deg 176deg,
+    rgb(180 92 169 / 66%) 204deg,
+    transparent 228deg 286deg,
+    rgb(211 164 119 / 54%) 312deg,
+    transparent 334deg 360deg);
+  transform: rotate(0deg);
+  transform-origin: center;
+  will-change: transform;
+  animation: galaxion-accretion-flow 8s linear infinite;
+}
+.galaxion-emergency__accretion-disc::after {
+  background: conic-gradient(from 0deg,
+    transparent 0deg 48deg,
+    rgb(233 233 241 / 40%) 54deg,
+    transparent 61deg 168deg,
+    rgb(82 125 205 / 35%) 182deg,
+    transparent 192deg 360deg);
+  filter: blur(2px);
+  opacity: .72;
+}
+.galaxion-emergency__accretion-disc--back { z-index: 3; clip-path: inset(0 0 50% 0); }
+.galaxion-emergency__accretion-disc--front { z-index: 5; clip-path: inset(50% 0 0 0); }
+.galaxion-emergency__black-hole {
+  position: absolute;
+  z-index: 4;
+  top: 50%;
+  left: 50%;
+  width: var(--galaxion-hole-size);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 50%, #000 0%, #010104 82%, #06060A 100%);
+  box-shadow: 0 0 14px rgb(82 125 205 / 42%), 0 0 42px rgb(85 64 160 / 40%), 0 0 96px rgb(180 92 169 / 21%);
+  transform: translate(-50%, -50%);
+}
+.galaxion-emergency.is-entering .galaxion-emergency__galaxy {
+  opacity: 0;
+  animation: galaxion-galaxy-expand 5.2s cubic-bezier(.18, .64, .2, 1) both;
+}
+.galaxion-emergency.is-entering .galaxion-emergency__black-hole { animation: galaxion-singularity-form 1.4s ease-out both; }
+.galaxion-emergency.is-active .galaxion-emergency__galaxy {
+  opacity: 1;
+  animation: none;
+}
+.galaxion-emergency.is-ending .galaxion-emergency__galaxy { animation: galaxion-galaxy-collapse 6s cubic-bezier(.6, 0, .82, .38) forwards; }
+.galaxion-emergency.is-ending .galaxion-emergency__black-hole { animation: galaxion-singularity-close 6s ease-in forwards; }
+.galaxion-emergency.is-ending .galaxion-emergency__accretion-disc::before {
+  animation-duration: 6s;
+  animation-timing-function: ease-in;
+  animation-iteration-count: 1;
+  animation-fill-mode: forwards;
+}
+.galaxion-emergency.is-paused .galaxion-emergency__galaxy { animation-play-state: paused; }
+.galaxion-emergency.is-paused .galaxion-emergency__accretion-disc::before { animation-play-state: paused; }
+.galaxion-emergency.is-reduced-motion .galaxion-emergency__galaxy,
+.galaxion-emergency.is-effects-reduced .galaxion-emergency__galaxy { opacity: .72; transform: translate(-50%, -50%) scale(1); animation: none; }
+.galaxion-emergency.is-reduced-motion .galaxion-emergency__accretion-disc::before,
+.galaxion-emergency.is-effects-reduced .galaxion-emergency__accretion-disc::before { animation: none; }
+@keyframes galaxion-galaxy-expand {
+  0% { opacity: .08; transform: translate(-50%, -50%) scale(.035); filter: blur(7px); }
+  20% { opacity: .48; }
+  68% { opacity: .86; filter: blur(1px); }
+  100% { opacity: .92; transform: translate(-50%, -50%) scale(1); filter: blur(0); }
+}
+@keyframes galaxion-galaxy-collapse {
+  0% { opacity: .92; transform: translate(-50%, -50%) scale(1); filter: blur(0); }
+  45% { opacity: .84; transform: translate(-50%, -50%) scale(.72); }
+  78% { opacity: .6; transform: translate(-50%, -50%) scale(.3); filter: blur(2px); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(.025); filter: blur(5px); }
+}
+@keyframes galaxion-accretion-flow { to { transform: rotate(360deg); } }
+@keyframes galaxion-singularity-form { 0% { scale: .12; opacity: .15; } 75% { scale: 1.12; opacity: 1; } 100% { scale: 1; opacity: 1; } }
+@keyframes galaxion-singularity-close { 0% { scale: 1; opacity: 1; } 72% { scale: .75; opacity: .88; } 100% { scale: .01; opacity: 0; } }
+@media (max-width: 700px) {
+  .galaxion-emergency { --galaxion-hole-size: clamp(290px, 70vmin, 410px); }
+  .galaxion-emergency__galaxy { width: min(94vmin, 860px); opacity: .9; }
+  .galaxion-emergency__accretion-disc { width: 100%; }
+  .galaxion-emergency__nebula::before,
+  .galaxion-emergency__nebula::after { width: 82vw; }
+  .galaxion-emergency__nebula::before { left: -36vw; }
+  .galaxion-emergency__nebula::after { right: -36vw; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .galaxion-emergency::before { animation: none; opacity: .84; }
+  .galaxion-emergency__accretion-disc::before { animation: none !important; }
+  .galaxion-emergency.is-ending .galaxion-emergency__nebula { transition: opacity 240ms ease; }
+}

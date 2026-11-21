@@ -1,0 +1,44 @@
+:root[data-system-theme='galaxion'] .app-layout :is(.monthly-panel, .monthly-retention-panel, .monthly-balance-card, .monthly-controls, .monthly-section-nav, .monthly-rank-days-detail__summary, .monthly-pause-summary > div) { border-color: var(--color-line); background: var(--surface-card); color: var(--color-text); }
+:root[data-system-theme='galaxion'] .app-layout :is(.monthly-section-nav a[aria-current='true'], .monthly-section-nav button[aria-current='true'], .monthly-section-nav .is-active) { border-color: var(--border-interactive); background: var(--surface-active-tab); color: var(--color-teal); }
+:root[data-system-theme='galaxion'] .monthly-section-nav :is(a, button):hover { background: var(--surface-hover); color: var(--color-teal); }
+:root[data-system-theme='galaxion'] .monthly-comparison-table th:first-child,
+:root[data-system-theme='galaxion'] .monthly-comparison-table td:first-child { background: var(--surface-table-head); }
+:root[data-system-theme='galaxion'] .monthly-controls select,
+:root[data-system-theme='galaxion'] .m25-compare-controls select { border-color: var(--color-line); background: var(--surface-input); color: var(--color-text); font: inherit; }
+:root[data-system-theme='galaxion'] .monthly-discipline-day { border-color: var(--color-line); background: var(--activity-level-0); color: var(--color-muted); }
+:root[data-system-theme='galaxion'] .monthly-task-count-strip > span { border-color: var(--color-line); background: var(--surface-card-nested); }
+:root[data-system-theme='galaxion'] .monthly-daily-chart__positive,
+:root[data-system-theme='galaxion'] .monthly-percent-chart__track i,
+:root[data-system-theme='galaxion'] .monthly-bar-row__track i { background: var(--progress-fill); }
+:root[data-system-theme='galaxion'] .monthly-panel :is(.monthly-empty-state, .monthly-chart-empty) { border-color: var(--color-line); background: var(--surface-empty); color: var(--color-muted); }
+:root[data-system-theme='galaxion'] .app-layout .monthly-analysis-page { --monthly-xp-net-positive: #E9E9F1; --monthly-xp-net-negative: #D9909D; --monthly-protected-color: #A8B9DC; --monthly-protected-border: rgb(182 160 245 / 38%); --monthly-protected-surface: rgb(99 76 152 / 28%); color: var(--color-text); }
+:root[data-system-theme='galaxion'] .app-layout :is(.monthly-analysis-header > div > p:not(.app-eyebrow), .monthly-major-heading > div > p:not(.app-eyebrow), .monthly-run-note, .monthly-inline-note, .monthly-retention-panel p:not(.app-eyebrow), .monthly-controls__range small, .monthly-chart-block__heading p, .m25-daily-panel .monthly-chart-block__heading p, .monthly-reminder-list small, .monthly-reminder-empty, .m25-detail-description, .monthly-empty) { color: var(--color-muted); }
+:root[data-system-theme='galaxion'] .app-layout :is(.monthly-analysis-header h1, .monthly-major-heading h2, .monthly-panel__heading h2, .monthly-chart-block__heading h3, .monthly-retention-panel h2, .monthly-retention-panel h3, .monthly-metric strong, .m25-stat-pair > strong) { color: var(--color-text); }
+:root[data-system-theme='galaxion'] .app-layout :is(.monthly-controls, .monthly-section-nav, .monthly-panel, .monthly-chart-block, .m25-daily-panel, .monthly-retention-panel, .monthly-metric, .monthly-balance-card, .m25-stat-pair, .monthly-table-wrap, .monthly-pause-summary > div, .monthly-rank-days-detail__summary) { border-color: var(--color-line); background: var(--surface-card); color: var(--color-text); }
+:root[data-system-theme='galaxion'] .app-layout :is(.monthly-chart-block, .m25-daily-panel, .monthly-metric, .m25-stat-pair, .monthly-rank-days-detail__summary, .monthly-pause-summary > div) { background: var(--surface-card-nested); }
+:root[data-system-theme='galaxion'] .app-layout :is(.monthly-controls label > span, .monthly-controls__range > span, .m25-compare-controls label, .monthly-period-status, .monthly-detail-tag, .monthly-metric > span, .monthly-metric > small) { color: var(--color-muted); }
+:root[data-system-theme='galaxion'] .app-layout :is(.monthly-controls__range strong, .monthly-period-status.is-partial, .monthly-detail-tag) { color: var(--color-teal); }
+:root[data-system-theme='galaxion'] .app-layout :is(.monthly-reminder-list li, .monthly-retention-banner) { border-color: color-mix(in srgb, var(--color-accent) 24%, var(--color-line)); background: color-mix(in srgb, var(--color-accent) 5%, var(--surface-card-nested)); }
+:root[data-system-theme='galaxion'] .app-layout .monthly-reminder-list :is(svg, strong) { color: var(--color-teal); }
+:root[data-system-theme='galaxion'] .app-layout :is(.monthly-table th, .monthly-table td) { border-color: var(--color-line); }
+:root[data-system-theme='galaxion'] .app-layout .monthly-table thead { background: var(--surface-table-head); color: var(--color-teal); }
+:root[data-system-theme='galaxion'] .app-layout .monthly-table tbody tr:nth-child(even) { background: color-mix(in srgb, var(--surface-card-nested) 58%, transparent); }
+:root[data-system-theme='galaxion'] .app-layout :is(.m25-day-item, .monthly-chart-legend, .monthly-chart-legend__net, .monthly-chart-legend__net small, .m25-stat-pair > span, .m25-day-item > small) { color: var(--color-muted); }
+:root[data-system-theme='galaxion'] .app-layout :is(.m25-bar--completed, .m25-bar--gained, .monthly-daily-chart__positive) { background: linear-gradient(180deg, #E9E9F1, #D3A477); }
+:root[data-system-theme='galaxion'] .app-layout :is(.m25-bar--missed, .m25-bar--drained, .monthly-daily-chart__negative) { background: linear-gradient(180deg, #D9909D, #D9909D); }
+:root[data-system-theme='galaxion'] .app-layout .monthly-daily-chart__net { background: linear-gradient(180deg, var(--monthly-xp-net-positive), #D3A477); }
+:root[data-system-theme='galaxion'] .app-layout .monthly-daily-chart__net.is-negative { background: linear-gradient(180deg, var(--monthly-xp-net-negative), #D9909D); }
+:root[data-system-theme='galaxion'] .app-layout .monthly-chart-legend i.is-protected,
+:root[data-system-theme='galaxion'] .app-layout .monthly-chart-legend i.is-emergency-pause { background: var(--monthly-protected-color); }
+:root[data-system-theme='galaxion'] .app-layout .monthly-status--protected { border-color: var(--monthly-protected-border); background: var(--monthly-protected-surface); color: var(--monthly-protected-color); }
+:root[data-system-theme='galaxion'] .app-layout .monthly-progress-track,
+:root[data-system-theme='galaxion'] .app-layout :is(.monthly-percent-chart__track, .monthly-bar-row__track) { background: var(--surface-progress-track); }
+:root[data-system-theme='galaxion'] .app-layout :is(.monthly-percent-chart__track i, .monthly-bar-row__track i) { background: var(--progress-fill); }
+:root[data-system-theme='galaxion'] .app-layout .monthly-chart-legend i.is-positive { background: linear-gradient(90deg, #E9E9F1, #D3A477); }
+:root[data-system-theme='galaxion'] .app-layout .monthly-chart-legend i.is-negative { background: linear-gradient(90deg, #D9909D, #D9909D); }
+:root[data-system-theme='galaxion'] .app-layout .monthly-chart-legend i.is-protected { background: var(--monthly-protected-color); }
+:root[data-system-theme='galaxion'] .app-layout :is(.monthly-chart-tooltip__xp-gained, .monthly-chart-tooltip__rank-bonus) { color: var(--color-teal); }
+:root[data-system-theme='galaxion'] .app-layout .monthly-chart-tooltip__xp-drained { color: var(--color-danger); }
+:root[data-system-theme='galaxion'] .app-layout .monthly-chart-tooltip__protected { color: var(--monthly-protected-color); }
+
+
