@@ -9,33 +9,6 @@ export const RECOVERY_STATUS = Object.freeze({
   THRESHOLD_CLEARED: 'threshold-cleared',
 });
 
-export function createRecoveryQuestState(demoTasks, activationDate = new Date().toISOString().slice(0, 10)) {
-  const task = demoTasks.find((item) => item.id === 'task-04') || demoTasks[0];
-  const actionTitle = task?.actionTitle || task?.accountabilityAction || '';
-  const actionDescription = task?.actionDescription || task?.accountabilityActionDescription || '';
-  const quests = [];
-
-  if (task && actionTitle) {
-    quests.push(makeQuest({
-      id: 'recovery-demo-missed-task-04',
-      occurrenceKey: 'demo:task-04',
-      task,
-      actionId: task.actionId || `${task.id}-accountability-action`,
-      actionTitle,
-      actionDescription,
-      activationDate,
-      remainingDays: 2,
-    }));
-  }
-
-  return {
-    gracePoints: INITIAL_GRACE_POINTS,
-    quests,
-    gracePointEvents: [],
-    activity: [],
-  };
-}
-
 function makeQuest({ id, occurrenceKey, task, actionId, actionTitle, actionDescription, activationDate, progressionRunId = null, remainingDays = RECOVERY_WINDOW_DAYS }) {
   const elapsedDays = RECOVERY_WINDOW_DAYS - remainingDays;
   return {

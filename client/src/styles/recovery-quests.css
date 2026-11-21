@@ -14,7 +14,7 @@
 .recovery-count-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 9px; margin-top: 20px; }
 .recovery-count-grid > div { display: grid; gap: 5px; min-width: 0; padding: 11px 12px; border: 1px solid rgb(119 159 197 / 11%); border-radius: 6px; background: linear-gradient(145deg, rgb(23 40 57 / 65%), rgb(11 20 31 / 44%)); }
 .recovery-count-grid strong { color: #dceeff; font: 500 1.35rem/1 var(--font-display); }
-.recovery-count-grid span { overflow-wrap: anywhere; color: #8298ad; font-size: .56rem; line-height: 1.35; }
+.recovery-count-grid span { overflow-wrap: anywhere; color: var(--color-muted); font-size: .78rem; line-height: 1.4; }
 .recovery-count-grid .is-active strong { color: #8bd8ed; }
 .recovery-count-grid .is-expired strong { color: #e2a18f; }
 .recovery-count-grid .is-cleared strong { color: #b8a6dd; }
@@ -43,6 +43,16 @@
 .grace-charge-event time { color: #63788e; font: .48rem var(--font-mono); }
 .grace-charge-summary__empty { margin: 0; color: #74899d; font-size: .54rem; }
 .grace-charge-summary--compact { min-width: 0; }
+.grace-charge-summary__balance h2 span { font-size: .72rem; }
+.grace-charge-summary__pips { gap: 9px; }
+.grace-charge-summary__pips span { width: 26px; height: 5px; }
+.grace-charge-summary__pips strong { color: #8fa9bf; font-size: .68rem; }
+.grace-charge-summary__explanation, .grace-charge-summary__warning { font-size: .74rem; }
+.grace-charge-summary__events h3 { font-size: .8rem; }
+.grace-charge-event__amount { font-size: .7rem; }
+.grace-charge-event strong { font-size: .72rem; }
+.grace-charge-event small, .grace-charge-event time { color: #8499ad; font-size: .68rem; }
+.grace-charge-summary__empty { font-size: .72rem; }
 .dashboard-side-stack { grid-template-rows: auto auto; }
 .dashboard-recovery-nearest, .dashboard-recovery-limit { margin: 8px 0 0; color: #7d97ad; font-size: .53rem; line-height: 1.4; }
 .dashboard-recovery-nearest strong { color: #84c5d6; font-weight: 550; }
@@ -60,15 +70,14 @@
 .recovery-quest-section { display: grid; gap: 13px; }
 .recovery-quest-section__heading h2 { margin: 0; color: #e3edf8; font: 500 1.12rem/1.3 var(--font-display); }
 .recovery-quest-section__heading p:last-child { margin: 6px 0 0; color: #8499ad; font-size: .62rem; line-height: 1.5; }
-.recovery-tabs { display: flex; gap: 5px; overflow-x: auto; padding: 3px 0 6px; border-bottom: 1px solid rgb(139 181 225 / 12%); scrollbar-width: none; }
-.recovery-tabs::-webkit-scrollbar { display: none; }
-.recovery-tabs button { display: inline-flex; min-height: 34px; flex: 0 0 auto; align-items: center; gap: 8px; padding: 0 10px; border: 1px solid transparent; border-radius: 5px; background: transparent; color: #879aaf; font: 500 .59rem var(--font-body); cursor: pointer; transition: color var(--motion-fast), border-color var(--motion-fast), background var(--motion-fast); }
-.recovery-tabs button:hover { color: #c4d9e9; background: rgb(33 56 77 / 30%); }
-.recovery-tabs button.is-selected { border-color: rgb(89 187 219 / 23%); background: rgb(26 76 94 / 28%); color: #b9e9f2; }
+.recovery-tabs { display: flex; gap: 5px; overflow-x: auto; padding: 3px 0 6px; border-bottom: 1px solid rgb(139 181 225 / 12%); }
+.recovery-tabs button { display: inline-flex; min-height: 38px; flex: 0 0 auto; align-items: center; gap: 8px; padding: 0 11px; border: 1px solid transparent; border-radius: 6px; background: transparent; color: var(--color-muted); font: 500 .78rem var(--font-body); cursor: pointer; transition: color var(--motion-fast), border-color var(--motion-fast), background var(--motion-fast); }
+.recovery-tabs button:hover { color: var(--color-text); background: var(--surface-hover); }
+.recovery-tabs button.is-selected { border-color: var(--border-interactive); background: var(--surface-active-tab); color: var(--color-text); }
 .recovery-tabs button span { display: grid; min-width: 17px; height: 17px; place-items: center; padding-inline: 4px; border-radius: 4px; background: rgb(118 153 180 / 12%); color: #a5b9c9; font: 500 .48rem var(--font-mono); }
 .recovery-quest-list { display: grid; gap: 12px; }
-.recovery-quest-card { min-width: 0; padding: 17px 18px 15px; border: 1px solid rgb(119 159 197 / 17%); border-radius: 8px; background: radial-gradient(ellipse at 8% 0%, rgb(47 105 133 / 9%), transparent 45%), linear-gradient(145deg, rgb(15 28 43 / 96%), rgb(8 15 25 / 98%)); box-shadow: inset 0 1px rgb(255 255 255 / 2%); animation: recovery-card-arrive .3s ease-out both; transition: border-color var(--motion-standard), background var(--motion-standard), transform var(--motion-standard), box-shadow var(--motion-standard); }
-.recovery-quest-card:hover { transform: translateY(-2px); border-color: rgb(100 190 221 / 28%); background-color: #0c1825; box-shadow: inset 0 1px rgb(255 255 255 / 3%), 0 12px 24px rgb(0 0 0 / 15%); }
+.recovery-quest-card { min-width: 0; padding: 17px 18px 15px; border: 1px solid var(--color-line); border-radius: 8px; background: var(--surface-card); box-shadow: inset 0 1px rgb(255 255 255 / 2%); animation: recovery-card-arrive .3s ease-out both; transition: border-color var(--motion-standard), background var(--motion-standard), transform var(--motion-standard), box-shadow var(--motion-standard); }
+.recovery-quest-card:hover { transform: translateY(-2px); border-color: var(--border-interactive); background: var(--surface-hover); box-shadow: inset 0 1px rgb(255 255 255 / 3%), 0 12px 24px rgb(0 0 0 / 15%); }
 .recovery-quest-card--completed { border-color: rgb(79 191 176 / 17%); }
 .recovery-quest-card--expired { border-color: rgb(226 142 112 / 20%); }
 .recovery-quest-card--threshold-cleared { border-color: rgb(160 140 205 / 22%); background: radial-gradient(ellipse at 9% 0%, rgb(106 83 149 / 10%), transparent 50%), linear-gradient(145deg, #121725, #090f19); }
@@ -93,13 +102,13 @@
 .recovery-window__meta { display: flex; align-items: center; justify-content: space-between; gap: 10px; color: #a6bdce; font-size: .56rem; }
 .recovery-window__meta strong { color: #79c5d7; font: 500 .53rem var(--font-mono); text-align: right; }
 .recovery-window__track { height: 5px; overflow: hidden; margin-top: 7px; border-radius: 20px; background: rgb(89 121 149 / 20%); }
-.recovery-window__track span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #348eb1, #59c3d5); box-shadow: 0 0 10px rgb(80 197 214 / 22%); transition: width .35s ease-out; }
+.recovery-window__track span { display: block; height: 100%; border-radius: inherit; background: var(--progress-fill); box-shadow: 0 0 10px color-mix(in srgb, var(--color-accent) 22%, transparent); transition: width .35s ease-out; }
 .recovery-window p { margin: 6px 0 0; color: #6f879b; font-size: .52rem; line-height: 1.45; }
 .recovery-quest-card__history { margin-top: 13px; color: #b1c0cf; font-size: .57rem; line-height: 1.55; }
 .recovery-quest-card__history p, .recovery-quest-card__outcome { margin: 0; color: #a599c8; font-size: .58rem; line-height: 1.55; }
 .recovery-quest-card__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 13px; padding-top: 11px; border-top: 1px solid rgb(139 181 225 / 9%); }
-.recovery-complete-button { display: inline-flex; min-height: 35px; align-items: center; justify-content: center; gap: 7px; padding: 0 11px; border: 1px solid rgb(90 191 213 / 31%); border-radius: 5px; background: linear-gradient(135deg, rgb(31 96 117 / 42%), rgb(14 42 58 / 62%)); color: #b8e8f1; font: 550 .59rem var(--font-body); cursor: pointer; transition: border-color var(--motion-fast), background var(--motion-fast), color var(--motion-fast), transform var(--motion-fast); }
-.recovery-complete-button:hover { transform: translateY(-1px); border-color: rgb(101 218 232 / 55%); background: linear-gradient(135deg, rgb(38 120 139 / 52%), rgb(17 54 69 / 68%)); color: #edfcff; }
+.recovery-complete-button { display: inline-flex; min-height: 38px; align-items: center; justify-content: center; gap: 7px; padding: 0 12px; border: 1px solid var(--border-interactive); border-radius: 6px; background: var(--button-save-bg); color: var(--button-save-text); font: 600 .78rem var(--font-body); cursor: pointer; transition: border-color var(--motion-fast), background var(--motion-fast), color var(--motion-fast), transform var(--motion-fast); }
+.recovery-complete-button:hover { transform: translateY(-1px); border-color: var(--accent-hover); background: var(--button-save-hover); color: var(--button-save-text); }
 .recovery-complete-button:active { transform: translateY(0); }
 .recovery-complete-button .app-icon { width: 14px; height: 14px; }
 .recovery-expire-button { min-height: 32px; padding: 0 8px; border: 1px solid transparent; border-radius: 4px; background: transparent; color: #7e90a2; font: 500 .53rem var(--font-body); cursor: pointer; transition: color var(--motion-fast), border-color var(--motion-fast); }
