@@ -6,6 +6,14 @@ export function getIstDateKey(date = new Date()) {
   return `${values.year}-${values.month}-${values.day}`;
 }
 
+export function formatTaskDateKey(dateKey) {
+  if (!dateKey) return 'the next eligible date';
+  const [year, month, day] = dateKey.split('-').map(Number);
+  return new Intl.DateTimeFormat('en-IN', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC',
+  }).format(new Date(Date.UTC(year, month - 1, day, 12)));
+}
+
 export function getTaskOccurrenceKey(taskId, cycleDay, dateKey) {
   return `${taskId}:${cycleDay}:${dateKey}`;
 }

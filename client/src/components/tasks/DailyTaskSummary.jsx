@@ -1,10 +1,10 @@
 import AppProgressBar from '../app/AppProgressBar.jsx';
 
-export default function DailyTaskSummary({ metrics, milestones }) {
+export default function DailyTaskSummary({ metrics }) {
   return (
     <section className="app-panel daily-task-summary" aria-labelledby="daily-task-summary-title">
       <div className="daily-task-summary__heading">
-        <div><p className="app-eyebrow">DAILY COMPLETION · EXAMPLE</p><h2 id="daily-task-summary-title">Today’s progress</h2></div>
+        <div><p className="app-eyebrow">DAILY TASKS · SERVER DATA</p><h2 id="daily-task-summary-title">Today’s schedule</h2></div>
         <strong className="daily-task-summary__percentage">{metrics.percentage}<span>%</span></strong>
       </div>
 
@@ -15,21 +15,10 @@ export default function DailyTaskSummary({ metrics, milestones }) {
       </div>
 
       <div className="daily-task-summary__progress">
-        <AppProgressBar value={metrics.percentage} label="Daily task completion" description={`${metrics.completed} of ${metrics.total} demonstration tasks completed. Each scheduled task has equal weight.`} />
-        <div className="daily-task-milestones" aria-label="XP bonus completion milestones">
-          {milestones.map((milestone) => {
-            const reached = metrics.percentage >= milestone;
-            return (
-              <span key={milestone} className={`daily-task-milestones__marker${reached ? ' is-reached' : ''}`} style={{ left: `${milestone}%` }}>
-                <i aria-hidden="true" />
-                <small>{milestone}%</small>
-              </span>
-            );
-          })}
-        </div>
+        <AppProgressBar value={metrics.percentage} label="Daily task completion" description={`${metrics.completed} of ${metrics.total} scheduled Tasks are recorded as completed.`} />
       </div>
 
-      <p className="daily-task-summary__note">Each task has equal weight. The markers are XP bonus milestones; reward amounts are not assigned. Submitted tasks remain under verification and are not shown as completed.</p>
+      <p className="daily-task-summary__note">Submit a scheduled Task to record it as completed. Proof is optional and is not AI-verified.</p>
     </section>
   );
 }

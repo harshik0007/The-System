@@ -21,11 +21,11 @@ export default function TaskCyclePanel({ context, allowance }) {
       </ol>
 
       <div className="task-change-allowance">
-        <div className="task-change-allowance__copy"><div><p className="app-eyebrow">WEEKLY TASK CHANGES</p><strong>{allowance.used} / {allowance.maximum} used</strong></div><span>{allowance.remaining} remaining</span></div>
+        <div className="task-change-allowance__copy"><div><p className="app-eyebrow">WEEKLY EXISTING TASK CHANGES</p><strong>{allowance.used} / {allowance.maximum} used</strong></div><span>{allowance.remaining} remaining</span></div>
         <div className="task-change-allowance__segments" aria-label={`${allowance.used} of ${allowance.maximum} weekly task changes used`}>
           {Array.from({ length: allowance.maximum }, (_, index) => <i className={index < allowance.used ? 'is-used' : ''} key={index} />)}
         </div>
-        <p><strong className="task-change-allowance__range">{allowance.rangeLabel}</strong> · Next reset Monday, {allowance.nextResetLabel}. Unused changes do not carry forward.</p>
+        <p><strong className="task-change-allowance__range">{allowance.rangeLabel}</strong> · Next reset Monday, {allowance.nextResetLabel}. New Tasks are free; existing Task edits, reschedules and deletions use this allowance. Unused changes do not carry forward.</p>
       </div>
     </section>
   );
