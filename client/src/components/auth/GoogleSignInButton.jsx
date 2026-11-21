@@ -1,6 +1,7 @@
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useLocation } from 'react-router-dom';
 import { safeAuthenticatedDestination } from '../../utils/authNavigation.js';
+import { apiUrl } from '../../services/apiClient.js';
 
 export default function GoogleSignInButton({ disabled = false }) {
   const { capabilities } = useAuth();
@@ -13,7 +14,7 @@ export default function GoogleSignInButton({ disabled = false }) {
   }
 
   const returnTo = safeAuthenticatedDestination(location.state?.from);
-  const googleUrl = `/api/v1/auth/google?returnTo=${encodeURIComponent(returnTo)}`;
+  const googleUrl = `${apiUrl('/auth/google')}?returnTo=${encodeURIComponent(returnTo)}`;
 
   return <div className={`auth-google${disabled ? ' is-disabled' : ''}`}>
     <a

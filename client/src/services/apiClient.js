@@ -1,4 +1,11 @@
-const API_ROOT = '/api/v1';
+const DEFAULT_PRODUCTION_API_ROOT = 'https://the-system-y39p.onrender.com/api/v1';
+const buildEnv = import.meta.env || {};
+export const API_ROOT = (buildEnv.VITE_API_BASE_URL
+  || (buildEnv.PROD ? DEFAULT_PRODUCTION_API_ROOT : '/api/v1')).replace(/\/+$/, '');
+
+export function apiUrl(path) {
+  return `${API_ROOT}${path.startsWith('/') ? path : `/${path}`}`;
+}
 let csrfToken = null;
 let csrfRequest = null;
 let csrfGeneration = 0;
@@ -44,7 +51,7 @@ async function getCsrfToken(signal) {
     }
 
     const request = { generation, promise: null };
-    request.promise = fetch(`${API_ROOT}/auth/csrf`, {
+    request.promise = fetch(apiUrl('/auth/csrf'), {
       method: 'GET',
       credentials: 'include',
       headers: { Accept: 'application/json' },
@@ -109,7 +116,7 @@ async function fetchWithCsrf(path, requestOptions, retryInvalidCsrf = true) {
   if (!isSafeMethod(method)) requestHeaders['X-CSRF-Token'] = await getCsrfToken(signal);
   let response;
   try {
-    response = await fetch(`${API_ROOT}${path}`, {
+    response = await fetch(apiUrl(path), {
       method,
       credentials: 'include',
       headers: requestHeaders,

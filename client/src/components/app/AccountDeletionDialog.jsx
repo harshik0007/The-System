@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import AppIcon from './AppIcon.jsx';
 import { SkeletonLine } from './PageLoadingSkeleton.jsx';
 import { authService } from '../../services/authService.js';
+import { apiUrl } from '../../services/apiClient.js';
 
 export default function AccountDeletionDialog({ open, authMethod, initialNotice = '', onClose, onConfirm }) {
   const dialogRef = useRef(null);
@@ -79,7 +80,7 @@ export default function AccountDeletionDialog({ open, authMethod, initialNotice 
           <div className="settings-delete-google" role="status">
             {reauth.loading ? <SkeletonLine width="long" label="Checking recent Google verification" /> : reauth.ready ? <span className="is-ready"><i />Google identity verified for this account.</span> : reauth.configured ? <>
               <span>A fresh Google sign-in is required immediately before deletion.</span>
-              <a className="settings-dialog__submit" href="/api/v1/auth/account/google-deletion/reauth">Verify with Google</a>
+              <a className="settings-dialog__submit" href={apiUrl('/auth/account/google-deletion/reauth')}>Verify with Google</a>
             </> : <span>Google re-authentication is not configured on this server.</span>}
           </div>
         ) : <p className="settings-reset-error" role="alert">The account sign-in method could not be verified.</p>}
