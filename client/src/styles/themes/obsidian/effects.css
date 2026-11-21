@@ -1,0 +1,10 @@
+:root[data-system-theme='obsidian']:not(.theme-transition-running) .app-navigation__link,
+:root[data-system-theme='obsidian']:not(.theme-transition-running) .app-panel,
+:root[data-system-theme='obsidian']:not(.theme-transition-running) .settings-theme-card,
+:root[data-system-theme='obsidian']:not(.theme-transition-running) .settings-toggle-list { transition: color 220ms ease, background-color 220ms ease, border-color 220ms ease, box-shadow 220ms ease; }
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-system-theme='obsidian'] .obsidian-click-impact { display: none; }
+}
+
+:root.reduce-nonessential-motion[data-system-theme='obsidian'] .obsidian-click-impact { display: none; }

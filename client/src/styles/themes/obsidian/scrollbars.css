@@ -1,0 +1,8 @@
+:root[data-system-theme='obsidian'] { scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track); scrollbar-width: thin; }
+:root[data-system-theme='obsidian'] * { scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track); scrollbar-width: thin; }
+:root[data-system-theme='obsidian'] *::-webkit-scrollbar { width: 11px; height: 11px; }
+:root[data-system-theme='obsidian'] *::-webkit-scrollbar-track { border: 1px solid #202228; border-radius: 10px; background: var(--scrollbar-track); }
+:root[data-system-theme='obsidian'] *::-webkit-scrollbar-thumb { min-height: 34px; border: 2px solid var(--scrollbar-track); border-radius: 10px; background: var(--scrollbar-thumb); }
+:root[data-system-theme='obsidian'] *::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-hover); }
+:root[data-system-theme='obsidian'] *::-webkit-scrollbar-thumb:active { background: var(--scrollbar-thumb-active); }
+:root[data-system-theme='obsidian'] *::-webkit-scrollbar-corner { background: var(--scrollbar-track); }

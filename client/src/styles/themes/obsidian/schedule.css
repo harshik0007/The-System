@@ -1,0 +1,17 @@
+:root[data-system-theme='obsidian'] .app-layout :is(.task-builder-progress, .task-builder-panel, .task-builder-form, .task-builder-schedule, .task-builder-task, .task-builder-existing-day, .task-action-picker, .task-action-editor, .task-review-day) { border-color: var(--color-line); background-color: var(--surface-card); color: var(--color-text); }
+:root[data-system-theme='obsidian'] .app-layout :is(.task-builder-progress__step > span, .task-builder-existing-day, .task-start-date input) { border-color: var(--color-line); background: var(--surface-card-nested); color: var(--color-text); }
+:root[data-system-theme='obsidian'] .task-builder-progress__step.is-current > span { border-color: var(--color-accent); background: var(--accent-soft); color: var(--color-amber); box-shadow: 0 0 12px rgb(217 107 39 / 18%); }
+:root[data-system-theme='obsidian'] .task-start-date input { background: var(--surface-input); }
+:root[data-system-theme='obsidian'] .task-builder-success { border-color: var(--color-line); background: linear-gradient(145deg, var(--surface-card-nested), var(--surface-card)); color: var(--color-text); }
+:root[data-system-theme='obsidian'] .task-cycle-option.is-selected { border-color: var(--color-accent); background: var(--surface-selected); color: var(--color-text); }
+:root[data-system-theme='obsidian'] .app-layout :is(.task-builder-progress, .task-builder-panel, .task-builder-form, .task-builder-schedule, .task-builder-task, .task-builder-existing-day, .task-review-day) { border-color: var(--color-line); background: var(--surface-card); color: var(--color-text); }
+:root[data-system-theme='obsidian'] .app-layout :is(.task-builder-existing-day, .task-builder-task-list--managed .task-builder-task, .task-builder-form, .task-action-picker, .task-action-editor) { background: var(--surface-card); }
+:root[data-system-theme='obsidian'] .app-layout :is(.task-builder-existing-day__title, .task-builder-task h3, .task-builder-task strong, .task-builder-form h2, .task-builder-form h3) { color: var(--color-text); }
+:root[data-system-theme='obsidian'] .app-layout :is(.task-builder-task p, .task-builder-task small, .task-builder-existing-day p, .task-builder-existing-day small, .task-builder-form > p, .task-builder-form label > small) { color: var(--color-muted); }
+:root[data-system-theme='obsidian'] .app-layout :is(.task-builder-existing-day__count, .task-builder-task__meta, .task-builder-task__accountability) { color: var(--color-amber); }
+:root[data-system-theme='obsidian'] .app-layout :is(.task-builder-task__actions, .task-action-menu__menu) { border-color: var(--color-line); background: var(--surface-dropdown); color: var(--color-text); }
+:root[data-system-theme='obsidian'] .app-layout .task-action-menu__menu :is(button, .app-icon) { color: var(--color-muted); }
+:root[data-system-theme='obsidian'] .app-layout .task-action-menu__menu button:hover:not(:disabled) { border-color: color-mix(in srgb, var(--color-accent) 32%, transparent); background: var(--accent-soft); color: var(--color-text); }
+:root[data-system-theme='obsidian'] .app-layout :is(.task-builder-progress__step, .task-builder-progress__step > span) { color: var(--color-muted); }
+:root[data-system-theme='obsidian'] .app-layout .task-builder-progress__step.is-current { color: var(--color-amber); }
+:root[data-system-theme='obsidian'] .app-layout .task-builder-progress__step.is-current > span { color: var(--color-amber); }

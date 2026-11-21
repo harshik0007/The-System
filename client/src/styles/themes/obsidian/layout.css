@@ -1,0 +1,12 @@
+:root[data-system-theme='obsidian'] .app-layout {
+  color: var(--color-text);
+  background: radial-gradient(ellipse at 82% 0%, rgb(217 107 39 / 7%), transparent 38rem), linear-gradient(180deg, var(--surface-app), var(--surface-page) 48rem);
+}
+:root[data-system-theme='obsidian'] .app-layout__main { background: transparent; }
+:root[data-system-theme='obsidian'] .app-layout__content { color: var(--color-text); }
+:root[data-system-theme='obsidian'] .app-panel,
+:root[data-system-theme='obsidian'] .settings-content,
+:root[data-system-theme='obsidian'] .settings-nav { border-color: var(--color-line); background: var(--surface-card); color: var(--color-text); }
+:root[data-system-theme='obsidian'] .app-panel { box-shadow: inset 0 1px rgb(255 255 255 / 2%); }
+:root[data-system-theme='obsidian'] .app-eyebrow { color: var(--color-accent); }
+:root[data-system-theme='obsidian'] .app-layout :is(.app-panel__description, .app-panel__footer, .app-profile-settings-error) { color: var(--color-muted); }
