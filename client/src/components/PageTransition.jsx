@@ -2,6 +2,8 @@ import { useLayoutEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { Routes, useLocation } from 'react-router-dom';
 import { useReducedMotion } from '../hooks/useReducedMotion.js';
+import { useAuth } from '../context/AuthContext.jsx';
+import { isAuthenticatedExperiencePath } from '../utils/routePaths.js';
 
 const FORM_REVEALS = [
   '.auth-form > .auth-field',
@@ -28,10 +30,9 @@ function revealAuthPage(timeline, page, isInitial) {
   const heading = page.querySelector('.auth-card h1');
   const support = page.querySelector('.auth-card__description');
   const controls = page.querySelectorAll(FORM_REVEALS.join(', '));
-  const otpDigits = page.querySelectorAll('.auth-otp__digit');
-  const verificationMark = page.querySelector('.auth-verification-mark, .auth-lock-mark');
+  const verificationMark = page.querySelector('.auth-lock-mark');
   const recoveryCards = page.querySelectorAll('.auth-recovery-options article');
-  const secondary = page.querySelectorAll('.auth-email-destination, .auth-resend-row, .auth-switch');
+  const secondary = page.querySelectorAll('.auth-switch');
   const buttons = page.querySelectorAll('.auth-form > .auth-primary-button');
 
   if (background) timeline.fromTo(background, { opacity: 0.72 }, { opacity: 1, duration: duration.background, ease: 'power1.out', clearProps: 'opacity' }, 0);
@@ -49,16 +50,14 @@ function revealAuthPage(timeline, page, isInitial) {
   if (support) timeline.from(support, { opacity: 0, y: 6, duration: 0.2, ease: 'power2.out', clearProps: 'opacity,transform' }, at.support);
   if (verificationMark) timeline.from(verificationMark, { opacity: 0, scale: 0.94, rotation: -3, duration: 0.28, ease: 'power2.out', clearProps: 'opacity,transform' }, at.icon);
   if (controls.length) timeline.from(controls, { opacity: 0, y: 6, duration: duration.field, stagger: duration.controlStagger, ease: 'power2.out', clearProps: 'opacity,transform' }, at.fields);
-  if (otpDigits.length) timeline.from(otpDigits, { opacity: 0, y: 7, duration: duration.field, stagger: duration.controlStagger, ease: 'power2.out', clearProps: 'opacity,transform' }, at.fields);
   if (recoveryCards.length) timeline.fromTo(recoveryCards,
     { opacity: 0, y: 8, borderColor: 'rgba(139, 181, 225, 0.08)' },
     { opacity: 1, y: 0, borderColor: 'rgba(110, 198, 232, 0.28)', duration: duration.recovery, stagger: isInitial ? 0.045 : 0.04, ease: 'power2.out', clearProps: 'opacity,transform,borderColor' },
     at.recovery,
   );
   const controlsEnd = controls.length ? at.fields + duration.field + (controls.length - 1) * duration.controlStagger : at.fields;
-  const otpEnd = otpDigits.length ? at.fields + duration.field + (otpDigits.length - 1) * duration.controlStagger : at.fields;
   const recoveryEnd = recoveryCards.length ? at.recovery + duration.recovery + (recoveryCards.length - 1) * (isInitial ? 0.045 : 0.04) : at.fields;
-  const buttonStart = Math.max(controlsEnd, otpEnd, recoveryEnd) + 0.018;
+  const buttonStart = Math.max(controlsEnd, recoveryEnd) + 0.018;
   if (buttons.length) timeline.from(buttons, { opacity: 0.4, y: 5, duration: isInitial ? 0.15 : 0.12, stagger: 0.025, ease: 'power2.out', clearProps: 'opacity,transform' }, buttonStart);
   if (secondary.length) timeline.from(secondary, { opacity: 0, y: 5, duration: 0.12, stagger: 0.025, ease: 'power2.out', clearProps: 'opacity,transform' }, at.links);
 }
@@ -83,6 +82,8 @@ function revealPublicPage(timeline, page, isInitial) {
 
 export default function PageTransition({ children }) {
   const location = useLocation();
+  const { member } = useAuth();
+  const isPersistentMemberRoute = Boolean(member && isAuthenticatedExperiencePath(location.pathname));
   const reducedMotion = useReducedMotion();
   const [activeLocation, setActiveLocation] = useState(location);
   const [outgoingLocation, setOutgoingLocation] = useState(null);
@@ -99,9 +100,16 @@ export default function PageTransition({ children }) {
     initialEntranceRef.current = false;
     if (window.scrollY !== 0) window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     pendingFocusKeyRef.current = location.key;
+    if (member && isAuthenticatedExperiencePath(location.pathname)) {
+      // Keep the authenticated shell mounted across app and information routes.
+      // Only the nested page changes; the sidebar, topbar and server providers stay put.
+      setOutgoingLocation(null);
+      setActiveLocation(location);
+      return;
+    }
     setOutgoingLocation(activeLocation);
     setActiveLocation(location);
-  }, [location, activeLocation]);
+  }, [location, activeLocation, member]);
 
   useLayoutEffect(() => {
     if (pendingFocusKeyRef.current !== activeLocation.key) return;
@@ -131,16 +139,33 @@ export default function PageTransition({ children }) {
     const runId = ++animationRunRef.current;
     const outgoingKey = outgoingLocation?.key;
     const isCurrentRun = () => animationRunRef.current === runId;
+    let observer;
+    let context;
     const finishExit = () => {
       if (outgoingKey && isCurrentRun()) {
         setOutgoingLocation((current) => (current?.key === outgoingKey ? null : current));
       }
     };
 
-    const hasPageContent = () => Boolean(entering.querySelector('.site-shell, .auth-layout, .public-layout, .app-layout'));
-    let observer;
-    let context;
+    if (member && isAuthenticatedExperiencePath(activeLocation.pathname)) {
+      const page = entering.querySelector('.app-page-container > *');
+      if (!page || reducedMotion) {
+        finishExit();
+        return undefined;
+      }
+      context = gsap.context(() => {
+        gsap.fromTo(page,
+          { autoAlpha: 0.78, y: 7 },
+          { autoAlpha: 1, y: 0, duration: 0.24, ease: 'power2.out', clearProps: 'opacity,visibility,transform', onComplete: finishExit },
+        );
+      }, stageRef);
+      return () => {
+        if (isCurrentRun()) animationRunRef.current += 1;
+        context?.revert();
+      };
+    }
 
+    const hasPageContent = () => Boolean(entering.querySelector('.site-shell, .auth-layout, .public-layout, .app-layout'));
     const runEntrance = () => {
       if (!isCurrentRun()) return;
       if (reducedMotion) {
@@ -192,7 +217,17 @@ export default function PageTransition({ children }) {
       if (isCurrentRun()) animationRunRef.current += 1;
       context?.revert();
     };
-  }, [activeLocation.key, reducedMotion]);
+  }, [activeLocation.key, reducedMotion, member]);
+
+  if (isPersistentMemberRoute) {
+    return (
+      <div className="page-transition__stage page-transition__stage--persistent" ref={stageRef}>
+        <div className="page-transition__view page-transition__view--enter" ref={activeViewRef}>
+          <Routes location={location}>{children}</Routes>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="page-transition__stage" ref={stageRef}>
