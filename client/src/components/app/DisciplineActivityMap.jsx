@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { getActivityQualificationLabel, getRollingActivityDates, getVisibleActivityRecord } from '../../utils/disciplineActivity.js';
+import { getActivityQualificationLabel, getRollingActivityDates, getVisibleActivityRecord, shouldShowHistoricalResetWarning } from '../../utils/disciplineActivity.js';
 import { getIstDateKey } from '../../utils/taskScheduleBuilder.js';
 import AppIcon from './AppIcon.jsx';
 
@@ -66,10 +66,11 @@ function placeTooltip(anchor, tooltip) {
   };
 }
 
-function ActivityTooltip({ dateKey, record, todayKey, position, tooltipRef }) {
+function ActivityTooltip({ dateKey, record, todayKey, position, tooltipRef, qualificationLabel, theme }) {
   if (!record) return null;
-  const qualification = getActivityQualificationLabel(record, dateKey, todayKey);
+  const qualification = qualificationLabel || getActivityQualificationLabel(record, dateKey, todayKey);
   const hasReset = record.hasDailyResetRecord !== false;
+  const xpDetailsKnown = typeof record.xpDrained === 'number' || typeof record.dailyRankXpAwarded === 'number';
   const xpChanges = [];
   if (record.xpDrained > 0) xpChanges.push(`−${record.xpDrained.toFixed(2)} XP drained`);
   if (record.dailyRankXpAwarded > 0) xpChanges.push(`+${record.dailyRankXpAwarded} Rank XP`);
@@ -81,6 +82,7 @@ function ActivityTooltip({ dateKey, record, todayKey, position, tooltipRef }) {
       className="discipline-activity-tooltip"
       role="tooltip"
       data-status={qualification.toLowerCase().replaceAll(' ', '-')}
+      data-system-theme={theme || undefined}
       style={position ? { left: `${position.left}px`, top: `${position.top}px` } : undefined}
       aria-hidden={!position}
     >
@@ -96,14 +98,14 @@ function ActivityTooltip({ dateKey, record, todayKey, position, tooltipRef }) {
       <div className="discipline-activity-tooltip__rows">
         <p><span>Discipline</span><strong>{qualification}</strong></p>
         <p><span>Emergency Pause</span><strong>{record.emergencyPause ? 'Protected' : 'Not active'}</strong></p>
-        <p><span>XP</span><strong>{xpChanges.length ? xpChanges.join(' · ') : hasReset ? 'No XP change recorded' : 'Reset processing pending'}</strong></p>
+        <p><span>XP</span><strong>{xpChanges.length ? xpChanges.join(' · ') : !hasReset ? 'Reset processing pending' : xpDetailsKnown ? 'No XP change recorded' : 'XP details unavailable'}</strong></p>
       </div>
     </aside>,
     document.body,
   );
 }
 
-export default function DisciplineActivityMap({ disciplineState, schedule, emergencyPauseState, compact = false }) {
+export default function DisciplineActivityMap({ disciplineState, schedule, emergencyPauseState, compact = false, serverRecords = null, serverToday = null, memberSince: memberSinceProp, theme = null }) {
   const todayKey = getIstDateKey();
   const dateKeys = useMemo(() => getRollingActivityDates(todayKey, 365), [todayKey]);
   const groupedMonths = useMemo(() => {
@@ -124,10 +126,57 @@ export default function DisciplineActivityMap({ disciplineState, schedule, emerg
   const [tooltipPosition, setTooltipPosition] = useState(null);
   const tooltipRef = useRef(null);
   const tooltipAnchorRef = useRef(null);
-  const selectedRecord = getVisibleActivityRecord({ dateKey: selectedDate, disciplineState, schedule, todayKey, emergencyPauseDates: disciplineState.emergencyPauseDates || [], emergencyPauseState });
-  const tooltipRecord = tooltipDate ? getVisibleActivityRecord({ dateKey: tooltipDate, disciplineState, schedule, todayKey, emergencyPauseDates: disciplineState.emergencyPauseDates || [], emergencyPauseState }) : null;
-  const selectedQualification = getActivityQualificationLabel(selectedRecord, selectedDate, todayKey);
-  const activityDays = Object.values(disciplineState.dailyRecords).filter((record) => record.completedTaskCount > 0).length;
+  const serverMode = Array.isArray(serverRecords);
+  const memberSince = memberSinceProp || disciplineState.memberSince || todayKey;
+  const serverRecordByDate = useMemo(() => new Map((serverRecords || []).map((record) => [record.date, record])), [serverRecords]);
+  const getRecord = (dateKey) => {
+    if (!serverMode) return getVisibleActivityRecord({ dateKey, disciplineState, schedule, todayKey, emergencyPauseDates: disciplineState.emergencyPauseDates || [], emergencyPauseState });
+    if (dateKey < memberSince || dateKey > todayKey) return null;
+    const row = serverRecordByDate.get(dateKey);
+    if (row) return {
+      ...row,
+      scheduledTaskCount: row.scheduledTaskCount ?? row.scheduledOriginalTaskCount ?? 0,
+      completedTaskCount: row.completedTaskCount ?? row.completedOriginalTaskCount ?? 0,
+      completionPercent: row.completionPercent ?? 0,
+      emergencyPause: Boolean(row.emergencyPause ?? row.protectedByEmergencyPause),
+      hasDailyResetRecord: true,
+      xpDrained: row.xpDrained ?? null,
+      dailyRankXpAwarded: row.dailyRankXpAwarded ?? null,
+      dpRewardAwarded: row.dpRewardAwarded ?? null,
+    };
+    if (dateKey === todayKey && serverToday) return {
+      date: dateKey,
+      scheduledTaskCount: serverToday.scheduledTaskCount ?? serverToday.scheduledOriginalTaskCount ?? 0,
+      completedTaskCount: serverToday.completedTaskCount ?? serverToday.completedOriginalTaskCount ?? 0,
+      completionPercent: serverToday.scheduledTaskCount
+        ? Math.round((serverToday.completedTaskCount / serverToday.scheduledTaskCount) * 100)
+        : serverToday.scheduledOriginalTaskCount
+          ? Math.round((serverToday.completedOriginalTaskCount / serverToday.scheduledOriginalTaskCount) * 100)
+          : 0,
+      qualificationStatus: serverToday.qualificationStatus || serverToday.status || 'in-progress',
+      emergencyPause: Boolean(serverToday.emergencyPause ?? serverToday.emergencyPauseProtected),
+      qualifies: serverToday.qualificationStatus === 'qualified' || serverToday.status === 'qualified',
+      hasDailyResetRecord: Boolean(serverToday.finalizedAt),
+      xpDrained: null,
+      dailyRankXpAwarded: null,
+      dpRewardAwarded: null,
+    };
+    return { date: dateKey, scheduledTaskCount: 0, completedTaskCount: 0, completionPercent: 0, qualificationStatus: 'unrecorded', emergencyPause: false, hasDailyResetRecord: false, xpDrained: null, dailyRankXpAwarded: null, dpRewardAwarded: null };
+  };
+  const qualificationFor = (record, dateKey) => {
+    if (dateKey < memberSince) return 'Before Member Since';
+    if (record?.emergencyPause || record?.qualificationStatus === 'emergency-pause-protected') return 'Protected';
+    if (record?.qualificationStatus === 'qualified' || record?.qualifies) return 'Qualified';
+    if (record?.qualificationStatus === 'not-qualified') return 'Not qualified';
+    if (dateKey === todayKey && (record?.qualificationStatus === 'in-progress' || record?.qualificationStatus === 'emergency-pause-protected')) return record?.emergencyPause ? 'Protected' : 'In Progress';
+    return serverMode ? 'No finalized record' : getActivityQualificationLabel(record, dateKey, todayKey);
+  };
+  const selectedRecord = getRecord(selectedDate);
+  const tooltipRecord = tooltipDate ? getRecord(tooltipDate) : null;
+  const selectedQualification = qualificationFor(selectedRecord, selectedDate);
+  const activityDays = serverMode
+    ? (serverRecords || []).filter((record) => (record.completedTaskCount ?? record.completedOriginalTaskCount ?? 0) > 0).length
+    : Object.values(disciplineState.dailyRecords).filter((record) => record.completedTaskCount > 0).length;
 
   const updateTooltipPosition = () => {
     const next = placeTooltip(tooltipAnchorRef.current, tooltipRef.current);
@@ -185,22 +234,22 @@ export default function DisciplineActivityMap({ disciplineState, schedule, emerg
             <div className="discipline-activity__cells">
               {Array.from({ length: weekdayOffset(month.dates[0]) }, (_, index) => <span className="discipline-activity__empty-cell" key={`offset-${index}`} aria-hidden="true" />)}
               {month.dates.map((dateKey) => {
-                const record = getVisibleActivityRecord({ dateKey, disciplineState, schedule, todayKey, emergencyPauseDates: disciplineState.emergencyPauseDates || [] });
+                const record = getRecord(dateKey);
                 const intensity = getIntensity(record);
                 const isSelected = selectedDate === dateKey;
-                const qualification = record ? getActivityQualificationLabel(record, dateKey, todayKey) : 'Before Member Since';
+                const qualification = qualificationFor(record, dateKey);
                 const accessibleDescription = record
                   ? `${formatLongDate(dateKey)}: ${record.completedTaskCount} of ${record.scheduledTaskCount} scheduled tasks completed, ${record.completionPercent} percent. ${qualification}. ${record.emergencyPause ? 'Emergency Pause protected.' : 'Emergency Pause not active.'}`
                   : `${formatLongDate(dateKey)}: before Member Since. No activity record is available.`;
                 return <button
                   key={dateKey}
-                  className={`discipline-activity__cell${isSelected ? ' is-selected' : ''}${record ? '' : ' is-before-member'}`}
+                  className={`discipline-activity__cell${isSelected ? ' is-selected' : ''}${dateKey < memberSince ? ' is-before-member' : ''}`}
                   type="button"
                   data-level={intensity}
                   aria-label={accessibleDescription}
                   aria-describedby={tooltipDate === dateKey ? 'discipline-activity-tooltip' : undefined}
                   aria-pressed={isSelected}
-                  disabled={!record}
+                  disabled={dateKey < memberSince}
                   onClick={() => setSelectedDate(dateKey)}
                   onPointerEnter={(event) => { if (event.pointerType !== 'touch') showTooltip(dateKey, event.currentTarget); }}
                   onPointerLeave={() => hideTooltip(dateKey)}
@@ -230,12 +279,13 @@ export default function DisciplineActivityMap({ disciplineState, schedule, emerg
             {selectedRecord.xpDrained > 0 && <span>−{selectedRecord.xpDrained.toFixed(2)} XP drained</span>}
             {selectedRecord.dailyRankXpAwarded > 0 && <span>+{selectedRecord.dailyRankXpAwarded} Rank XP</span>}
             {selectedRecord.dpRewardAwarded > 0 && <span>+{selectedRecord.dpRewardAwarded.toFixed(2)} DP</span>}
-            {selectedRecord.hasDailyResetRecord === false && <span>Daily reset processing pending</span>}
-            {selectedRecord.hasDailyResetRecord !== false && selectedRecord.xpDrained === 0 && selectedRecord.dailyRankXpAwarded === 0 && <span>No XP change recorded</span>}
+            {shouldShowHistoricalResetWarning(selectedRecord, selectedDate, todayKey) && <span>No finalized Discipline record</span>}
+            {selectedRecord.hasDailyResetRecord !== false && typeof selectedRecord.xpDrained === 'number' && selectedRecord.xpDrained === 0 && typeof selectedRecord.dailyRankXpAwarded === 'number' && selectedRecord.dailyRankXpAwarded === 0 && <span>No XP change recorded</span>}
+            {selectedRecord.hasDailyResetRecord !== false && typeof selectedRecord.xpDrained !== 'number' && typeof selectedRecord.dailyRankXpAwarded !== 'number' && <span>XP details unavailable</span>}
           </div>
         </> : <p className="discipline-activity__before-member">This day is before the permanent Member Since date.</p>}
       </aside>
     </section>
-    {tooltipDate && tooltipRecord && <ActivityTooltip dateKey={tooltipDate} record={tooltipRecord} todayKey={todayKey} position={tooltipPosition} tooltipRef={tooltipRef} />}
+    {tooltipDate && tooltipRecord && <ActivityTooltip dateKey={tooltipDate} record={tooltipRecord} todayKey={todayKey} position={tooltipPosition} tooltipRef={tooltipRef} qualificationLabel={qualificationFor(tooltipRecord, tooltipDate)} theme={theme} />}
   </>;
 }

@@ -11,6 +11,10 @@ export function getRollingActivityDates(todayKey = getIstDateKey(), length = 365
   return Array.from({ length }, (_, index) => addIstCalendarDays(todayKey, index - length + 1));
 }
 
+export function shouldShowHistoricalResetWarning(record, selectedDate, todayKey) {
+  return record?.hasDailyResetRecord === false && selectedDate !== todayKey;
+}
+
 function getTaskDefinitionsForDate(schedule, dateKey) {
   const history = schedule.taskHistory || [];
   const currentTasks = schedule?.tasks || [];
@@ -32,7 +36,7 @@ export function getScheduleDaySnapshot(schedule, dateKey, { todayKey = getIstDat
     .map((task) => {
       const occurrenceKey = getTaskOccurrenceKey(task.id, cycleDay, dateKey);
       const occurrence = schedule.occurrences?.[occurrenceKey];
-      const status = occurrence?.status || (dateKey === todayKey && schedule.source === 'demo' ? task.status : 'scheduled');
+      const status = occurrence?.status || 'scheduled';
       return { id: task.id, status, occurrenceKey };
     });
   return {

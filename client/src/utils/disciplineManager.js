@@ -101,7 +101,7 @@ export function normalizeHighestRankAchieved(state) {
   return { ...state, highestRankAchieved };
 }
 
-export function createDisciplineState({ now = new Date(), rankSlug = 'continuum', totalXp = 1240, dpBalance = DISCIPLINE_POINTS_START } = {}) {
+export function createDisciplineState({ now = new Date(), rankSlug = 'origin', totalXp = 0, dpBalance = 0 } = {}) {
   const rank = getRankDisciplineConfig(rankSlug);
   const dateKey = getIstDateKey(now);
   const cycle = { rankSlug, requiredDays: rank.cycleDays, rewardDp: rank.recurringDp, progress: 0, completedCycles: 0 };
@@ -113,8 +113,7 @@ export function createDisciplineState({ now = new Date(), rankSlug = 'continuum'
     dailyRecords: {},
     currentRankSlug: rankSlug,
     highestRankAchieved: rankAchievementRecord(RANK_DISCIPLINE_CONFIG[rankSlug]),
-    personalBestCaptureEnabled: true,
-    progressionRunId: `run-${dateKey}-demo`,
+    progressionRunId: null,
     claimedRankEntryIds: [],
     currentStreak: 0,
     longestStreak: 0,
