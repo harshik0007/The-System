@@ -1,47 +1,70 @@
 # THE SYSTEM
 
-THE SYSTEM is a MERN application foundation with a Vite + React client and an Express API. The landing page runs without a MongoDB connection; MongoDB configuration is prepared for future modules.
+THE SYSTEM is a MERN application: a React/Vite browser client, an Express API, and MongoDB persistence through Mongoose. Public routes and API liveness can load without MongoDB; authenticated accounts and application data require the database to be ready.
 
-## Requirements
+## Requirements and install
 
-- Node.js 20 or later (Node.js 22 recommended)
+- Node.js 20 or newer (Node.js 22 is recommended)
 - npm
-- MongoDB is optional for the current landing page and health check
+- A MongoDB replica set for transactional account and progression workflows
 
-## Install
-
-From the repository root, install dependencies for the root scripts, client, and server:
+From the repository root:
 
 ```bash
 npm install
 ```
 
-Copy `server/.env.example` to `server/.env` if you want to configure the API port or a future MongoDB connection. No environment file is required for local development.
+Copy `server/.env.example` to `server/.env` and configure stable, independent `AUTH_SESSION_SECRET` and `RECOVERY_CODE_HMAC_SECRET` values before relying on sessions and recovery codes across server restarts. Keep `.env` files private. Google OAuth is optional and configured only in the server environment.
 
-## Run both applications
+## Run locally
+
+Open two terminals from the repository root:
 
 ```bash
-npm run dev
+# Terminal 1
+npm run dev:server
+
+# Terminal 2
+npm run dev:client
 ```
 
-The Vite client is served at `http://localhost:5173` and the API at `http://localhost:5000`. Vite proxies `/api` requests to the Express server.
+The backend binds to `127.0.0.1:5001`. Vite binds to port `5175` with strict port binding and proxies `/api` to `http://127.0.0.1:5001`. The Google OAuth callback remains `http://localhost:5175/api/v1/auth/google/callback`. Each command starts only its own workspace; stop each service with Ctrl+C in its terminal.
 
-Check the API with `http://localhost:5000/api/health` (or `http://localhost:5173/api/health` through the Vite proxy).
-
-## Other commands
+Useful commands:
 
 ```bash
 npm run dev:client
 npm run dev:server
 npm run build
-npm start
+npm test --workspace client
+npm test --workspace server
+npm run test:browser:smoke
 ```
 
-## Project notes
+The frontend-only command can serve public pages without an API. The backend remains independently startable and exposes `/api/health` for liveness and `/api/ready` for database readiness.
 
-- React UI lives under `client/src`; API routes and server setup live under `server/src`.
-- GSAP and ScrollTrigger are installed as client dependencies. Animations respect the user's reduced-motion preference.
-- `server/src/config/database.js` exports an optional Mongoose connection helper. The server does not call it until a database-backed module is introduced.
-- `design-reference/` is reserved for design inputs. It was not present in the starting workspace, so no reference files or existing rank animation prototype were available to inspect or modify.
+## Where code belongs
 
-See [AGENTS.md](./AGENTS.md) for conventions for future contributors and Codex sessions.
+- `client/src/pages`: route-level composition.
+- `client/src/components`: reusable UI and application shell.
+- `client/src/context`: cross-route account, task, notification and preference state.
+- `client/src/services`: HTTP clients and API operations.
+- `client/src/styles`, `data`, `hooks`, `utils`: shared styling, content/configuration, reusable behavior and pure helpers.
+- `server/src/routes`: HTTP surface and middleware attachment.
+- `server/src/controllers`: request/response translation.
+- `server/src/services`: application and business workflows.
+- `server/src/repositories`: persistence query boundaries where separated.
+- `server/src/models`: Mongoose schemas, constraints and indexes.
+- `server/src/config`, `middleware`, `validators`, `jobs`, `events`, `utils`: infrastructure and shared server behavior.
+
+## Authentication and data
+
+Passport Local handles username/email password sign-in. Passport Google OAuth 2.0 is optional and uses a server-side callback strategy. Mongo-backed express sessions store only the serialized account ID; CSRF protection applies to unsafe API requests. Passwords use Argon2id, and local account recovery uses one-time codes stored as keyed hashes.
+
+Application records are scoped to account and, where appropriate, the active Progression Run. The current API does not seed fictional leaderboard users into production runtime. See the model map for ownership and retention details.
+
+## Existing visual behavior
+
+The client keeps its current THE SYSTEM visual identity, rank artwork, VOID SHARD cursor, click ripple, page transitions, GSAP and ScrollTrigger effects. Shared reduced-motion preferences and the operating system preference control nonessential animation.
+
+`design-reference/` is read-only source material. Do not change it unless the user explicitly asks.
