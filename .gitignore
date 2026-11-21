@@ -2,7 +2,7 @@ node_modules/
 **/node_modules/
 client/dist/
 coverage/
-artifacts/stability-audit/
+artifacts/
 .env
 .env.*
 !.env.example
