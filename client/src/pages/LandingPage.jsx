@@ -1,7 +1,6 @@
 import { useLayoutEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import Footer from '../components/Footer.jsx';
 import Navbar from '../components/Navbar.jsx';
 import { useReducedMotion } from '../hooks/useReducedMotion.js';
 import FeaturesSection from '../sections/FeaturesSection.jsx';
@@ -76,13 +75,18 @@ export default function LandingPage() {
           scrollTrigger: { trigger: '.ranks-grid', start: 'top 82%', toggleActions: 'play none none reverse' },
         },
       );
-      gsap.fromTo('.ranks-grid .emblem-stroke:not(.emblem-core)',
-        { strokeDasharray: 240, strokeDashoffset: 240 },
-        {
-          strokeDashoffset: 0, stagger: { each: 0.035, from: 'start' }, duration: 0.9, ease: 'power2.out',
-          scrollTrigger: { trigger: '.ranks-grid', start: 'top 78%', toggleActions: 'play none none reverse' },
-        },
+      const emblemPaths = pageRef.current?.querySelectorAll(
+        '.ranks-grid .emblem-art .emblem-metal, .ranks-grid .emblem-art .emblem-inlay, .ranks-grid .emblem-art .emblem-engrave',
       );
+      if (emblemPaths?.length) {
+        gsap.fromTo(emblemPaths,
+          { strokeDasharray: 240, strokeDashoffset: 240 },
+          {
+            strokeDashoffset: 0, stagger: { each: 0.035, from: 'start' }, duration: 0.9, ease: 'power2.out',
+            scrollTrigger: { trigger: pageRef.current.querySelector('.ranks-grid'), start: 'top 78%', toggleActions: 'play none none reverse' },
+          },
+        );
+      }
       gsap.from('.final-cta .shadow-shape', {
         yPercent: 35, stagger: 0.1, ease: 'none',
         scrollTrigger: { trigger: '.final-cta', start: 'top bottom', end: 'bottom bottom', scrub: 1.4 },
@@ -103,7 +107,6 @@ export default function LandingPage() {
         <ProgressionSection />
         <FinalCTASection />
       </main>
-      <Footer />
     </div>
   );
 }

@@ -6,37 +6,37 @@ import FAQAccordion from '../../components/public/FAQAccordion.jsx';
 import ContactForm from '../../components/public/ContactForm.jsx';
 import RankCard from '../../components/ranks/RankCard.jsx';
 import RankProgression from '../../components/ranks/RankProgression.jsx';
-import { ranks, rankDemoDisclosure } from '../../data/ranks.js';
+import { ranks } from '../../data/ranks.js';
 import { ruleSections, taskCycleTable, xpMilestoneTable } from '../../data/productRules.js';
 
 const featureItems = [
-  ['Daily Task schedule', 'Follow 7 scheduled Tasks each day in a repeating cycle of 1–7 days.'],
-  ['Task change limit', 'Make up to 3 edits, replacements or rescheduling changes per calendar week, Monday through Sunday.'],
+  ['Daily Task schedule', 'Schedule at least 7 original Tasks for each cycle day in a repeating cycle of 1–7 days.'],
+  ['Task change limit', 'New Tasks are free and start on the next IST date. Up to 3 existing Tasks may be edited, rescheduled or deleted each Monday–Sunday week in IST.'],
   ['Accountability Actions', 'Choose a distinct Accountability Action for every Task.'],
   ['Recovery Quests', 'A missed Task activates its own associated Accountability Action as a Recovery Quest.'],
   ['Recovery Window', 'An unfinished Recovery Quest carries forward during its 3-day Recovery Window.'],
   ['Grace Points', 'Start with 3. Individual expiry and the 6th-active-quest threshold can deduct a point.'],
   ['Progression Reset', 'Exhausted Grace Points trigger a Progression Reset that preserves the account.'],
-  ['XP milestones', 'Tasks award base XP; completion bonuses occur at 25%, 50%, 75% and 100%.'],
+  ['Task XP calculation', 'A 300 XP daily base pool is divided across original scheduled Tasks, then Rank multiplier and daily Rank XP cap apply. Awards are not active yet.'],
   ['Seven Ranks', 'Seven named Ranks follow a fixed lowest-to-highest order, each with a unique badge and rank-specific XP benefit.'],
   ['Discipline Points', 'Qualifying scheduled-task streaks award Rank-based recurring rewards; the balance is capped at 4.00.'],
   ['Emergency Pause', 'Use up to 2 activations per calendar month, each lasting up to 7 consecutive days.'],
   ['Monthly Analysis', 'Compare any available months in your current progression run.'],
   ['Leaderboard', 'Competitive ordering is based on XP, missed Tasks and failed quests.'],
-  ['Proof verification', 'Use evidence appropriate to a Task; AI may assist, while backend validation makes the final decision.'],
-  ['Verification receipts', 'After confirmed deletion from THE SYSTEM storage, retain a receipt without original proof.'],
+  ['Task completion', 'Submitting records the current Task as Completed immediately. Proof fields are optional.'],
+  ['Proof verification', 'AI verification and reviewer approval are not active. Selected files are not uploaded.'],
 ].map(([title, body], i) => ({ title, body, label: String(i + 1).padStart(2, '0'), icon: ['◇', '↗', '⌑', '⌁'][i % 4] }));
 
 const steps = [
   ['Understand the System', 'Review the Task schedule, Accountability Actions, Recovery Windows and Grace Point rules before you begin.'],
   ['Create an account', 'Account creation belongs to the separate authentication milestone; this guide does not activate an account.'],
   ['Choose your cycle', 'Set a repeating Task cycle from 1 to 7 days. A 7-day cycle follows Monday through Sunday; someone joining Wednesday enters Day 3.'],
-  ['Schedule 7 Tasks', 'Prepare your daily schedule. All 7 Tasks have equal weight in daily completion percentage.'],
+  ['Schedule your Tasks', 'Prepare at least seven original Tasks for each cycle day. All original Tasks scheduled that day have equal weight in completion percentage.'],
   ['Choose Accountability Actions', 'Assign a user-selected Accountability Action to every Task.'],
-  ['Review weekly changes', 'You can make up to 3 Task changes in a Monday–Sunday calendar week. Edits, replacements and rescheduling all count.'],
+  ['Review weekly changes', 'New Tasks are free. Editing, rescheduling or deleting an existing Task uses one of the three weekly changes per Task.'],
   ['Complete Tasks by the deadline', 'The daily deadline is midnight India Standard Time. Unfinished Tasks do not carry forward as ordinary Tasks.'],
   ['Complete Recovery Quests', 'A missed Task activates its own action with a 3-day Recovery Window. An unfinished quest carries forward during that window.'],
-  ['Earn XP', 'Task completion awards base XP, with additional XP tied to overall completion milestones. Numerical values are not specified.'],
+  ['Track XP', 'The approved daily base pool is 300 XP across original scheduled Tasks, followed by the Rank multiplier and daily Rank XP cap. XP awards are not active yet.'],
   ['Review progression', 'Track Levels, seven Ranks, Monthly Analysis and the Leaderboard. A Progression Reset preserves your account.'],
 ].map(([title, body], i) => ({ title, body, label: String(i + 1).padStart(2, '0'), icon: '↗' }));
 
@@ -55,7 +55,7 @@ function HowContent() {
   const lifecycle = [
     ['01', 'Follow your Task schedule', 'Complete 7 Tasks a day in a repeating 1–7-day cycle. The deadline is midnight IST.'],
     ['02', 'Choose Accountability Actions', 'Every Task has its own user-selected Accountability Action.'],
-    ['03', 'Make weekly changes carefully', 'Up to 3 Task changes each Monday–Sunday week; every edit, replacement or rescheduling counts.'],
+    ['03', 'Make weekly changes carefully', 'New Tasks are free. Up to 3 existing Tasks may be edited, rescheduled or deleted each Monday–Sunday week in IST.'],
     ['04', 'Complete each Task', 'Unfinished Tasks do not carry forward as ordinary Tasks.'],
     ['05', 'Recover through its linked action', 'A missed Task activates its associated Recovery Quest, not an unrelated generic consequence.'],
     ['06', 'Use the Recovery Window', 'The quest has 3 days; it carries forward while that window remains open.'],
@@ -72,13 +72,12 @@ function HowContent() {
 
 function RulesContent() {
   const [open, setOpen] = useState('tasks');
-  return <><div className="rules-layout"><nav className="rules-index" aria-label="On this page"><p>On this page</p>{ruleSections.map((item) => <a key={item.id} href={`#${item.id}`} onClick={() => setOpen(item.id)}>{item.title}</a>)}</nav><div className="rules-accordion">{ruleSections.map((item) => <section className="rule-accordion" id={item.id} key={item.id}><h2><button type="button" aria-expanded={open === item.id} onClick={() => setOpen(open === item.id ? '' : item.id)}>{item.title}<span className="rule-status">{item.status}</span><b aria-hidden="true">{open === item.id ? '−' : '+'}</b></button></h2>{open === item.id && <div className="rule-body"><p>{item.body}</p>{item.id === 'tasks' && <DataTable headers={['Cycle', 'Rule']} rows={taskCycleTable} caption="Repeating Task cycles" />}{item.id === 'xp' && <DataTable headers={['Completion', 'Bonus']} rows={xpMilestoneTable} caption="Completion milestone concepts" />}</div>}</section>)}</div></div><p className="public-source-note">This reference follows <code>docs/product-rules.md</code>. Legal and policy pages remain <Link to="/legal/terms">drafts pending review</Link>.</p></>;
+  return <><div className="rules-layout"><nav className="rules-index" aria-label="On this page"><p>On this page</p>{ruleSections.map((item) => <a key={item.id} href={`#${item.id}`} onClick={() => setOpen(item.id)}>{item.title}</a>)}</nav><div className="rules-accordion">{ruleSections.map((item) => <section className="rule-accordion" id={item.id} key={item.id}><h2><button type="button" aria-expanded={open === item.id} onClick={() => setOpen(open === item.id ? '' : item.id)}>{item.title}<span className="rule-status">{item.status}</span><b aria-hidden="true">{open === item.id ? '−' : '+'}</b></button></h2>{open === item.id && <div className="rule-body"><p>{item.body}</p>{item.id === 'tasks' && <DataTable headers={['Cycle', 'Rule']} rows={taskCycleTable} caption="Repeating Task cycles" />}{item.id === 'xp' && <DataTable headers={['Calculation', 'Rule']} rows={xpMilestoneTable} caption="Task XP calculation order" />}</div>}</section>)}</div></div><p className="public-source-note">This reference follows <code>docs/product-rules.md</code>. Legal and policy pages remain <Link to="/legal/terms">drafts pending review</Link>.</p></>;
 }
 
 function RanksContent() {
   return <>
     <ContentSection id="ranks-sequence" title="Discover the seven Ranks">
-      <p className="rank-demo-note">{rankDemoDisclosure}</p>
       <div className="rank-gallery" role="group" aria-label="Seven Ranks, ordered from lowest to highest">
         <div className="rank-gallery__row rank-gallery__row--four">
           {ranks.slice(0, 4).map((rank) => <RankCard rank={rank} key={rank.number} />)}
@@ -93,7 +92,7 @@ function RanksContent() {
 }
 
 function GettingStartedContent() {
-  return <><ContentSection title="Your first cycle"><InfoGrid items={steps} columns={2} /></ContentSection><ContentSection title="Before you begin"><div className="public-notice"><strong>Know the current limits.</strong><p>Seven equally weighted Tasks are scheduled per day. The deadline is midnight IST. You can make up to 3 changes per Monday–Sunday calendar week. Each Task needs its own Accountability Action. A missed Task activates a 3-day Recovery Quest. Grace Points start at 3; exhausting them triggers a Progression Reset that preserves your account.</p><ActionLink to="/rules" secondary>Read the complete rules</ActionLink></div></ContentSection></>;
+  return <><ContentSection title="Your first cycle"><InfoGrid items={steps} columns={2} /></ContentSection><ContentSection title="Before you begin"><div className="public-notice"><strong>Know the current limits.</strong><p>Schedule at least seven equally weighted Tasks per cycle day. The deadline is midnight IST. You can make up to 3 changes to existing Tasks per Monday–Sunday calendar week; new Tasks are free. Each Task needs its own Accountability Action. A missed Task activates a 3-day Recovery Quest. Grace Points start at 3; exhausting them triggers a Progression Reset that preserves your account.</p><ActionLink to="/rules" secondary>Read the complete rules</ActionLink></div></ContentSection></>;
 }
 
 function AboutContent() {

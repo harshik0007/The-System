@@ -1,31 +1,42 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import AppSidebar from './AppSidebar.jsx';
 import AppTopbar from './AppTopbar.jsx';
 import AppPageContainer from './AppPageContainer.jsx';
-import { Link } from 'react-router-dom';
-import AppIcon from './AppIcon.jsx';
-import { useTaskSchedule } from '../../context/TaskScheduleContext.jsx';
+import AuthenticatedFooter from './AuthenticatedFooter.jsx';
 import { useUserPreferences } from '../../context/UserPreferencesContext.jsx';
+import { useAuth } from '../../context/AuthContext.jsx';
 import { AccountActionsProvider } from '../../context/AccountActionsContext.jsx';
 import { NotificationCenterProvider } from '../../context/NotificationCenterContext.jsx';
-import { dashboardDemo } from '../../data/dashboardDemo.js';
-import { leaderboardDemoMembers } from '../../data/leaderboardDemo.js';
-import useCurrentMemberPersonalBest from '../../hooks/useCurrentMemberPersonalBest.js';
-import { createCurrentMemberEntry, mergeLeaderboardMembers } from '../../utils/leaderboard.js';
+import { taskApi } from '../../services/taskApi.js';
 import '../../styles/app-shell.css';
 import '../../styles/discipline.css';
 
 export default function AppLayout() {
-  const { rankUpNotice, dismissRankUpNotice, disciplineState } = useTaskSchedule();
-  const { preferences } = useUserPreferences();
-  const identity = useMemo(() => ({ ...dashboardDemo.member, ...preferences.profile }), [preferences.profile]);
-  const currentMember = useMemo(() => createCurrentMemberEntry(identity, disciplineState), [identity, disciplineState]);
-  const leaderboardMembers = useMemo(() => mergeLeaderboardMembers(leaderboardDemoMembers, currentMember), [currentMember]);
-  useCurrentMemberPersonalBest(currentMember, leaderboardMembers, { enabled: disciplineState.personalBestCaptureEnabled !== false });
+  const { mergePreferences } = useUserPreferences();
+  const { member } = useAuth();
   const [isMobile, setIsMobile] = useState(() => window.matchMedia('(max-width: 760px)').matches);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => window.matchMedia('(max-width: 1100px)').matches);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [profileSettingsRetry, setProfileSettingsRetry] = useState(0);
+  const [profileSettingsError, setProfileSettingsError] = useState('');
+
+  useEffect(() => {
+    const controller = new AbortController();
+    setProfileSettingsError('');
+    taskApi.publicProfileSettings({ signal: controller.signal }).then(({ settings }) => {
+      if (!settings) return;
+      mergePreferences({
+        profile: { username: member?.username || settings.username, avatarMark: settings.avatarMark },
+        privacy: settings.privacy,
+      });
+    }).catch((error) => {
+      if (!controller.signal.aborted) setProfileSettingsError(error?.message || 'Profile display preferences could not be loaded.');
+    });
+    return () => {
+      controller.abort();
+    };
+  }, [member?.username, mergePreferences, profileSettingsRetry]);
 
   useEffect(() => {
     const mobileQuery = window.matchMedia('(max-width: 760px)');
@@ -67,10 +78,14 @@ export default function AppLayout() {
       />
       <div className="app-layout__main">
         <AppTopbar isMobile={isMobile} sidebarExpanded={sidebarExpanded} onNavigationToggle={toggleNavigation} />
-        {rankUpNotice && <section className="discipline-rank-up discipline-rank-up--global" role="status" aria-live="polite"><span><AppIcon name="spark" /></span><div><p className="app-eyebrow">RANK ADVANCED</p><h2>Rank {rankUpNotice.rankNumber} — {rankUpNotice.rankName}</h2><p>{rankUpNotice.dpAwarded > 0 ? `+${rankUpNotice.dpAwarded.toFixed(2)} Discipline Points awarded.` : 'No Discipline Points were added because the balance is at its cap.'} Rank-entry XP remains pending configuration.</p><Link to={`/ranks/${rankUpNotice.rankSlug}`}>View Rank <AppIcon name="arrow" /></Link></div><button type="button" onClick={dismissRankUpNotice} aria-label="Dismiss Rank update"><AppIcon name="close" /></button></section>}
+        {profileSettingsError && <div className="app-profile-settings-error" role="alert">
+          <span>{profileSettingsError}</span>
+          <button type="button" onClick={() => setProfileSettingsRetry((attempt) => attempt + 1)}>Retry</button>
+        </div>}
         <main className="app-layout__content" id="main-content">
           <AppPageContainer><Outlet /></AppPageContainer>
         </main>
+        <AuthenticatedFooter />
       </div>
     </div>
     </NotificationCenterProvider>

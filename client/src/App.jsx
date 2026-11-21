@@ -1,21 +1,33 @@
-import { lazy, Suspense, useEffect } from 'react';
-import { BrowserRouter, Navigate, Route, useLocation } from 'react-router-dom';
+import { lazy, Suspense, useEffect, useRef } from 'react';
+import { BrowserRouter, Navigate, Outlet, Route, useLocation } from 'react-router-dom';
 import VoidShardCursor from './components/VoidShardCursor.jsx';
+import AuroraCursor from './components/AuroraCursor.jsx';
+import EclipseCursor from './components/EclipseCursor.jsx';
+import SingularityCursor from './components/SingularityCursor.jsx';
 import PageTransition from './components/PageTransition.jsx';
+import RouteErrorBoundary from './components/RouteErrorBoundary.jsx';
 import EmergencyPauseAtmosphere from './components/app/EmergencyPauseAtmosphere.jsx';
+import PageLoadingSkeleton from './components/app/PageLoadingSkeleton.jsx';
 import LandingPage from './pages/LandingPage.jsx';
 import { applicationNavigationItems } from './data/applicationNavigation.js';
-import { TaskScheduleProvider, useTaskSchedule } from './context/TaskScheduleContext.jsx';
+import { TaskBackendProvider, useTaskBackend } from './context/TaskBackendContext.jsx';
 import { UserPreferencesProvider, useUserPreferences } from './context/UserPreferencesContext.jsx';
+import { AuthProvider, useAuth } from './context/AuthContext.jsx';
+import { SignUpDraftProvider } from './context/SignUpDraftContext.jsx';
+import { FlashMessageProvider } from './context/FlashMessageContext.jsx';
+import { dispatchCursorRuntimeEvent, isViewportPoint } from './hooks/useCursorTopLayer.js';
+import { isAuthenticatedExperiencePath } from './utils/routePaths.js';
 
 const routeLoaders = {
   signup: () => import('./pages/auth/SignUpPage.jsx'),
   login: () => import('./pages/auth/LoginPage.jsx'),
-  verifyEmail: () => import('./pages/auth/VerifyEmailPage.jsx'),
   forgotPassword: () => import('./pages/auth/ForgotPasswordPage.jsx'),
   resetPassword: () => import('./pages/auth/ResetPasswordPage.jsx'),
   accountRecovery: () => import('./pages/auth/AccountRecoveryPage.jsx'),
+  recoveryCodes: () => import('./pages/auth/RecoveryCodesPage.jsx'),
+  googleComplete: () => import('./pages/auth/GoogleProfileCompletionPage.jsx'),
   publicInfo: () => import('./pages/public/PublicInfoPage.jsx'),
+  badgeInfo: () => import('./pages/public/BadgeInformationPage.jsx'),
   legal: () => import('./pages/public/LegalPage.jsx'),
   rankDetail: () => import('./pages/public/RankDetailPage.jsx'),
   appShell: () => import('./components/app/AppLayout.jsx'),
@@ -36,11 +48,13 @@ const prefetchedRoutes = new Set();
 
 const SignUpPage = lazy(routeLoaders.signup);
 const LoginPage = lazy(routeLoaders.login);
-const VerifyEmailPage = lazy(routeLoaders.verifyEmail);
 const ForgotPasswordPage = lazy(routeLoaders.forgotPassword);
 const ResetPasswordPage = lazy(routeLoaders.resetPassword);
 const AccountRecoveryPage = lazy(routeLoaders.accountRecovery);
+const RecoveryCodesPage = lazy(routeLoaders.recoveryCodes);
+const GoogleProfileCompletionPage = lazy(routeLoaders.googleComplete);
 const PublicInfoPage = lazy(routeLoaders.publicInfo);
+const BadgeInformationPage = lazy(routeLoaders.badgeInfo);
 const LegalPage = lazy(routeLoaders.legal);
 const RankDetailPage = lazy(routeLoaders.rankDetail);
 const AppLayout = lazy(routeLoaders.appShell);
@@ -72,16 +86,34 @@ function getRouteLoaders(pathname) {
   if (pathname === '/app/settings') return [routeLoaders.appShell, routeLoaders.settings];
   if (pathname === '/signup') return [routeLoaders.signup];
   if (pathname === '/login') return [routeLoaders.login];
-  if (pathname === '/verify-email') return [routeLoaders.verifyEmail];
   if (pathname === '/forgot-password') return [routeLoaders.forgotPassword];
   if (pathname === '/reset-password') return [routeLoaders.resetPassword];
   if (pathname === '/account-recovery') return [routeLoaders.accountRecovery];
+  if (pathname === '/recovery-codes') return [routeLoaders.recoveryCodes];
+  if (pathname === '/google-complete') return [routeLoaders.googleComplete];
   if (/^\/ranks\/[^/]+\/?$/.test(pathname)) return [routeLoaders.rankDetail];
+  if (pathname === '/badges') return [routeLoaders.badgeInfo];
   if (/^\/legal\/[^/]+\/?$/.test(pathname)) return [routeLoaders.legal];
   if (['/about', '/how-it-works', '/features', '/ranks', '/rules', '/faq', '/getting-started', '/contact'].includes(pathname)) {
     return [routeLoaders.publicInfo];
   }
   return [];
+}
+
+function getLoadingVariant(pathname) {
+  if (pathname === '/') return 'landing';
+  if (['/signup', '/login', '/forgot-password', '/reset-password', '/account-recovery', '/recovery-codes', '/google-complete'].includes(pathname)) return 'auth';
+  if (pathname === '/app' || pathname.startsWith('/app/dashboard')) return 'dashboard';
+  if (pathname.startsWith('/app/tasks')) return 'tasks';
+  if (pathname.startsWith('/app/recovery-quests')) return 'recovery';
+  if (pathname.startsWith('/app/discipline')) return 'discipline';
+  if (pathname.startsWith('/app/profile')) return 'profile';
+  if (pathname.startsWith('/app/settings')) return 'settings';
+  if (pathname.startsWith('/app/monthly-analysis')) return 'monthly';
+  if (pathname.startsWith('/app/notifications')) return 'notifications';
+  if (pathname.startsWith('/app/leaderboard')) return 'table';
+  if (pathname.startsWith('/ranks') || pathname === '/badges' || pathname.startsWith('/legal/') || !pathname.startsWith('/app/')) return 'public';
+  return 'page';
 }
 
 function prefetchInternalRoute(event) {
@@ -112,44 +144,198 @@ function RoutePrefetch() {
 }
 
 function RouteView({ children }) {
-  return <Suspense fallback={null}>{children}</Suspense>;
+  const { pathname } = useLocation();
+  return (
+    <RouteErrorBoundary key={pathname} resetKey={pathname}>
+      <Suspense fallback={<PageLoadingSkeleton variant={getLoadingVariant(pathname)} label="Loading page content" />}>
+        {children}
+      </Suspense>
+    </RouteErrorBoundary>
+  );
 }
 
 function EmergencyPauseAtmosphereGate() {
   const { pathname } = useLocation();
-  const { isEmergencyPauseActive } = useTaskSchedule();
+  const { emergencyPause } = useTaskBackend();
   const { preferences } = useUserPreferences();
 
-  if (pathname !== '/app' && !pathname.startsWith('/app/')) return null;
-  return <EmergencyPauseAtmosphere active={isEmergencyPauseActive} reduceDecorativeEffects={preferences.appearance.reduceDecorativeEffects} />;
+  if (!isAuthenticatedExperiencePath(pathname)) return null;
+  // Both themes follow the same server-confirmed active state; the selected
+  // theme only changes the decoration rendered by the shared atmosphere.
+  return <EmergencyPauseAtmosphere
+    active={Boolean(emergencyPause?.isActive)}
+    activationId={emergencyPause?.pause?.id || emergencyPause?.pause?.startedAt || null}
+    startedAt={emergencyPause?.pause?.startedAt || null}
+    statusKnown={emergencyPause !== null}
+    theme={preferences.appearance.theme}
+    clickRipple={preferences.appearance.clickRipple}
+    reduceDecorativeEffects={preferences.appearance.reduceDecorativeEffects}
+    effectQuality={preferences.appearance.effectQuality}
+  />;
+}
+
+function ApplicationErrorBoundary({ children }) {
+  const { pathname } = useLocation();
+  return <RouteErrorBoundary resetKey={pathname}>{children}</RouteErrorBoundary>;
+}
+
+function ThemeCursor() {
+  const { preferences } = useUserPreferences();
+  const pointerRef = useRef({ x: 0, y: 0, inside: false, buttons: 0 });
+
+  useEffect(() => {
+    // Include the viewport edge: Chromium reports scrollbar drags at the last
+    // viewport pixel, and hiding the cursor there exposes the native pointer.
+    const inViewport = (event) => isViewportPoint(event.clientX, event.clientY);
+    const rememberPointer = (event) => {
+      if (event.pointerType === 'touch' || !inViewport(event)) return;
+      const previous = pointerRef.current;
+      if (previous.inside && previous.x === event.clientX && previous.y === event.clientY) return;
+      pointerRef.current = {
+        x: event.clientX,
+        y: event.clientY,
+        inside: true,
+        buttons: typeof event.buttons === 'number' ? event.buttons : previous.buttons,
+      };
+      dispatchCursorRuntimeEvent('move', event);
+    };
+    const pointerEnter = (event) => {
+      if (event.pointerType === 'touch' || !inViewport(event)) return;
+      pointerRef.current = {
+        x: event.clientX,
+        y: event.clientY,
+        inside: true,
+        buttons: typeof event.buttons === 'number' ? event.buttons : 0,
+      };
+      dispatchCursorRuntimeEvent('enter', event);
+    };
+    const pointerLeave = (event) => {
+      // Native browser scrollbars can dispatch a leave with no related DOM
+      // target. Keep the custom cursor alive while the pointer is still in
+      // viewport coordinates so scrollbar drags do not switch cursor modes.
+      if (event.pointerType === 'touch' || inViewport(event) || event.buttons || pointerRef.current.buttons) return;
+      pointerRef.current = { ...pointerRef.current, inside: false, buttons: 0 };
+      dispatchCursorRuntimeEvent('leave', event);
+    };
+    const pointerOver = (event) => {
+      if (event.pointerType !== 'touch') dispatchCursorRuntimeEvent('over', event);
+    };
+    const pointerDown = (event) => {
+      if (event.pointerType !== 'touch') {
+        pointerRef.current = { ...pointerRef.current, buttons: event.buttons || 1 };
+        dispatchCursorRuntimeEvent('down', event);
+      }
+    };
+    const pointerUp = (event) => {
+      if (event.pointerType !== 'touch') {
+        pointerRef.current = { ...pointerRef.current, buttons: 0 };
+        if (inViewport(event)) rememberPointer(event);
+        else pointerLeave({ pointerType: event.pointerType, clientX: event.clientX, clientY: event.clientY, buttons: 0 });
+        dispatchCursorRuntimeEvent('up', event);
+      }
+    };
+    const pointerCancel = (event) => {
+      if (event.pointerType !== 'touch') {
+        pointerRef.current = { ...pointerRef.current, buttons: 0 };
+        dispatchCursorRuntimeEvent('cancel', event);
+        if (!inViewport(event)) pointerLeave({ pointerType: event.pointerType, clientX: event.clientX, clientY: event.clientY, buttons: 0 });
+      }
+    };
+    const scroll = (event) => dispatchCursorRuntimeEvent('scroll', event);
+    const visibilityChange = (event) => dispatchCursorRuntimeEvent('visibility', event);
+
+    // Capture at document level so controls and nested scrolling regions that
+    // stop bubbling still update the fixed cursor. Window listeners retain
+    // coverage for browser scrollbar drag events; duplicate points are ignored.
+    document.addEventListener('pointermove', rememberPointer, { passive: true, capture: true });
+    document.addEventListener('mousemove', rememberPointer, { passive: true, capture: true });
+    window.addEventListener('pointermove', rememberPointer, { passive: true });
+    window.addEventListener('mousemove', rememberPointer, { passive: true });
+    window.addEventListener('pointerenter', pointerEnter, { passive: true });
+    window.addEventListener('pointerleave', pointerLeave, { passive: true });
+    window.addEventListener('pointerdown', pointerDown, { passive: true });
+    window.addEventListener('pointerup', pointerUp, { passive: true });
+    window.addEventListener('pointercancel', pointerCancel, { passive: true });
+    document.addEventListener('pointerover', pointerOver, { passive: true });
+    document.addEventListener('scroll', scroll, { passive: true, capture: true });
+    document.addEventListener('visibilitychange', visibilityChange);
+    return () => {
+      document.removeEventListener('pointermove', rememberPointer, true);
+      document.removeEventListener('mousemove', rememberPointer, true);
+      window.removeEventListener('pointermove', rememberPointer);
+      window.removeEventListener('mousemove', rememberPointer);
+      window.removeEventListener('pointerenter', pointerEnter);
+      window.removeEventListener('pointerleave', pointerLeave);
+      window.removeEventListener('pointerdown', pointerDown);
+      window.removeEventListener('pointerup', pointerUp);
+      window.removeEventListener('pointercancel', pointerCancel);
+      document.removeEventListener('pointerover', pointerOver);
+      document.removeEventListener('scroll', scroll, true);
+      document.removeEventListener('visibilitychange', visibilityChange);
+    };
+  }, []);
+
+  const initialPointer = pointerRef.current;
+  if (preferences.appearance.theme === 'aurora') return <AuroraCursor initialPointer={initialPointer} />;
+  if (preferences.appearance.theme === 'eclipse') return <EclipseCursor initialPointer={initialPointer} />;
+  if (preferences.appearance.theme === 'galaxion') return <SingularityCursor initialPointer={initialPointer} enabled={preferences.appearance.voidShardCursor} clickEffectEnabled={preferences.appearance.clickRipple} />;
+  return <VoidShardCursor initialPointer={initialPointer} />;
+}
+
+function AuthenticatedApplicationRuntime({ children }) {
+  const { member } = useAuth();
+
+  // Keep server-backed app state and the pause atmosphere outside the keyed
+  // page-transition views so navigation does not remount their animation.
+  if (!member) return children;
+  return (
+    <TaskBackendProvider>
+      <EmergencyPauseAtmosphereGate />
+      {children}
+    </TaskBackendProvider>
+  );
+}
+
+function AuthenticatedExperienceLayout() {
+  const { pathname } = useLocation();
+  const { member, loading } = useAuth();
+  const { ready: preferencesReady } = useUserPreferences();
+  if (loading || (member && !preferencesReady)) return <PageLoadingSkeleton variant={getLoadingVariant(pathname)} label="Preparing your experience" />;
+  return member ? <AppLayout /> : <Outlet />;
 }
 
 export default function App() {
   return (
     <BrowserRouter>
-      <TaskScheduleProvider>
+      <FlashMessageProvider>
+      <AuthProvider>
+      <SignUpDraftProvider>
       <UserPreferencesProvider>
+      <ApplicationErrorBoundary>
       <RoutePrefetch />
-      <EmergencyPauseAtmosphereGate />
+      <AuthenticatedApplicationRuntime>
       <PageTransition>
-        <Route path="/" element={<LandingPage />} />
+        <Route path="/" element={<HomeRoute />} />
         <Route path="/signup" element={<RouteView><SignUpPage /></RouteView>} />
         <Route path="/login" element={<RouteView><LoginPage /></RouteView>} />
-        <Route path="/verify-email" element={<RouteView><VerifyEmailPage /></RouteView>} />
         <Route path="/forgot-password" element={<RouteView><ForgotPasswordPage /></RouteView>} />
         <Route path="/reset-password" element={<RouteView><ResetPasswordPage /></RouteView>} />
         <Route path="/account-recovery" element={<RouteView><AccountRecoveryPage /></RouteView>} />
-        <Route path="/about" element={<RouteView><PublicInfoPage page="about" /></RouteView>} />
-        <Route path="/how-it-works" element={<RouteView><PublicInfoPage page="how" /></RouteView>} />
-        <Route path="/features" element={<RouteView><PublicInfoPage page="features" /></RouteView>} />
-        <Route path="/ranks" element={<RouteView><PublicInfoPage page="ranks" /></RouteView>} />
-        <Route path="/ranks/:rankSlug" element={<RouteView><RankDetailPage /></RouteView>} />
-        <Route path="/rules" element={<RouteView><PublicInfoPage page="rules" /></RouteView>} />
-        <Route path="/faq" element={<RouteView><PublicInfoPage page="faq" /></RouteView>} />
-        <Route path="/getting-started" element={<RouteView><PublicInfoPage page="getting-started" /></RouteView>} />
-        <Route path="/contact" element={<RouteView><PublicInfoPage page="contact" /></RouteView>} />
-        <Route path="/legal/:slug" element={<RouteView><LegalPage /></RouteView>} />
-        <Route path="/app" element={<RouteView><AppLayout /></RouteView>}>
+        <Route path="/recovery-codes" element={<RouteView><RecoveryCodesPage /></RouteView>} />
+        <Route path="/google-complete" element={<RouteView><GoogleProfileCompletionPage /></RouteView>} />
+        <Route element={<AuthenticatedExperienceLayout />}>
+          <Route path="/about" element={<RouteView><PublicInfoPage page="about" /></RouteView>} />
+          <Route path="/how-it-works" element={<RouteView><PublicInfoPage page="how" /></RouteView>} />
+          <Route path="/features" element={<RouteView><PublicInfoPage page="features" /></RouteView>} />
+          <Route path="/ranks" element={<RouteView><PublicInfoPage page="ranks" /></RouteView>} />
+          <Route path="/ranks/:rankSlug" element={<RouteView><RankDetailPage /></RouteView>} />
+          <Route path="/badges" element={<RouteView><BadgeInformationPage /></RouteView>} />
+          <Route path="/rules" element={<RouteView><PublicInfoPage page="rules" /></RouteView>} />
+          <Route path="/faq" element={<RouteView><PublicInfoPage page="faq" /></RouteView>} />
+          <Route path="/getting-started" element={<RouteView><PublicInfoPage page="getting-started" /></RouteView>} />
+          <Route path="/contact" element={<RouteView><PublicInfoPage page="contact" /></RouteView>} />
+          <Route path="/legal/:slug" element={<RouteView><LegalPage /></RouteView>} />
+          <Route path="/app" element={<AuthenticatedApplication />}>
           <Route index element={<Navigate to="/app/dashboard" replace />} />
           <Route path="dashboard" element={<RouteView><DashboardPage /></RouteView>} />
           <Route path="tasks" element={<RouteView><DailyTasksPage /></RouteView>} />
@@ -165,12 +351,35 @@ export default function App() {
           {applicationNavigationItems.filter((item) => !['dashboard', 'tasks', 'recovery-quests', 'discipline', 'profile', 'leaderboard', 'monthly-analysis', 'settings', 'notifications'].includes(item.id)).map((item) => (
             <Route key={item.id} path={item.path.replace('/app/', '')} element={<RouteView><AppPlaceholderPage /></RouteView>} />
           ))}
+          </Route>
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </PageTransition>
-      <VoidShardCursor />
+      </AuthenticatedApplicationRuntime>
+      <ThemeCursor />
+      </ApplicationErrorBoundary>
       </UserPreferencesProvider>
-      </TaskScheduleProvider>
+      </SignUpDraftProvider>
+      </AuthProvider>
+      </FlashMessageProvider>
     </BrowserRouter>
   );
+}
+
+function HomeRoute() {
+  const { member, loading } = useAuth();
+  if (loading) return <PageLoadingSkeleton variant="landing" label="Restoring your session" />;
+  return member ? <Navigate to="/app/dashboard" replace /> : <LandingPage />;
+}
+
+function AuthenticatedApplication() {
+  const { member, loading } = useAuth();
+  const { ready: preferencesReady } = useUserPreferences();
+  const location = useLocation();
+  if (loading || (member && !preferencesReady)) return <PageLoadingSkeleton variant={getLoadingVariant(location.pathname)} label="Preparing your experience" />;
+  if (!member) {
+    const from = `${location.pathname}${location.search}${location.hash}`;
+    return <Navigate to="/login" replace state={{ from }} />;
+  }
+  return <Outlet />;
 }

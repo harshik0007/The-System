@@ -1,7 +1,23 @@
 .public-layout { position: relative; min-height: 100vh; overflow: clip; background: radial-gradient(ellipse at 75% 3%, rgb(22 72 115 / 15%), transparent 34rem), var(--color-bg); }
 .public-atmosphere { position: absolute; z-index: 0; inset: 0 0 auto; height: 760px; overflow: hidden; pointer-events: none; opacity: .72; mask-image: linear-gradient(#000 48%, transparent); }
 .public-atmosphere .shadow-field { height: 100%; min-height: 0; }
-.public-main { position: relative; z-index: 1; width: min(var(--page-width), calc(100% - 3rem)); min-height: 65vh; margin: 0 auto; padding: 132px 0 96px; }
+.public-main { position: relative; z-index: 1; width: min(var(--page-width), calc(100% - 3rem)); min-height: 65vh; margin: 0 auto; padding: 132px 0 clamp(42px, 5vw, 70px); }
+.public-information-content { min-width: 0; }
+.public-main--authenticated { width: min(var(--page-width), 100%); min-height: 0; padding: 20px 0 34px; }
+.public-main--authenticated .public-hero { max-width: 880px; margin: 0 0 42px; text-align: left; }
+.public-main--authenticated .public-breadcrumb { justify-content: flex-start; margin-bottom: 18px; }
+.public-main--authenticated .public-hero h1 { margin: 0; font-size: clamp(2rem, 4.5vw, 3.5rem); }
+.public-main--authenticated .public-hero__intro { max-width: 760px; margin: 14px 0 0; font-size: .95rem; }
+.public-main--authenticated .public-content { gap: 48px; }
+.badge-information-page { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.badge-information-card { display: grid; min-width: 0; grid-template-columns: 112px minmax(0, 1fr); align-items: center; gap: 16px; padding: 16px; border: 1px solid color-mix(in srgb, var(--rank-accent) 24%, var(--color-line)); border-radius: 10px; background: linear-gradient(145deg, color-mix(in srgb, var(--rank-accent) 6%, var(--surface-card)), var(--surface-card)); }
+.badge-information-card__art { display: grid; min-width: 0; place-items: center; overflow: hidden; }
+.badge-information-card__art .rank-badge-aura { width: 100%; max-width: 92px; }
+.badge-information-card__copy { min-width: 0; }
+.badge-information-card__copy .public-eyebrow { margin: 0 0 5px; color: var(--rank-accent); font-size: .58rem; }
+.badge-information-card__copy h2 { margin: 0; color: var(--color-text); font: 550 1.05rem var(--font-display); }
+.badge-information-card__copy > p:not(.public-eyebrow) { margin: 6px 0 10px; color: var(--color-muted); font-size: .75rem; line-height: 1.5; }
+.badge-information-card__copy a { display: inline-flex; align-items: center; gap: 6px; color: var(--rank-accent); font-size: .72rem; font-weight: 600; }
 .public-hero { max-width: 880px; margin: 0 auto 78px; text-align: center; }
 .public-breadcrumb { display: flex; justify-content: center; align-items: center; gap: .7rem; margin-bottom: 27px; color: var(--color-subtle); font: 500 .73rem var(--font-mono); letter-spacing: .04em; }
 .public-breadcrumb a { color: #9cb5d0; transition: color var(--motion-fast); }
@@ -802,6 +818,14 @@
 @media (prefers-reduced-motion: reduce) {
   .rank-badge-showcase, .rank-badge-showcase__open { transition: none !important; }
   .rank-badge-showcase:hover { transform: none; }
+}
+
+@media (max-width: 760px) {
+  .badge-information-page { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .badge-information-card { grid-template-columns: 92px minmax(0, 1fr); gap: 12px; padding: 13px; }
+  .badge-information-card__art .rank-badge-aura { max-width: 76px; }
+  .public-main--authenticated { padding-block: 14px 28px; }
+  .public-main--authenticated .public-hero { margin-bottom: 30px; }
 }
 
 /* Badge preview plates stay still on pointer entry; the badge remains clickable. */

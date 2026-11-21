@@ -3,7 +3,7 @@ import PublicLayout from '../../components/public/PublicLayout.jsx';
 import RankBadgeShowcase from '../../components/ranks/RankBadgeShowcase.jsx';
 import RankProgression from '../../components/ranks/RankProgression.jsx';
 import RankBenefitSection from '../../components/ranks/RankBenefitSection.jsx';
-import { ranks, rankDemoDisclosure } from '../../data/ranks.js';
+import { ranks } from '../../data/ranks.js';
 
 export default function RankDetailPage() {
   const { rankSlug } = useParams();
@@ -11,7 +11,6 @@ export default function RankDetailPage() {
   if (rankIndex < 0) return <Navigate to="/ranks" replace />;
 
   const rank = ranks[rankIndex];
-  const demo = rank.demo;
   const previous = ranks[rankIndex - 1];
   const next = ranks[rankIndex + 1];
   const isHighest = Number(rank.number) === 1;
@@ -31,14 +30,10 @@ export default function RankDetailPage() {
           <h2 id="rank-detail-title">Rank {rank.number} <span>· {rank.name}</span></h2>
           <p className="rank-detail-page__description">{rank.description}</p>
 
-          <div className="rank-detail-page__stats">
-            <div><span>Earned by</span><strong>{demo.membersEarned.toLocaleString('en-US')}</strong><small>Demonstration members</small></div>
-            <div><span>Rank position</span><strong>{rank.number} / 07</strong><small>{Number(rank.number) === 7 ? 'Starting Rank' : Number(rank.number) === 2 ? 'Second-highest Rank' : isHighest ? 'Highest Rank' : `${Number(rank.number) - 1} Ranks stand above`}</small></div>
-          </div>
+          <div className="rank-detail-page__stats"><div><span>Rank position</span><strong>{rank.number} / 07</strong><small>{Number(rank.number) === 7 ? 'Starting Rank' : Number(rank.number) === 2 ? 'Second-highest Rank' : isHighest ? 'Highest Rank' : `${Number(rank.number) - 1} Ranks stand above`}</small></div></div>
 
           <RankBenefitSection rank={rank} />
 
-          <p className="rank-demo-note">{rankDemoDisclosure}</p>
         </div>
 
         <RankBadgeShowcase rank={rank} />
