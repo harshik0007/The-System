@@ -1,0 +1,42 @@
+:root[data-system-theme='eclipse'] .profile-identity,
+:root[data-system-theme='eclipse'] .profile-account,
+:root[data-system-theme='eclipse'] .profile-lifetime,
+:root[data-system-theme='eclipse'] .profile-rank-badges { border-color: var(--color-line); background: var(--surface-card); color: var(--color-text); }
+:root[data-system-theme='eclipse'] .profile-identity__avatar { border-color: color-mix(in srgb, var(--color-accent) 45%, var(--color-line)); background: linear-gradient(145deg, #352B58, #151322); color: var(--color-ice); }
+:root[data-system-theme='eclipse'] .profile-identity :is(h1, h2, h3, strong),
+:root[data-system-theme='eclipse'] .profile-account :is(h1, h2, h3, strong),
+:root[data-system-theme='eclipse'] .profile-lifetime :is(h1, h2, h3, strong) { color: var(--color-text); }
+:root[data-system-theme='eclipse'] .leaderboard-public-profile[data-system-theme='eclipse'] .leaderboard-profile-card { border-color: var(--color-line); background: linear-gradient(145deg, var(--surface-card-nested), var(--surface-page)); }
+:root[data-system-theme='eclipse'] .leaderboard-public-profile[data-system-theme='eclipse'] .leaderboard-profile-card__notice { border-color: var(--color-line); background: var(--surface-card-nested); }
+:root[data-system-theme='eclipse'] .leaderboard-public-profile[data-system-theme='eclipse'] .leaderboard-back-link { color: var(--color-ice); }
+:root[data-system-theme='eclipse'] .leaderboard-public-profile[data-system-theme='eclipse'] .leaderboard-profile-card__content { color: var(--color-text); }
+.leaderboard-public-profile[data-system-theme='eclipse'] .personal-best-records { color: var(--color-text); }
+.leaderboard-public-profile[data-system-theme='eclipse'] .personal-best-records__heading :is(h2, p),
+.leaderboard-public-profile[data-system-theme='eclipse'] .personal-best-card :is(.personal-best-card__value, .personal-best-card__rank-name) { color: var(--color-text); }
+.leaderboard-public-profile[data-system-theme='eclipse'] .personal-best-card { border-color: var(--color-line); background: linear-gradient(145deg, var(--surface-card-nested), var(--surface-card)); }
+.leaderboard-public-profile[data-system-theme='eclipse'] .personal-best-card :is(.personal-best-card__eyebrow, .personal-best-card__current, .personal-best-card__date, .personal-best-card__category) { color: var(--color-muted); }
+.leaderboard-public-profile[data-system-theme='eclipse'] .personal-best-card__record-badge { border-color: color-mix(in srgb, var(--color-teal) 34%, var(--color-line)); background: color-mix(in srgb, var(--color-teal) 9%, var(--surface-card)); color: var(--color-teal); }
+.leaderboard-public-profile[data-system-theme='eclipse'] .personal-best-card::after { background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--color-teal) 35%, transparent), transparent); }
+.leaderboard-public-profile[data-system-theme='eclipse'] .discipline-activity-map { border-color: var(--color-line); background: var(--surface-card); color: var(--color-text); }
+.leaderboard-public-profile[data-system-theme='eclipse'] .discipline-activity__month { border-color: var(--color-line); background: var(--surface-card-nested); }
+.leaderboard-public-profile[data-system-theme='eclipse'] .discipline-activity__detail { border-color: var(--color-line); background: var(--surface-card-nested); color: var(--color-text); }
+.leaderboard-public-profile[data-system-theme='eclipse'] .discipline-activity__cell[data-level='0'] { background: var(--activity-level-0); }
+.leaderboard-public-profile[data-system-theme='eclipse'] .discipline-activity__cell[data-level='1'] { background: var(--activity-level-1); }
+.leaderboard-public-profile[data-system-theme='eclipse'] .discipline-activity__cell[data-level='2'] { background: var(--activity-level-2); }
+.leaderboard-public-profile[data-system-theme='eclipse'] .discipline-activity__cell[data-level='3'] { background: var(--activity-level-3); }
+.leaderboard-public-profile[data-system-theme='eclipse'] .discipline-activity__cell[data-level='4'] { background: var(--activity-level-4); }
+.discipline-activity-tooltip[data-system-theme='eclipse'] { border-color: var(--color-line); background: var(--surface-tooltip); color: var(--color-text); font-family: var(--font-body); }
+:root[data-system-theme='eclipse'] .app-layout :is(.profile-page, .profile-page__header, .personal-best-records) { color: var(--color-text); }
+:root[data-system-theme='eclipse'] .app-layout :is(.profile-identity, .profile-account, .profile-discipline, .profile-lifetime, .profile-rank-badges, .personal-best-card) { border-color: var(--color-line); background: var(--surface-card); color: var(--color-text); }
+:root[data-system-theme='eclipse'] .app-layout .personal-best-card::after { background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--color-teal) 38%, transparent), transparent); }
+:root[data-system-theme='eclipse'] .app-layout :is(.profile-identity > div > p:not(.app-eyebrow), .profile-account .discipline-section-heading > span, .profile-discipline .discipline-section-heading > span, .profile-lifetime__copy > p:not(.app-eyebrow), .profile-lifetime__pending, .personal-best-records__heading > p, .personal-best-records__notice, .personal-best-card__current, .personal-best-card__date, .personal-best-card__category) { color: var(--color-muted); }
+:root[data-system-theme='eclipse'] .app-layout :is(.personal-best-card__eyebrow, .profile-discipline__metrics dt, .profile-account .profile-discipline__metrics dt) { color: var(--color-muted); }
+:root[data-system-theme='eclipse'] .app-layout :is(.profile-identity__name, .profile-identity__since small, .profile-identity__since strong, .profile-account .profile-discipline__metrics dd, .profile-discipline .profile-discipline__metrics dd, .personal-best-card__value, .personal-best-card__current b, .personal-best-card__rank-name) { color: var(--color-text); }
+:root[data-system-theme='eclipse'] .app-layout :is(.profile-account .profile-discipline__metrics > div, .profile-discipline .profile-discipline__metrics > div) { border-color: var(--color-line); background: var(--surface-card-nested); }
+:root[data-system-theme='eclipse'] .app-layout .personal-best-card__record-badge { border-color: color-mix(in srgb, var(--color-teal) 32%, var(--color-line)); background: color-mix(in srgb, var(--color-teal) 8%, var(--surface-card-nested)); color: var(--color-teal); }
+:root[data-system-theme='eclipse'] .app-layout .profile-discipline__metric--lifetime { border-color: color-mix(in srgb, var(--color-teal) 28%, var(--color-line)) !important; background: linear-gradient(145deg, color-mix(in srgb, var(--color-teal) 6%, var(--surface-card-nested)), var(--surface-card-nested)) !important; }
+:root[data-system-theme='eclipse'] .app-layout .profile-discipline__metric--lifetime dd { color: var(--color-teal); }
+:root[data-system-theme='eclipse'] .app-layout .profile-lifetime__badge .rank-badge-aura { filter: drop-shadow(0 0 6px rgb(167 139 250 / 12%)); }
+:root[data-system-theme='eclipse'] .app-layout .profile-page__discipline-link { color: var(--color-accent); }
+
+

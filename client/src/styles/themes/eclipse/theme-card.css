@@ -1,0 +1,34 @@
+.settings-theme-card[data-theme-preview='eclipse'] {
+  --theme-card-accent: #A78BFA;
+  position: relative;
+  border: 1px solid transparent;
+  background:
+    linear-gradient(148deg, rgb(32 27 53 / 97%), rgb(16 15 29 / 98%) 74%) padding-box,
+    linear-gradient(125deg, #44375F, #7657FF 38%, #C8C9E0 68%, #44375F) border-box;
+  box-shadow: inset 0 1px rgb(255 255 255 / 4%), 0 10px 32px rgb(0 0 0 / 22%);
+  transition: box-shadow 220ms ease;
+}
+
+.settings-theme-card[data-theme-preview='eclipse']:hover,
+.settings-theme-card[data-theme-preview='eclipse'].is-active {
+  box-shadow: inset 0 1px rgb(255 255 255 / 6%), 0 0 26px rgb(167 139 250 / 12%), 0 14px 38px rgb(0 0 0 / 28%);
+}
+
+.eclipse-moon-mark { position: relative; display: block; width: 64px; aspect-ratio: 1; flex: 0 0 auto; isolation: isolate; }
+.eclipse-moon-mark > i { position: absolute; display: block; border-radius: 50%; }
+.eclipse-moon-mark__halo { inset: -23%; background: radial-gradient(circle, rgb(118 87 255 / 34%), rgb(118 87 255 / 13%) 43%, transparent 74%); }
+.eclipse-moon-mark__orbit { inset: -8%; border: 1px solid transparent; }
+.eclipse-moon-mark__orbit--violet { border-top-color: rgb(167 139 250 / 92%); border-right-color: rgb(167 139 250 / 34%); transform: rotate(-32deg) scaleY(.82); }
+.eclipse-moon-mark__orbit--silver { inset: -15%; border-bottom-color: rgb(231 223 255 / 72%); border-left-color: rgb(231 223 255 / 25%); transform: rotate(24deg) scaleY(.78); }
+.eclipse-moon-mark__disc { inset: 10%; border: 1px solid rgb(231 223 255 / 70%); background: radial-gradient(circle at 31% 26%, #39334D 0%, #211B35 37%, #100F1D 72%, #08070D 100%); box-shadow: 0 0 13px rgb(167 139 250 / 46%), inset -4px -2px 12px rgb(0 0 0 / 83%), inset 2px 1px 5px rgb(231 223 255 / 34%); }
+.eclipse-moon-mark__shadow { inset: 12%; background: linear-gradient(105deg, transparent 0 44%, rgb(5 5 10 / 67%) 61%, rgb(5 5 10 / 5%) 100%); }
+.eclipse-moon-mark__star { z-index: 1; width: 3px; height: 3px; background: #E7DFFF; box-shadow: 0 0 7px #C8C9E0; }
+.eclipse-moon-mark__star--one { top: 5%; right: 14%; }
+.eclipse-moon-mark__star--two { bottom: 8%; left: 6%; width: 2px; height: 2px; }
+.settings-theme-card[data-theme-preview='eclipse'] .settings-theme-card__heading h3 { color: #F4F2FF; }
+.settings-theme-card[data-theme-preview='eclipse'] .settings-theme-card__heading > div > p { color: #AAA4C2; }
+.settings-theme-card[data-theme-preview='eclipse'] .settings-theme-card__requirement { color: #AAA4C2; }
+.settings-theme-card[data-theme-preview='eclipse'] .settings-theme-card__actions button { border-color: #44375F; color: #C8C9E0; }
+.settings-theme-card[data-theme-preview='eclipse'] .settings-theme-card__actions button:hover:not(:disabled) { border-color: #A78BFA; background: rgb(167 139 250 / 12%); color: #F4F2FF; }
+.settings-theme-card[data-theme-preview='eclipse'] .settings-theme-card__actions .settings-theme-card__apply-button:not(:disabled) { border-color: #A78BFA; background: linear-gradient(115deg, #8064DB, #AA98E9); color: #100D1D; }
+

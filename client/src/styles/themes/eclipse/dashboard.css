@@ -1,0 +1,99 @@
+:root[data-system-theme='eclipse'] .dashboard-rank-panel { border-color: color-mix(in srgb, var(--rank-accent) 34%, var(--color-line)); background: radial-gradient(ellipse at 17% 50%, color-mix(in srgb, var(--rank-accent) 10%, transparent), transparent 50%), linear-gradient(145deg, var(--surface-card), var(--surface-page) 82%); }
+:root[data-system-theme='eclipse'] .dashboard-rank-panel__member :is(strong, span),
+:root[data-system-theme='eclipse'] .dashboard-rank-panel__details :is(h2, > p:not(.app-eyebrow)),
+:root[data-system-theme='eclipse'] .dashboard-rank-panel__position { color: var(--color-text); }
+:root[data-system-theme='eclipse'] .dashboard-rank-panel__badge { background: transparent; }
+:root[data-system-theme='eclipse'] .dashboard-xp-snapshot,
+:root[data-system-theme='eclipse'] .dashboard-xp-panel,
+:root[data-system-theme='eclipse'] .dashboard-benefit-card,
+:root[data-system-theme='eclipse'] .dashboard-tasks-preview,
+:root[data-system-theme='eclipse'] .dashboard-quest-preview,
+:root[data-system-theme='eclipse'] .dashboard-discipline-card,
+:root[data-system-theme='eclipse'] .dashboard-grace-card { border-color: var(--color-line); background: var(--surface-card); color: var(--color-text); }
+:root[data-system-theme='eclipse'] .app-layout :is(.dashboard-rank-panel__details > p:not(.app-eyebrow), .dashboard-xp-snapshot p, .dashboard-benefit-card p, .dashboard-tasks-preview p, .dashboard-quest-preview p) { background: transparent; color: var(--color-muted); font-size: .875rem; }
+:root[data-system-theme='eclipse'] .app-layout :is(.dashboard-rank-panel__details, .dashboard-xp-snapshot__copy, .dashboard-benefit-card__copy, .dashboard-tasks-preview__copy) { background: transparent; }
+:root[data-system-theme='eclipse'] .app-layout :is(.dashboard-xp-snapshot__track, .dashboard-progress-track, .app-progress-bar__track) { background: var(--surface-progress-track); }
+:root[data-system-theme='eclipse'] .app-layout :is(.dashboard-xp-snapshot__track > span, .dashboard-progress-track > span, .app-progress-bar__fill) { background: var(--progress-fill); }
+:root[data-system-theme='eclipse'] .app-layout :is(.dashboard-discipline-panel, .dashboard-discipline-card, .dashboard-grace-panel, .dashboard-grace-card, .dashboard-task-cycle, .dashboard-cycle-panel, .daily-task-summary, .task-cycle-panel) { border-color: var(--color-line); background: var(--surface-card); color: var(--color-text); }
+:root[data-system-theme='eclipse'] .app-layout :is(.dashboard-discipline-stats > div, .daily-task-summary__counts > div) { border-color: var(--color-line); background: var(--surface-card-nested); }
+:root[data-system-theme='eclipse'] .app-layout :is(.dashboard-discipline-stats span, .dashboard-discipline-cycle, .dashboard-discipline-panel p:not(.app-eyebrow), .dashboard-grace-panel p:not(.app-eyebrow), .daily-task-summary__counts > div > span, .daily-task-summary__note) { color: var(--color-muted); }
+:root[data-system-theme='eclipse'] .app-layout :is(.daily-task-summary__percentage, .daily-task-summary__counts > div > strong, .dashboard-discipline-stats strong, .dashboard-discipline-cycle strong) { color: var(--color-teal); }
+:root[data-system-theme='eclipse'] .app-layout :is(.task-cycle-panel__icon, .dashboard-discipline-panel .app-icon, .dashboard-grace-panel .app-icon) { color: var(--color-teal); }
+:root[data-system-theme='eclipse'] .app-layout :is(.task-cycle-track, .dashboard-task-cycle__track) { background: transparent; }
+:root[data-system-theme='eclipse'] .app-layout :is(.task-cycle-track li span, .dashboard-task-cycle__track li span) { border-color: var(--color-line); background: var(--surface-card-nested); color: var(--color-muted); }
+:root[data-system-theme='eclipse'] .app-layout :is(.task-cycle-track li.is-current span, .dashboard-task-cycle__track li.is-current span) { border-color: var(--color-accent); background: var(--accent-soft); color: var(--color-teal); }
+:root[data-system-theme='eclipse'] .app-layout .dashboard-progression-benefit { border-color: var(--color-line); background: var(--surface-card); color: var(--color-text); }
+:root[data-system-theme='eclipse'] .app-layout :is(.dashboard-progression-benefit__source, .dashboard-progression-benefit .app-panel__note, .dashboard-progression-benefit__cap > div > span, .dashboard-progression-benefit__list li > span, .dashboard-progression-benefit__top-rank p) { color: var(--color-muted); }
+:root[data-system-theme='eclipse'] .app-layout .dashboard-progression-benefit__cap,
+:root[data-system-theme='eclipse'] .app-layout .dashboard-progression-benefit__top-rank { border-color: var(--color-line); background: var(--surface-card-nested); color: var(--color-text); }
+:root[data-system-theme='eclipse'] .app-layout :is(.dashboard-progression-benefit__multiplier, .dashboard-progression-benefit__list li > strong, .dashboard-progression-benefit__next-title > strong, .dashboard-progression-benefit__cap > div > strong) { border-color: color-mix(in srgb, var(--color-teal) 36%, var(--color-line)); background: color-mix(in srgb, var(--color-teal) 8%, var(--surface-card-nested)); color: var(--color-teal); }
+:root[data-system-theme='eclipse'] .app-layout .dashboard-progression-benefit__icon { border-color: color-mix(in srgb, var(--color-accent) 38%, var(--color-line)); background: var(--accent-soft); color: var(--color-teal); }
+:root[data-system-theme='eclipse'] .app-layout .dashboard-progression-benefit__next-title { border-color: var(--color-line); background: var(--surface-card-nested); color: var(--color-muted); }
+:root[data-system-theme='eclipse'] .app-layout .dashboard-progression-benefit__cap .app-progress-bar__track { background: var(--surface-progress-track); }
+:root[data-system-theme='eclipse'] .app-layout .dashboard-progression-benefit__cap .app-progress-bar__fill { background: var(--progress-fill); }
+:root[data-system-theme='eclipse'] .app-layout .grace-charge-summary { border-color: var(--color-line); background: var(--surface-card); color: var(--color-text); }
+:root[data-system-theme='eclipse'] .app-layout .grace-charge-summary__icon { border-color: color-mix(in srgb, var(--color-accent) 40%, var(--color-line)); background: var(--accent-soft); color: var(--color-teal); }
+:root[data-system-theme='eclipse'] .app-layout .grace-charge-summary__balance h2 { color: var(--color-text); }
+:root[data-system-theme='eclipse'] .app-layout .grace-charge-summary__balance h2 span,
+:root[data-system-theme='eclipse'] .app-layout .grace-charge-summary__explanation { color: var(--color-muted); }
+:root[data-system-theme='eclipse'] .app-layout .grace-charge-summary__pips > span { background: var(--surface-progress-track); }
+:root[data-system-theme='eclipse'] .app-layout .grace-charge-summary__pips > span.is-available { background: var(--progress-fill); box-shadow: 0 0 8px rgb(167 139 250 / 20%); }
+:root[data-system-theme='eclipse'] .app-layout .grace-charge-summary__pips strong { color: var(--color-teal); }
+:root[data-system-theme='eclipse'] .app-layout .dashboard-grace-panel__links .dashboard-text-link { color: var(--color-teal); }
+:root[data-system-theme='eclipse'] .app-layout .dashboard-grace-panel__links .dashboard-text-link:hover { color: var(--color-text); }
+:root[data-system-theme='eclipse'] .app-layout :is(.dashboard-text-link, .app-panel__small-link, .app-panel__footer-link) { color: var(--color-accent); }
+:root[data-system-theme='eclipse'] .app-layout :is(.dashboard-text-link, .app-panel__small-link, .app-panel__footer-link):hover { color: var(--color-teal); }
+
+/* Keep the XP cap as a simple divider and progress track, not a gray inset slab. */
+:root[data-system-theme='eclipse'] .app-layout .dashboard-progression-benefit__cap {
+  border-top-color: var(--color-line);
+  background: transparent;
+}
+:root[data-system-theme='eclipse'] .app-layout .dashboard-progression-benefit__cap > div:first-child {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+:root[data-system-theme='eclipse'] .app-layout .dashboard-progression-benefit__cap > div:first-child strong {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-teal);
+}
+
+/* Three equal metric tiles keep the Discipline summary balanced on wide cards. */
+:root[data-system-theme='eclipse'] .app-layout .dashboard-discipline-stats {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+:root[data-system-theme='eclipse'] .app-layout .dashboard-discipline-stats > div {
+  display: grid;
+  min-width: 0;
+  min-height: 70px;
+  align-content: center;
+  gap: 5px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-line);
+  border-radius: 8px;
+  background: linear-gradient(155deg, color-mix(in srgb, var(--surface-card-nested) 82%, transparent), var(--surface-card));
+}
+:root[data-system-theme='eclipse'] .app-layout .dashboard-discipline-stats strong {
+  font-size: 1.25rem;
+  line-height: 1.1;
+}
+:root[data-system-theme='eclipse'] .app-layout .dashboard-discipline-stats span {
+  font-size: .67rem;
+  line-height: 1.35;
+}
+@media (max-width: 680px) {
+  :root[data-system-theme='eclipse'] .app-layout .dashboard-discipline-stats { grid-template-columns: 1fr; gap: 8px; }
+  :root[data-system-theme='eclipse'] .app-layout .dashboard-discipline-stats > div {
+    min-height: 0;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    padding: 9px 12px;
+  }
+}
+
+

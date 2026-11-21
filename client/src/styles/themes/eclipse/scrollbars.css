@@ -1,0 +1,15 @@
+:root[data-system-theme='eclipse'] *,
+.leaderboard-public-profile[data-system-theme='eclipse'] * {
+  scrollbar-color: #4B3D70 #090812;
+  scrollbar-width: thin;
+}
+:root[data-system-theme='eclipse'] *::-webkit-scrollbar,
+.leaderboard-public-profile[data-system-theme='eclipse'] *::-webkit-scrollbar { width: 9px; height: 9px; }
+:root[data-system-theme='eclipse'] *::-webkit-scrollbar-track,
+.leaderboard-public-profile[data-system-theme='eclipse'] *::-webkit-scrollbar-track { border: 1px solid #28213B; border-radius: 99px; background: #090812; }
+:root[data-system-theme='eclipse'] *::-webkit-scrollbar-thumb,
+.leaderboard-public-profile[data-system-theme='eclipse'] *::-webkit-scrollbar-thumb { min-height: 34px; border: 2px solid #090812; border-radius: 99px; background: linear-gradient(180deg, #806CCE, #C8C9E0); }
+:root[data-system-theme='eclipse'] *::-webkit-scrollbar-thumb:hover,
+.leaderboard-public-profile[data-system-theme='eclipse'] *::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, #B7A8F5, #E7DFFF); }
+
+

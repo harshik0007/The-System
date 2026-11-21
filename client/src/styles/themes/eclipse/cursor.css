@@ -1,0 +1,30 @@
+.eclipse-cursor { position: fixed; z-index: var(--z-cursor); inset: 0; overflow: visible; pointer-events: none; }
+.eclipse-cursor__position { position: fixed; top: 0; left: 0; width: 36px; height: 44px; opacity: 1; will-change: transform; transition: opacity 90ms ease; }
+.eclipse-cursor__position.is-offscreen { opacity: 0; }
+.eclipse-cursor__pointer { display: block; width: 36px; height: 44px; overflow: visible; filter: drop-shadow(0 2px 3px rgb(0 0 0 / 75%)) drop-shadow(0 0 5px rgb(118 87 255 / 36%)); transition: filter 140ms ease, transform 120ms ease; }
+.eclipse-cursor__pointer-edge { fill: #110F1A; stroke: #C8C9E0; stroke-width: 1.4; stroke-linejoin: round; }
+.eclipse-cursor__pointer-core { fill: #201B35; stroke: #A78BFA; stroke-width: .7; stroke-linejoin: round; }
+.eclipse-cursor__pointer-glint { stroke: #F4F2FF; stroke-width: .8; stroke-linecap: round; opacity: .78; }
+.eclipse-cursor__pointer-orbit { fill: #7657FF; stroke: #E7DFFF; stroke-width: .7; }
+.eclipse-cursor__satellite { position: absolute; display: block; width: 5px; height: 5px; border: 1px solid #D9D2F0; border-radius: 50%; background: #7657FF; box-shadow: 0 0 6px rgb(167 139 250 / 68%); }
+.eclipse-cursor__satellite--one { top: 26px; left: 27px; }
+.eclipse-cursor__satellite--two { top: 37px; left: 31px; width: 3px; height: 3px; background: #C8C9E0; }
+.eclipse-cursor.is-hovering .eclipse-cursor__pointer { filter: drop-shadow(0 0 7px rgb(167 139 250 / 78%)) drop-shadow(0 0 10px rgb(200 201 224 / 32%)); }
+.eclipse-cursor.is-hovering .eclipse-cursor__pointer-edge { stroke: #F4F2FF; }
+.eclipse-cursor.is-pressed .eclipse-cursor__pointer { transform: scale(.94); }
+.eclipse-cursor__click-wave { position: fixed; z-index: 1; width: 22px; height: 22px; border: 1px solid rgb(200 201 224 / 84%); border-radius: 50%; background: radial-gradient(circle, rgb(167 139 250 / 23%), transparent 68%); box-shadow: 0 0 12px rgb(118 87 255 / 36%); pointer-events: none; transform: translate(-50%, -50%) scale(.25); animation: eclipse-cursor-wave 580ms cubic-bezier(.14,.6,.22,1) both; }
+.eclipse-cursor__click-wave::before,
+.eclipse-cursor__click-wave::after { position: absolute; top: 50%; left: 50%; width: 4px; height: 4px; border: 1px solid #E7DFFF; content: ''; transform: translate(-50%, -50%) rotate(45deg); }
+.eclipse-cursor__click-wave::after { width: 30px; height: 30px; border-color: rgb(167 139 250 / 55%); border-radius: 50%; }
+html.has-eclipse-cursor,
+html.has-eclipse-cursor body,
+html.has-eclipse-cursor body *,
+html.has-eclipse-cursor body *::before,
+html.has-eclipse-cursor body *::after,
+html.has-eclipse-cursor body input[type='file']::file-selector-button,
+html.has-eclipse-cursor body input[type='file']::-webkit-file-upload-button { cursor: none !important; }
+.theme-transition-overlay-active .eclipse-cursor { display: none !important; }
+
+@keyframes eclipse-cursor-wave { 0% { opacity: .75; transform: translate(-50%, -50%) scale(.25); } 70% { opacity: .45; } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.7); } }
+@media (prefers-reduced-motion: reduce) { .eclipse-cursor__position, .eclipse-cursor__pointer { transition: none; } .eclipse-cursor__click-wave { display: none; animation: none; } }
+

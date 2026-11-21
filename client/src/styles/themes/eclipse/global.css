@@ -1,0 +1,44 @@
+:root[data-system-theme='eclipse'] body {
+  background: var(--surface-page);
+  color: var(--color-text);
+  accent-color: var(--color-teal);
+}
+
+:root[data-system-theme='eclipse'] ::selection {
+  background: var(--selection-bg);
+  color: var(--selection-text);
+}
+
+:root[data-system-theme='eclipse'] :is(.app-layout, .app-panel, .settings-content, .settings-nav, .app-popover, [role='dialog']) {
+  color-scheme: dark;
+}
+
+:root[data-system-theme='eclipse'] :is(button, a, input, textarea, select, [role='button'], [role='tab']):focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+
+:root[data-system-theme='eclipse'] .leaderboard-public-profile {
+  min-height: 100vh;
+  padding: clamp(1rem, 3vw, 2rem);
+  background: radial-gradient(ellipse at 50% 0%, rgb(167 139 250 / 8%), transparent 34rem), var(--surface-page);
+  color: var(--color-text);
+}
+
+.leaderboard-public-profile[data-system-theme='eclipse'] :is(.leaderboard-profile-card, .leaderboard-profile-card__notice) {
+  border-color: var(--color-line);
+  background: linear-gradient(145deg, var(--surface-card), var(--surface-page));
+  color: var(--color-text);
+}
+
+.leaderboard-public-profile[data-system-theme='eclipse'] .leaderboard-back-link { color: var(--color-ice); }
+.leaderboard-public-profile[data-system-theme='eclipse'] .leaderboard-profile-card__content h1 { color: var(--color-text); }
+.leaderboard-public-profile[data-system-theme='eclipse'] .leaderboard-profile-card__rank { color: var(--color-violet); }
+.leaderboard-public-profile[data-system-theme='eclipse'] .leaderboard-profile-card__description { color: var(--color-muted); }
+.leaderboard-public-profile[data-system-theme='eclipse'] .leaderboard-profile-card__stats { border-color: var(--color-line); }
+.leaderboard-public-profile[data-system-theme='eclipse'] .leaderboard-profile-card__stats > div { border-color: var(--color-line); }
+.leaderboard-public-profile[data-system-theme='eclipse'] .leaderboard-profile-card__stats dt { color: var(--color-ice); }
+.leaderboard-public-profile[data-system-theme='eclipse'] .leaderboard-profile-card__stats dd { color: var(--color-text); }
+.leaderboard-public-profile[data-system-theme='eclipse'] .leaderboard-profile-card__notice { border-left-color: var(--color-teal); }
+
+

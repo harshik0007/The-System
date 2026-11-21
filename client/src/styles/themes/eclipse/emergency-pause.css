@@ -1,0 +1,126 @@
+.eclipse-totality {
+  position: fixed;
+  z-index: 0;
+  inset: 0;
+  overflow: hidden;
+  contain: strict;
+  isolation: isolate;
+  opacity: 1;
+  pointer-events: none;
+  transition: opacity 520ms ease;
+}
+
+.eclipse-totality[data-document-visible='false'] * { animation-play-state: paused !important; }
+.eclipse-totality[data-phase='ending'] { opacity: 0; transition-duration: 2.4s; }
+.eclipse-totality[data-phase='ending'] .eclipse-totality__resonance-ring { animation-play-state: paused; }
+.eclipse-totality__field,
+.eclipse-totality__particle-canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; pointer-events: none; }
+.eclipse-totality__field {
+  z-index: 0;
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 40% 43% at 50% 50%, rgb(118 87 255 / 17%), transparent 73%),
+    radial-gradient(ellipse 80% 68% at 50% 50%, rgb(21 16 42 / 21%), transparent 78%),
+    radial-gradient(ellipse 72% 32% at 48% 0%, rgb(118 87 255 / 9%), transparent 82%);
+  animation: eclipse-field-resonance 19s ease-in-out infinite alternate;
+}
+.eclipse-totality__particle-canvas--back { z-index: 1; }
+.eclipse-totality__particle-canvas--front { z-index: 3; }
+
+.eclipse-totality__moon {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  left: 50%;
+  width: clamp(280px, 30vw, 380px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  opacity: .78;
+  transform: translate(-50%, -50%);
+  will-change: transform, opacity;
+}
+.eclipse-totality__moon-corona,
+.eclipse-totality__moon-silver-rim,
+.eclipse-totality__moon-disc,
+.eclipse-totality__moon-shadow { position: absolute; display: block; border-radius: 50%; }
+.eclipse-totality__moon-corona {
+  inset: -8%;
+  background:
+    radial-gradient(circle, transparent 61%, rgb(118 87 255 / 5%) 64%, rgb(167 139 250 / 35%) 67%, rgb(231 223 255 / 65%) 68.2%, rgb(118 87 255 / 16%) 70%, transparent 75%),
+    conic-gradient(from 0deg, transparent 0deg 23deg, rgb(118 87 255 / 18%) 35deg, rgb(231 223 255 / 72%) 48deg, transparent 60deg 126deg, rgb(167 139 250 / 30%) 146deg, transparent 166deg 272deg, rgb(231 223 255 / 52%) 293deg, transparent 313deg);
+  filter: drop-shadow(0 0 18px rgb(118 87 255 / 54%));
+  animation: eclipse-corona-breathe 8.5s ease-in-out infinite alternate, eclipse-corona-turn 80s linear infinite;
+}
+.eclipse-totality__moon-silver-rim { inset: 2.5%; border: 1px solid rgb(231 223 255 / 61%); box-shadow: inset 0 0 12px rgb(231 223 255 / 15%), 0 0 10px rgb(200 201 224 / 21%); }
+.eclipse-totality__moon-disc {
+  inset: 7%;
+  overflow: hidden;
+  border: 1px solid rgb(183 168 245 / 58%);
+  background:
+    radial-gradient(ellipse at 28% 23%, rgb(92 81 118 / 24%), transparent 39%),
+    radial-gradient(ellipse at 74% 72%, rgb(12 10 20 / 91%), transparent 47%),
+    radial-gradient(circle at 46% 42%, #1A1725 0%, #0D0B14 54%, #050509 100%);
+  box-shadow: 0 0 30px rgb(118 87 255 / 30%), 0 0 84px rgb(118 87 255 / 17%), inset 9px 4px 28px rgb(231 223 255 / 8%), inset -18px -8px 36px rgb(0 0 0 / 86%);
+}
+.eclipse-totality__moon-shadow { inset: 7%; z-index: 1; background: linear-gradient(100deg, transparent 27%, rgb(3 3 8 / 6%) 41%, rgb(3 3 8 / 79%) 75%, rgb(3 3 8 / 35%) 100%); }
+.eclipse-totality__moon-crater { position: absolute; z-index: 2; display: block; border: 1px solid rgb(200 201 224 / 9%); border-radius: 50%; background: radial-gradient(circle at 35% 30%, rgb(3 3 8 / 18%), rgb(105 95 131 / 9%) 42%, rgb(1 1 4 / 53%) 76%); box-shadow: inset 1px 1px 3px rgb(231 223 255 / 7%), 0 0 4px rgb(167 139 250 / 8%); }
+.eclipse-totality__moon-crater--one { top: 28%; left: 24%; width: 13%; aspect-ratio: 1; }
+.eclipse-totality__moon-crater--two { top: 55%; left: 62%; width: 9%; aspect-ratio: 1; }
+.eclipse-totality__moon-crater--three { top: 68%; left: 35%; width: 6%; aspect-ratio: 1; }
+.eclipse-totality__moon-glint { position: absolute; z-index: 3; top: 10%; left: 25%; width: 26%; height: 1px; border-radius: 50%; background: linear-gradient(90deg, transparent, rgb(231 223 255 / 63%), transparent); transform: rotate(-25deg); }
+
+.eclipse-totality__resonance-ring { position: absolute; top: 50%; left: 50%; width: 72%; height: 72%; border: 1px solid rgb(183 168 245 / 33%); border-radius: 50%; opacity: 0; transform: translate(-50%, -50%) scale(.55); }
+.eclipse-totality__resonance-ring--one { animation: eclipse-ring-expand 8.8s ease-out 1.1s infinite; }
+.eclipse-totality__resonance-ring--two { animation: eclipse-ring-expand 11.2s ease-out 5.7s infinite; }
+
+.eclipse-totality[data-phase='entering'] .eclipse-totality__moon { animation: eclipse-moon-arrive 2.3s cubic-bezier(.2,.7,.24,1) both; }
+.eclipse-totality[data-phase='ending'] .eclipse-totality__moon { animation: eclipse-moon-depart 2.25s cubic-bezier(.45,.02,.72,.43) both; }
+.eclipse-totality[data-phase='ending'] .eclipse-totality__moon-corona { animation: eclipse-corona-dim 2.25s ease both; }
+.eclipse-totality.is-static .eclipse-totality__moon { opacity: .74; }
+.eclipse-totality.is-static .eclipse-totality__moon-corona,
+.eclipse-totality.is-static .eclipse-totality__field { animation: none; }
+.eclipse-totality.is-effects-reduced :is(.eclipse-totality__resonance-ring, .eclipse-totality__moon-glint) { display: none; }
+.eclipse-totality.is-effects-reduced .eclipse-totality__moon-corona { opacity: .58; }
+
+@keyframes eclipse-field-resonance { from { opacity: .56; } to { opacity: .92; } }
+@keyframes eclipse-corona-breathe { from { opacity: .64; transform: scale(.99); } to { opacity: 1; transform: scale(1.025); } }
+@keyframes eclipse-corona-turn { to { rotate: 360deg; } }
+@keyframes eclipse-ring-expand { 0% { opacity: 0; transform: translate(-50%, -50%) scale(.55); } 10% { opacity: .42; } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.95); } }
+@keyframes eclipse-moon-arrive { from { opacity: 0; transform: translate(-50%, -50%) translate3d(0, -145vh, 0) scale(.8); } 72% { opacity: .8; transform: translate(-50%, -50%) translate3d(0, 2vh, 0) scale(1.015); } to { opacity: .78; transform: translate(-50%, -50%) translate3d(0, 0, 0) scale(1); } }
+@keyframes eclipse-moon-depart { from { opacity: .78; transform: translate(-50%, -50%) translate3d(0, 0, 0) scale(1); } to { opacity: 0; transform: translate(-50%, -50%) translate3d(0, 145vh, 0) scale(.9); } }
+@keyframes eclipse-corona-dim { to { opacity: .06; } }
+
+/* Keep the cosmic field behind the app while allowing controlled light through card surfaces. */
+:root[data-system-theme='eclipse'] body.eclipse-emergency-active .app-layout {
+  position: relative;
+  z-index: 2;
+  background: transparent;
+}
+:root[data-system-theme='eclipse'] body.eclipse-emergency-active :is(.app-layout__main, .app-layout__content) { background: transparent; }
+:root[data-system-theme='eclipse'] body.eclipse-emergency-active .app-sidebar { background: linear-gradient(180deg, rgb(13 12 23 / 91%), rgb(9 8 18 / 93%)); }
+:root[data-system-theme='eclipse'] body.eclipse-emergency-active .app-topbar { background: rgb(9 8 18 / 91%); }
+:root[data-system-theme='eclipse'] body.eclipse-emergency-active .app-layout :is(
+  .app-panel, .settings-content, .settings-nav, .settings-toggle-list, .settings-notification-group,
+  .settings-theme-card, .settings-readonly, .settings-accessibility-grid article, .settings-avatar-choice,
+  .leaderboard-list, .monthly-panel, .monthly-retention-panel, .monthly-balance-card, .recovery-quest-card,
+  .discipline-reward, .task-builder-panel, .task-builder-form, .task-builder-schedule, .task-builder-task,
+  .task-builder-existing-day, .task-review-day, .task-card, .daily-task-summary, .task-cycle-panel,
+  .task-change-allowance, .dashboard-rank-panel, .dashboard-stat-card, .dashboard-xp-panel,
+  .dashboard-discipline-panel, .dashboard-grace-card
+) {
+  background-color: rgb(21 19 34 / 84%);
+  background-image: linear-gradient(150deg, rgb(32 27 53 / 76%), rgb(9 8 18 / 86%) 82%);
+}
+
+@media (max-width: 760px) {
+  .eclipse-totality__moon { width: min(58vw, 300px); opacity: .62; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eclipse-totality, .eclipse-totality__moon { transition-duration: 220ms; animation: none !important; }
+  .eclipse-totality__moon { opacity: .72; transform: translate(-50%, -50%); }
+  .eclipse-totality :is(.eclipse-totality__field, .eclipse-totality__moon-corona, .eclipse-totality__resonance-ring) { animation: none !important; }
+  .eclipse-totality[data-phase='ending'] { opacity: 0; }
+}
+
