@@ -2,6 +2,15 @@
 *::before,
 *::after { box-sizing: border-box; }
 
+/* One THE SYSTEM scrollbar treatment for document and nested scroll regions. */
+* { scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track); scrollbar-width: thin; }
+*::-webkit-scrollbar { width: 12px; height: 12px; }
+*::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+*::-webkit-scrollbar-thumb { min-height: 34px; border: 3px solid var(--scrollbar-track); border-radius: 99px; background: var(--scrollbar-thumb); }
+*::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-hover); }
+*::-webkit-scrollbar-thumb:active { background: var(--scrollbar-thumb-active); }
+*::-webkit-scrollbar-corner { background: var(--scrollbar-track); }
+
 html { scroll-behavior: smooth; }
 
 body {
@@ -10,8 +19,12 @@ body {
   background: var(--color-bg);
   color: var(--color-text);
   font-family: var(--font-body);
+  font-size: var(--type-body);
+  line-height: 1.55;
   -webkit-font-smoothing: antialiased;
 }
+
+button, input, select, textarea { font-family: inherit; font-size: inherit; }
 
 body::before {
   position: fixed;
@@ -25,8 +38,48 @@ body::before {
 
 a { color: inherit; text-decoration: none; }
 button, a { -webkit-tap-highlight-color: transparent; }
-a:focus-visible, button:focus-visible { outline: 2px solid var(--color-cyan); outline-offset: 4px; }
-::selection { color: #06101b; background: #83d5ff; }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 4px; }
+.button {
+  appearance: none;
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: .65rem;
+  padding: 0 1rem;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  color: var(--button-secondary-text);
+  font: 600 .76rem/1.2 var(--font-body);
+  letter-spacing: .01em;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform var(--motion-fast), box-shadow var(--motion-fast), border-color var(--motion-fast), background var(--motion-fast), color var(--motion-fast), opacity var(--motion-fast);
+}
+.button:hover:not(:disabled) { transform: translateY(-1px); }
+.button:active:not(:disabled) { transform: translateY(0); }
+.button:disabled { opacity: .54; cursor: not-allowed; }
+.button--primary {
+  color: var(--button-primary-text);
+  background: var(--button-primary-bg);
+  box-shadow: 0 0 20px color-mix(in srgb, var(--color-accent) 16%, transparent), inset 0 1px 0 rgb(255 255 255 / 45%);
+}
+.button--primary:hover:not(:disabled) { background: var(--button-primary-hover); box-shadow: 0 0 30px color-mix(in srgb, var(--color-accent) 28%, transparent), inset 0 1px 0 rgb(255 255 255 / 55%); }
+.button--quiet, .button--secondary {
+  border-color: var(--color-line);
+  color: var(--button-secondary-text);
+  background: var(--button-secondary-bg);
+  box-shadow: inset 0 1px rgb(255 255 255 / 3%);
+}
+.button--quiet:hover:not(:disabled), .button--secondary:hover:not(:disabled) {
+  border-color: var(--border-interactive);
+  color: var(--color-text);
+  background: var(--button-secondary-hover);
+  box-shadow: 0 8px 22px rgb(0 0 0 / 18%), 0 0 16px color-mix(in srgb, var(--color-accent) 10%, transparent), inset 0 1px rgb(255 255 255 / 4%);
+}
+.button--quiet:focus-visible, .button--secondary:focus-visible, .button--primary:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 3px; }
+::selection { color: var(--selection-text); background: var(--selection-bg); }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }

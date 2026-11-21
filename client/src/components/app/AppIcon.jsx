@@ -10,6 +10,7 @@ const icons = {
   bell: <><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9Z"/><path d="M10 21h4"/></>,
   menu: <><path d="M4 7h16M4 12h16M4 17h16"/></>,
   close: <><path d="m6 6 12 12M18 6 6 18"/></>,
+  check: <><path d="m5 12 4.2 4.2L19 6.5"/></>,
   arrow: <><path d="M5 12h14M13 6l6 6-6 6"/></>,
   clock: <><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/></>,
   spark: <><path d="m12 3 1.7 6.3L20 11l-6.3 1.7L12 19l-1.7-6.3L4 11l6.3-1.7L12 3Z"/><path d="m19 16 .8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8L19 16Z"/></>,
