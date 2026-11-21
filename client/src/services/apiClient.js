@@ -103,7 +103,8 @@ function announceUnauthorized(path, response) {
   }
 }
 
-async function fetchWithCsrf(path, { method, body, headers, signal }) {
+async function fetchWithCsrf(path, requestOptions, retryInvalidCsrf = true) {
+  const { method, body, headers, signal } = requestOptions;
   const requestHeaders = { ...headers };
   if (!isSafeMethod(method)) requestHeaders['X-CSRF-Token'] = await getCsrfToken(signal);
   let response;
@@ -122,24 +123,37 @@ async function fetchWithCsrf(path, { method, body, headers, signal }) {
   if (response.status === 403 && !isSafeMethod(method)) {
     const payload = await readJson(response.clone());
     if (['CSRF_INVALID', 'CSRF_VALIDATION_FAILED', 'INVALID_CSRF_TOKEN'].includes(payload?.error?.code)) {
+      const originalError = apiErrorFromResponse(response, payload);
+      if (!retryInvalidCsrf) {
+        const requestReference = originalError.requestId ? ` Reference ID: ${originalError.requestId}.` : '';
+        throw new ApiError(
+          originalError.status,
+          originalError.code,
+          `The server still could not validate this session after refreshing the security token. Refresh the page and try again.${requestReference}`,
+          originalError.details,
+          originalError.requestId,
+        );
+      }
+
       invalidateCsrfToken();
-      let refreshed = false;
       try {
         await getCsrfToken(signal);
-        refreshed = true;
       } catch (error) {
         if (error?.name === 'AbortError') throw error;
+        const requestReference = originalError.requestId ? ` Reference ID: ${originalError.requestId}.` : '';
+        throw new ApiError(
+          originalError.status,
+          originalError.code,
+          `Your secure session could not be refreshed. Refresh the page, then try again.${requestReference}`,
+          originalError.details,
+          originalError.requestId,
+        );
       }
-      const originalError = apiErrorFromResponse(response, payload);
-      throw new ApiError(
-        originalError.status,
-        originalError.code,
-        refreshed
-          ? 'Your secure request token was refreshed. Submit again to retry this action.'
-          : 'Your secure session could not be refreshed. Refresh the page, then try again.',
-        originalError.details,
-        originalError.requestId,
-      );
+
+      // The server's CSRF middleware runs before every API handler, so this
+      // specific rejection guarantees the submitted mutation did not execute.
+      // Refresh the session token and retry once; never replay other failures.
+      return fetchWithCsrf(path, requestOptions, false);
     }
   }
   announceUnauthorized(path, response);

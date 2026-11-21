@@ -55,6 +55,8 @@ export function createApp({
   app.use('/api/v1', passportMiddleware.initialize());
   app.use('/api/v1', passportMiddleware.session());
   app.use('/api/v1', resolvedAuthIdentityMiddleware);
+  // Keep CSRF validation ahead of every API handler so rejected mutations
+  // cannot perform domain work before the client refreshes and retries once.
   app.use('/api/v1', createCsrfProtection({ trustedOrigins, nodeEnv, testIdentityInjected: Boolean(testIdentityMiddleware) }));
   app.use('/api/v1', createApiV1Router({ identityMiddleware: testIdentityMiddleware || requireAuthenticatedUser, passport: passportMiddleware }));
   app.use(notFoundHandler);
