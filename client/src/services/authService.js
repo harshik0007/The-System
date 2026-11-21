@@ -1,18 +1,33 @@
-// Authentication is not connected in this frontend preview. Keep these calls
-// as the single integration seam for a future authenticated API.
-export async function changePassword(credentials) {
-  void credentials;
-  return {
-    success: false,
-    reason: 'unavailable',
-    message: 'Password changes are not connected yet. Your current password was not verified and no password was changed.',
-  };
-}
+import { invalidateCsrfToken, requestApi } from './apiClient.js';
 
-export async function signOut() {
-  return {
-    success: false,
-    reason: 'unavailable',
-    message: 'Sign out is not connected in this frontend preview. Your demo session remains active and your progress is unchanged.',
-  };
-}
+const query = (value) => new URLSearchParams({ username: value }).toString();
+
+export const authService = Object.freeze({
+  currentMember: () => requestApi('/auth/me'),
+  capabilities: () => requestApi('/auth/capabilities'),
+  accountDeletionStatus: () => requestApi('/auth/account/deletion/status'),
+  deleteAccount: (details) => requestApi('/auth/account/delete', { method: 'POST', body: details }),
+  usernameAvailability: (username, options) => requestApi(`/auth/username-availability?${query(username)}`, options),
+  signUp: (details) => requestApi('/auth/signup', { method: 'POST', body: details }),
+  login: (credentials) => requestApi('/auth/login', { method: 'POST', body: credentials }),
+  googlePending: () => requestApi('/auth/google/pending'),
+  completeGoogleSignup: (details) => requestApi('/auth/google/complete', { method: 'POST', body: details }),
+  resetPassword: (details) => requestApi('/auth/reset-password', { method: 'POST', body: details }),
+  regenerateRecoveryCodes: (details) => requestApi('/auth/recovery-codes/regenerate', { method: 'POST', body: details }),
+  updateIdentity: (details) => requestApi('/auth/profile', { method: 'PATCH', body: details }),
+  changePassword: (credentials) => requestApi('/auth/change-password', { method: 'POST', body: credentials }),
+  async logout() {
+    try { return await requestApi('/auth/logout', { method: 'POST', body: {} }); }
+    finally { invalidateCsrfToken(); }
+  },
+});
+
+export const signOut = async () => {
+  await authService.logout();
+  return { success: true };
+};
+
+export const changePassword = async (credentials) => {
+  const result = await authService.changePassword(credentials);
+  return { success: true, ...result };
+};

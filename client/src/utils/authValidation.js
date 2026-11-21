@@ -1,8 +1,9 @@
 export const PASSWORD_RULES = [
-  { id: 'length', label: 'At least 8 characters', test: (value) => value.length >= 8 },
-  { id: 'lower', label: 'One lowercase letter', test: (value) => /[a-z]/.test(value) },
-  { id: 'upper', label: 'One uppercase letter', test: (value) => /[A-Z]/.test(value) },
-  { id: 'number', label: 'One number', test: (value) => /\d/.test(value) },
+  { id: 'length', label: 'At least 8 characters', test: (value) => [...value].length >= 8 },
+  { id: 'letter', label: 'At least 1 letter', test: (value) => /\p{L}/u.test(value) },
+  { id: 'digit', label: 'At least 1 number (0–9)', test: (value) => /[0-9]/.test(value) },
+  { id: 'symbol', label: 'At least 1 symbol (not whitespace)', test: (value) => /[\p{P}\p{S}]/u.test(value) },
+  { id: 'maximum', label: 'No more than 1,024 UTF-8 bytes', test: (value) => new TextEncoder().encode(value).length <= 1024 },
 ];
 
 export function isValidEmail(value) {
@@ -14,7 +15,7 @@ export function passwordRules(value) {
 }
 
 export function isStrongPassword(value) {
-  return passwordRules(value).every((rule) => rule.passed);
+  return typeof value === 'string' && passwordRules(value).every((rule) => rule.passed);
 }
 
 export function validatePasswordChange({ currentPassword = '', newPassword = '', confirmPassword = '' } = {}) {
