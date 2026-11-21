@@ -11,6 +11,12 @@ const SESSION_TTL_SECONDS = Math.floor(AUTH_SESSION_ABSOLUTE_MS / 1000);
 const developmentSecret = randomBytes(48).toString('base64url');
 let sharedMongoSessionStore;
 
+function authSessionSameSite(nodeEnv = config.nodeEnv) {
+  // Render gives the frontend and API separate public-suffix domains, so
+  // production API fetches are cross-site and require None + Secure.
+  return nodeEnv === 'production' ? 'none' : 'lax';
+}
+
 function digest(value) {
   return createHash('sha256').update(String(value)).digest();
 }
@@ -52,7 +58,7 @@ export function createExpressSessionMiddleware({
     cookie: {
       httpOnly: true,
       secure: nodeEnv === 'production',
-      sameSite: 'lax',
+      sameSite: authSessionSameSite(nodeEnv),
       path: '/',
       maxAge: AUTH_SESSION_IDLE_MS,
     },
@@ -106,7 +112,7 @@ export async function destroyCurrentAuthSession(request, response) {
     // Keep these options aligned with the session middleware. No unrelated
     // browser cookies are touched.
     response.clearCookie(config.authSessionCookieName, {
-      path: '/', httpOnly: true, secure: config.nodeEnv === 'production', sameSite: 'lax',
+      path: '/', httpOnly: true, secure: config.nodeEnv === 'production', sameSite: authSessionSameSite(),
     });
     request.authSession = null;
     request.authMember = null;
@@ -145,7 +151,7 @@ export function createAuthSessionMiddleware({ now = () => new Date() } = {}) {
     try {
       if (!passportUser?.id || String(passportUser.id) !== String(sessionAuth.userId)) {
         await callSessionMethod(request.session, 'destroy');
-        response.clearCookie(config.authSessionCookieName, { path: '/', httpOnly: true, secure: config.nodeEnv === 'production', sameSite: 'lax' });
+        response.clearCookie(config.authSessionCookieName, { path: '/', httpOnly: true, secure: config.nodeEnv === 'production', sameSite: authSessionSameSite() });
         request.user = undefined;
         request.authSession = null;
         return next();
@@ -153,7 +159,7 @@ export function createAuthSessionMiddleware({ now = () => new Date() } = {}) {
       const issuedAt = Number(sessionAuth.issuedAt);
       if (!Number.isFinite(issuedAt) || now().getTime() - issuedAt > AUTH_SESSION_ABSOLUTE_MS) {
         await callSessionMethod(request.session, 'destroy');
-        response.clearCookie(config.authSessionCookieName, { path: '/', httpOnly: true, secure: config.nodeEnv === 'production', sameSite: 'lax' });
+        response.clearCookie(config.authSessionCookieName, { path: '/', httpOnly: true, secure: config.nodeEnv === 'production', sameSite: authSessionSameSite() });
         request.user = undefined;
         request.authMember = null;
         return next();
@@ -161,7 +167,7 @@ export function createAuthSessionMiddleware({ now = () => new Date() } = {}) {
       const user = passportUser;
       if (!user || user.accountStatus !== 'active' || (user.authVersion || 0) !== sessionAuth.authVersion) {
         await callSessionMethod(request.session, 'destroy');
-        response.clearCookie(config.authSessionCookieName, { path: '/', httpOnly: true, secure: config.nodeEnv === 'production', sameSite: 'lax' });
+        response.clearCookie(config.authSessionCookieName, { path: '/', httpOnly: true, secure: config.nodeEnv === 'production', sameSite: authSessionSameSite() });
         request.user = undefined;
         request.authMember = null;
         request.authSession = null;
