@@ -2,7 +2,7 @@ import RankBadge from './RankBadge.jsx';
 import RankUnlockReveal from './RankUnlockReveal.jsx';
 
 export default function RankBadgeShowcase({ rank, isEarned = false, serialNumber, achievementRevealActive = false }) {
-  const serial = isEarned ? (serialNumber || 'SERIAL PENDING') : rank.demo.exampleSerial;
+  const serial = serialNumber || (isEarned ? 'SERIAL PENDING' : 'NOT ASSIGNED');
   const presentation = isEarned ? 'earned' : 'preview';
 
   return (

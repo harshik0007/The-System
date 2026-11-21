@@ -13,7 +13,6 @@ export default function RankCard({ rank }) {
       <span className="rank-card__emblem" aria-hidden="true"><RankLogo rank={rank} /></span>
       <span className="rank-card__identity"><span className="rank-card__name">{rank.name}</span></span>
       <span className="rank-card__description">{rank.shortDescription}</span>
-      <span className="rank-card__members"><strong>{rank.demo.membersEarned.toLocaleString('en-US')}</strong><span>earned members <i>demo</i></span></span>
       <span className="rank-card__action">VIEW RANK <b aria-hidden="true">↗</b></span>
     </Link>
   );

@@ -6,7 +6,7 @@ export default function RankBadge({ rank, serialNumber, size = 'medium', classNa
   const reactId = useId().replace(/:/g, '');
   const id = `award-${reactId}`;
   const isReference = presentation === 'reference';
-  const serial = serialNumber || (presentation === 'preview' ? rank.demo?.exampleSerial : isReference ? 'NOT ASSIGNED' : 'SERIAL PENDING');
+  const serial = serialNumber || (isReference ? 'NOT ASSIGNED' : 'SERIAL PENDING');
   const [, accent, highlight] = badgeTones[rank.slug] || [rank.color, rank.color, '#F5FAFF'];
   const accessiblePresentation = presentation === 'earned' ? 'earned badge' : isReference ? 'reference artwork with no member serial assigned' : 'badge preview';
   return (
@@ -29,7 +29,7 @@ export default function RankBadge({ rank, serialNumber, size = 'medium', classNa
         <path className="rank-badge__serial-plate" d="M91 342h138l14 17-14 17H91l-14-17Z" fill="#080E17" stroke={accent} strokeWidth="1.6"/>
         <path className="rank-badge__serial-highlight" d="M104 346h112" stroke={highlight} strokeOpacity=".42"/>
         <text x="160" y="363" className="rank-badge__serial" textAnchor="middle" fill="#F5FAFF">{serial}</text>
-        <text x="160" y="395" className="rank-badge__state" textAnchor="middle" fill={highlight}>{presentation === 'earned' ? 'EARNED' : isReference ? 'REFERENCE' : 'EXAMPLE'}</text>
+        <text x="160" y="395" className="rank-badge__state" textAnchor="middle" fill={highlight}>{presentation === 'earned' ? 'EARNED' : isReference ? 'REFERENCE' : 'PREVIEW'}</text>
       </svg>
     </RankBadgeAura>
   );

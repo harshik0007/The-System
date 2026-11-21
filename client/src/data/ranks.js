@@ -3,7 +3,7 @@ const circle = (cx, cy, r, className = '') => ({ type: 'circle', cx, cy, r, clas
 
 export const ranks = [
   {
-    number: '07', progressionOrder: 1, name: 'Origin', slug: 'origin', colorName: 'Ice Blue', color: '#78C9F2', prefix: 'OR', aura: 'origin', demo: { membersEarned: 42816, exampleSerial: 'OR.18426' },
+    number: '07', progressionOrder: 1, name: 'Origin', slug: 'origin', colorName: 'Ice Blue', color: '#78C9F2', prefix: 'OR', aura: 'origin',
     spectrum: 'linear-gradient(112deg, #78C9F2, #d9f4ff 52%, #78C9F2)',
     shortDescription: 'Every meaningful change begins with a deliberate first step.',
     description: 'Every meaningful change begins with a deliberate first step. This is where your progression starts.',
@@ -11,7 +11,7 @@ export const ranks = [
     badge: { frame: 'M90 5 143 27 151 80 139 137 90 183 41 137 29 80 37 27Z', motif: 'M90 43v22l17 10' },
   },
   {
-    number: '06', progressionOrder: 2, name: 'Ember', slug: 'ember', colorName: 'Flame Orange', color: '#FF9857', prefix: 'EM', aura: 'ember', demo: { membersEarned: 28204, exampleSerial: 'EM.10284' },
+    number: '06', progressionOrder: 2, name: 'Ember', slug: 'ember', colorName: 'Flame Orange', color: '#FF9857', prefix: 'EM', aura: 'ember',
     spectrum: 'linear-gradient(112deg, #FF9857, #ffe0ad 52%, #FF9857)',
     shortDescription: 'Small actions begin to form a lasting pattern.',
     description: 'Small actions begin to form a pattern. A commitment becomes something you return to.',
@@ -19,7 +19,7 @@ export const ranks = [
     badge: { frame: 'M90 7 112 20 128 17 136 37 152 53 143 75 147 98 129 113 122 138 101 145 90 178 79 145 58 138 51 113 33 98 37 75 28 53 44 37 52 17 68 20Z', motif: 'M90 43c0 12-10 16-9 28 1 8 10 13 17 7 6-5 2-12-2-17-2 8-8 9-8 15' },
   },
   {
-    number: '05', progressionOrder: 3, name: 'Surge', slug: 'surge', colorName: 'Turquoise', color: '#54D7C5', prefix: 'SU', aura: 'surge', demo: { membersEarned: 16742, exampleSerial: 'SU.05291' },
+    number: '05', progressionOrder: 3, name: 'Surge', slug: 'surge', colorName: 'Turquoise', color: '#54D7C5', prefix: 'SU', aura: 'surge',
     spectrum: 'linear-gradient(112deg, #54D7C5, #d5fff6 52%, #54D7C5)',
     shortDescription: 'Repeated effort creates momentum.',
     description: 'Repeated effort creates momentum. Your progress becomes visible through what you keep doing.',
@@ -27,7 +27,7 @@ export const ranks = [
     badge: { frame: 'M90 7c14 12 37 8 48 23 11 14 2 31 6 48 5 20-10 38-25 48-11 9-18 25-29 34-11-9-18-25-29-34-15-10-30-28-25-48 4-17-5-34 6-48C53 15 76 19 90 7Z', motif: 'M47 77c12-14 24-14 36 0s24 14 36 0M51 91c10-11 20-11 30 0s20 11 30 0M57 105c8-8 16-8 24 0s16 8 24 0' },
   },
   {
-    number: '04', progressionOrder: 4, name: 'Vector', slug: 'vector', colorName: 'Electric Blue', color: '#579EFF', prefix: 'VE', aura: 'vector', demo: { membersEarned: 8359, exampleSerial: 'VE.02114' },
+    number: '04', progressionOrder: 4, name: 'Vector', slug: 'vector', colorName: 'Electric Blue', color: '#579EFF', prefix: 'VE', aura: 'vector',
     spectrum: 'linear-gradient(112deg, #579EFF, #dcf0ff 52%, #579EFF)',
     shortDescription: 'Focused effort gives your progress direction.',
     description: 'Your effort has direction. Commitments become deliberate, focused and increasingly reliable.',
@@ -35,7 +35,7 @@ export const ranks = [
     badge: { frame: 'M90 5 158 74 90 179 22 74Z', motif: 'M90 38v48m-24-24h48m-10-12 12 12-12 12' },
   },
   {
-    number: '03', progressionOrder: 5, name: 'Apex', slug: 'apex', colorName: 'Royal Violet', color: '#A38BFF', prefix: 'AP', aura: 'apex', demo: { membersEarned: 3412, exampleSerial: 'AP.00703' },
+    number: '03', progressionOrder: 5, name: 'Apex', slug: 'apex', colorName: 'Royal Violet', color: '#A38BFF', prefix: 'AP', aura: 'apex',
     spectrum: 'linear-gradient(112deg, #A38BFF, #eee8ff 52%, #A38BFF)',
     shortDescription: 'Strong performance becomes dependable.',
     description: 'Strong performance becomes dependable. Progress is sustained across meaningful commitments.',
@@ -43,7 +43,7 @@ export const ranks = [
     badge: { frame: 'M90 6 112 31 143 17 139 54 161 72 136 94 147 133 111 128 90 176 69 128 33 133 44 94 19 72 41 54 37 17 68 31Z', motif: 'M47 115 68 72 82 94 99 56 134 115M60 115 88 79 119 115M79 62l11-13 11 13' },
   },
   {
-    number: '02', progressionOrder: 6, name: 'Zenith', slug: 'zenith', colorName: 'Radiant Gold', color: '#F2C96B', prefix: 'ZE', aura: 'zenith', demo: { membersEarned: 1106, exampleSerial: 'ZE.01028' },
+    number: '02', progressionOrder: 6, name: 'Zenith', slug: 'zenith', colorName: 'Radiant Gold', color: '#F2C96B', prefix: 'ZE', aura: 'zenith',
     emblemName: 'SOLAR DIADEM',
     palette: { shadow: '#3B2514', bronze: '#9B692D', main: '#F2C96B', champagne: '#FFE8AF', platinum: '#F5FAFF' },
     spectrum: 'linear-gradient(112deg, #3B2514 0%, #9B692D 32%, #F2C96B 58%, #FFE8AF 78%, #F5FAFF 100%)',
@@ -54,7 +54,7 @@ export const ranks = [
     badge: { frame: 'M90 5 137 24 157 58 145 94 127 126 90 220 53 126 35 94 23 58 43 24Z', motif: 'M34 76h10m-10 6h7m105-6h-10m10 6h-7M35 131l10-8m90 0 10 8' },
   },
   {
-    number: '01', progressionOrder: 7, name: 'Continuum', slug: 'continuum', emblemName: 'INTERLINKED CONVERGENCE SIGIL', badgeTitle: 'THE ULTIMATE ACHIEVEMENT', colorName: 'Crimson Metal', color: '#F0443E', prefix: 'CO', aura: 'continuum', demo: { membersEarned: 284, exampleSerial: 'CO.00034' },
+    number: '01', progressionOrder: 7, name: 'Continuum', slug: 'continuum', emblemName: 'INTERLINKED CONVERGENCE SIGIL', colorName: 'Crimson Metal', color: '#F0443E', prefix: 'CO', aura: 'continuum',
     palette: { deep: '#450712', shadow: '#190D18', darkCrimson: '#7F1024', crimson: '#B8203F', scarlet: '#F0443E', highlight: '#FF6670', platinum: '#F5FAFF' },
     spectrum: 'linear-gradient(112deg, #190D18 0%, #450712 16%, #7F1024 34%, #B8203F 55%, #F0443E 76%, #FF6670 91%, #F5FAFF 100%)',
     badgeColors: ['#450712', '#7F1024', '#B8203F', '#F0443E', '#FF6670', '#F5FAFF'],
@@ -64,8 +64,6 @@ export const ranks = [
     badge: { frame: 'M90 5 110 22 138 20 145 43 161 58 153 84 155 132 135 159 90 220 45 159 25 132 27 84 19 58 35 43 42 20 70 22Z', motif: 'M32 58h10m-10 6h7m109-6h-10m10 6h-7M29 132l14-10m108 10-14-10' },
   },
 ];
-
-export const rankDemoDisclosure = 'Demonstration data only — earned-member counts and serials shown here are examples, not live platform statistics or assignments.';
 
 export function getRankDeletionPolicy(rankNumber) {
   return Number(rankNumber) >= 3

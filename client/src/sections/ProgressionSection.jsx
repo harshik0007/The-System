@@ -28,7 +28,10 @@ export default function ProgressionSection() {
               </Link>
           ))}
         </div>
-        <div className="progression-explore"><Link className="button button--quiet" to="/ranks">EXPLORE ALL RANKS <span aria-hidden="true">↗</span></Link></div>
+        <div className="progression-explore">
+          <Link className="button button--quiet" to="/ranks">EXPLORE ALL RANKS <span aria-hidden="true">↗</span></Link>
+          <Link className="button button--quiet" to="/badges">BADGE INFORMATION <span aria-hidden="true">↗</span></Link>
+        </div>
       </div>
     </section>
   );
