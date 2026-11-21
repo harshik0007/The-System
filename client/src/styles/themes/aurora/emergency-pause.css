@@ -1,0 +1,241 @@
+.aurora-emergency-atmosphere {
+  position: fixed;
+  z-index: 1;
+  inset: 0;
+  overflow: hidden;
+  contain: strict;
+  isolation: isolate;
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 5600ms ease;
+}
+
+.aurora-emergency-atmosphere.is-ending { opacity: 0; }
+.aurora-emergency-atmosphere[data-document-visible='false'] :is(.aurora-emergency-atmosphere__curtain, .aurora-emergency-atmosphere__particle) { animation-play-state: paused; }
+
+.aurora-emergency-atmosphere__aura,
+.aurora-emergency-atmosphere__curtains,
+.aurora-emergency-atmosphere__particles {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.aurora-emergency-atmosphere__aura {
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 72% 34% at 48% 0%, rgb(69 220 196 / 17%), transparent 78%),
+    radial-gradient(ellipse 58% 31% at 32% 8%, rgb(146 112 255 / 13%), transparent 80%),
+    radial-gradient(ellipse 56% 35% at 75% 15%, rgb(142 223 255 / 12%), transparent 82%),
+    radial-gradient(ellipse 40% 72% at 0% 42%, rgb(69 220 196 / 11%), transparent 77%),
+    radial-gradient(ellipse 40% 72% at 100% 48%, rgb(146 112 255 / 12%), transparent 78%);
+  box-shadow: inset 0 0 130px rgb(146 112 255 / 11%), inset 0 0 45px rgb(69 220 196 / 9%);
+  opacity: .86;
+  animation: aurora-aura-breathe 19s ease-in-out infinite alternate;
+}
+
+.aurora-emergency-atmosphere__curtains {
+  z-index: 1;
+  overflow: hidden;
+}
+
+.aurora-emergency-atmosphere__curtain {
+  position: absolute;
+  top: -7%;
+  left: var(--curtain-left);
+  display: block;
+  width: var(--curtain-width);
+  height: 122%;
+  clip-path: polygon(15% 0, 88% 0, 96% 16%, 78% 30%, 91% 45%, 76% 61%, 91% 79%, 72% 100%, 25% 100%, 17% 82%, 32% 64%, 13% 48%, 25% 31%, 9% 15%);
+  background:
+    repeating-linear-gradient(90deg, transparent 0 17px, var(--curtain-pleat) 20px, transparent 24px 39px),
+    linear-gradient(180deg, transparent 0%, var(--curtain-soft) 8%, var(--curtain-mid) 20%, var(--curtain-core) 34%, var(--curtain-soft) 48%, var(--curtain-mid) 63%, var(--curtain-soft) 78%, transparent 100%);
+  mix-blend-mode: screen;
+  opacity: .38;
+  transform: translate3d(var(--curtain-return-sway), -4vh, 0) rotate(var(--curtain-tilt)) scaleX(.96);
+  transform-origin: top center;
+  animation: aurora-curtain-flow var(--curtain-duration) var(--curtain-delay) ease-in-out infinite alternate;
+}
+
+.aurora-emergency-atmosphere__curtain.is-teal {
+  --curtain-core: rgb(69 220 196 / 20%);
+  --curtain-mid: rgb(69 220 196 / 12%);
+  --curtain-soft: rgb(69 220 196 / 4%);
+  --curtain-pleat: rgb(142 255 235 / 10%);
+}
+
+.aurora-emergency-atmosphere__curtain.is-violet {
+  --curtain-core: rgb(146 112 255 / 19%);
+  --curtain-mid: rgb(181 162 255 / 11%);
+  --curtain-soft: rgb(146 112 255 / 4%);
+  --curtain-pleat: rgb(211 197 255 / 11%);
+}
+
+.aurora-emergency-atmosphere__curtain.is-ice {
+  --curtain-core: rgb(142 223 255 / 17%);
+  --curtain-mid: rgb(142 223 255 / 10%);
+  --curtain-soft: rgb(142 223 255 / 3%);
+  --curtain-pleat: rgb(239 252 255 / 12%);
+}
+
+.aurora-emergency-atmosphere__particles {
+  z-index: 2;
+  overflow: hidden;
+}
+
+.aurora-emergency-atmosphere__particle {
+  position: absolute;
+  top: 0;
+  left: var(--particle-left);
+  display: block;
+  width: var(--particle-size);
+  height: var(--particle-size);
+  opacity: 0;
+  mix-blend-mode: screen;
+  animation: aurora-particle-fall var(--particle-duration) var(--particle-delay) linear infinite both;
+  transform-origin: center center;
+}
+
+.aurora-emergency-atmosphere__particle.is-tiny {
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 34%, #f5ffff 0%, #8edfff 42%, #45dcc4 100%);
+  box-shadow: 0 0 5px rgb(142 223 255 / 44%);
+}
+
+.aurora-emergency-atmosphere__particle.is-tiny::after {
+  position: absolute;
+  bottom: 68%;
+  left: 42%;
+  width: 1px;
+  height: 7px;
+  background: linear-gradient(180deg, transparent, rgb(142 223 255 / 56%));
+  content: '';
+}
+
+.aurora-emergency-atmosphere__particle.is-medium,
+.aurora-emergency-atmosphere__particle.is-large {
+  width: var(--particle-width);
+  height: var(--particle-height);
+}
+
+.aurora-emergency-atmosphere__crystal { display: block; width: 100%; height: 100%; overflow: visible; }
+.aurora-emergency-atmosphere__crystal-edge { fill: rgb(69 220 196 / 19%); stroke: rgb(142 223 255 / 86%); stroke-width: 1.15; stroke-linejoin: round; }
+.aurora-emergency-atmosphere__crystal-facet { fill: none; stroke: rgb(244 252 255 / 68%); stroke-width: .8; stroke-linecap: round; stroke-linejoin: round; }
+.aurora-emergency-atmosphere__particle.is-medium.is-violet .aurora-emergency-atmosphere__crystal-edge,
+.aurora-emergency-atmosphere__particle.is-large.is-violet .aurora-emergency-atmosphere__crystal-edge { fill: rgb(146 112 255 / 23%); stroke: rgb(211 197 255 / 94%); }
+.aurora-emergency-atmosphere__particle.is-medium.is-teal .aurora-emergency-atmosphere__crystal-edge,
+.aurora-emergency-atmosphere__particle.is-large.is-teal .aurora-emergency-atmosphere__crystal-edge { fill: rgb(69 220 196 / 24%); stroke: rgb(142 255 235 / 94%); }
+.aurora-emergency-atmosphere__particle.is-large .aurora-emergency-atmosphere__crystal-edge { stroke-width: 1.25; }
+
+.aurora-emergency-atmosphere__particle.is-silver:not(.is-streak) {
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff 0%, #f4fcff 38%, rgb(142 223 255 / 62%) 100%);
+  box-shadow: 0 0 6px rgb(244 252 255 / 58%);
+}
+
+.aurora-emergency-atmosphere__particle.is-silver:not(.is-streak)::before,
+.aurora-emergency-atmosphere__particle.is-silver:not(.is-streak)::after {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 1px;
+  height: 9px;
+  background: linear-gradient(180deg, transparent, rgb(244 252 255 / 80%), transparent);
+  content: '';
+  transform: translate(-50%, -50%);
+}
+
+.aurora-emergency-atmosphere__particle.is-silver:not(.is-streak)::after {
+  transform: translate(-50%, -50%) rotate(90deg);
+}
+
+.aurora-emergency-atmosphere__particle.is-streak {
+  width: var(--particle-size);
+  height: var(--particle-length);
+  border-radius: 999px;
+  background: linear-gradient(180deg, transparent 0%, rgb(142 223 255 / 7%) 14%, rgb(244 252 255 / 72%) 72%, rgb(69 220 196 / 46%) 90%, transparent 100%);
+}
+
+.aurora-emergency-atmosphere.is-static { transition-duration: 240ms; }
+.aurora-emergency-atmosphere.is-static .aurora-emergency-atmosphere__aura { animation: none; opacity: .75; }
+.aurora-emergency-atmosphere.is-static .aurora-emergency-atmosphere__curtain { animation: none; opacity: .2; }
+
+/* Aurora is visible through app surfaces without dimming controls or text. */
+:root[data-system-theme='aurora'] body.aurora-emergency-active .app-layout,
+:root[data-system-theme='aurora'] body.aurora-emergency-active .app-layout__main,
+:root[data-system-theme='aurora'] body.aurora-emergency-active .app-layout__content {
+  background: transparent;
+}
+
+:root[data-system-theme='aurora'] body.aurora-emergency-active .app-sidebar {
+  background: linear-gradient(180deg, rgb(12 19 36 / 87%), rgb(8 13 27 / 90%));
+}
+
+:root[data-system-theme='aurora'] body.aurora-emergency-active .app-topbar {
+  background: rgb(8 13 27 / 84%);
+}
+
+:root[data-system-theme='aurora'] body.aurora-emergency-active .app-layout :is(
+  .app-panel,
+  .settings-content,
+  .settings-nav,
+  .settings-toggle-list,
+  .settings-notification-group,
+  .settings-theme-card,
+  .settings-readonly,
+  .settings-accessibility-grid article,
+  .settings-avatar-choice,
+  .leaderboard-list,
+  .monthly-panel,
+  .monthly-retention-panel,
+  .monthly-balance-card,
+  .recovery-quest-card,
+  .discipline-reward,
+  .task-builder-panel,
+  .task-builder-form,
+  .task-builder-schedule,
+  .task-builder-task,
+  .task-builder-existing-day,
+  .task-review-day,
+  .task-card,
+  .daily-task-summary,
+  .task-cycle-panel,
+  .task-change-allowance,
+  .dashboard-rank-panel,
+  .dashboard-stat-card,
+  .dashboard-xp-panel,
+  .dashboard-discipline-panel
+) {
+  background: linear-gradient(150deg, rgb(23 33 58 / 77%), rgb(8 13 27 / 81%) 82%);
+}
+
+@keyframes aurora-aura-breathe {
+  from { opacity: .68; }
+  to { opacity: .9; }
+}
+
+@keyframes aurora-curtain-flow {
+  from { transform: translate3d(var(--curtain-return-sway), -4vh, 0) rotate(var(--curtain-tilt)) scaleX(.96); opacity: .25; }
+  to { transform: translate3d(var(--curtain-sway), 5vh, 0) rotate(calc(var(--curtain-tilt) + 1deg)) scaleX(1.04); opacity: .43; }
+}
+
+@keyframes aurora-particle-fall {
+  0% { opacity: 0; transform: translate3d(0, -12vh, 0) rotate(0deg) scale(.72); }
+  7% { opacity: var(--particle-opacity); }
+  39% { opacity: var(--particle-opacity); transform: translate3d(var(--particle-drift-mid), 38vh, 0) rotate(var(--particle-turn-mid)) scale(1); }
+  76% { opacity: var(--particle-opacity); transform: translate3d(var(--particle-drift-end), 82vh, 0) rotate(var(--particle-turn-end)) scale(.92); }
+  91% { opacity: .4; transform: translate3d(var(--particle-drift-end), 104vh, 0) rotate(calc(var(--particle-turn-end) + 12deg)) scale(.82); }
+  100% { opacity: 0; transform: translate3d(var(--particle-drift-end), 118vh, 0) rotate(calc(var(--particle-turn-end) + 18deg)) scale(.68); }
+}
+
+@media (max-width: 900px) {
+  .aurora-emergency-atmosphere__curtain { opacity: .3; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aurora-emergency-atmosphere { transition-duration: 240ms; }
+  .aurora-emergency-atmosphere__aura { animation: none; opacity: .72; }
+  .aurora-emergency-atmosphere__curtain { animation: none; opacity: .2; }
+  .aurora-emergency-atmosphere__particle { display: none; animation: none; }
+}

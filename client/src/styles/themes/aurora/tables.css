@@ -1,0 +1,8 @@
+:root[data-system-theme='aurora'] .app-layout table,
+:root[data-system-theme='aurora'] [role='dialog'] table { border-color: var(--color-line); }
+:root[data-system-theme='aurora'] .app-layout :is(th, thead),
+:root[data-system-theme='aurora'] [role='dialog'] :is(th, thead) { background: var(--surface-table-head); color: var(--color-muted); }
+:root[data-system-theme='aurora'] .app-layout :is(td, th),
+:root[data-system-theme='aurora'] [role='dialog'] :is(td, th) { border-color: var(--color-line); }
+:root[data-system-theme='aurora'] .monthly-comparison-table :is(th:first-child, td:first-child) { background: var(--surface-table-head); }
+:root[data-system-theme='aurora'] .leaderboard-list { border-color: var(--color-line); background: var(--surface-card); }

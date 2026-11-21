@@ -1,0 +1,5 @@
+:root[data-system-theme='aurora'] .brand-logo__mark svg { color: var(--color-violet); filter: drop-shadow(0 0 8px rgb(146 112 255 / 24%)); }
+:root[data-system-theme='aurora'] .brand-logo__mark svg :is(path, circle) { stroke: var(--color-ice); }
+:root[data-system-theme='aurora'] .brand-logo__wordmark { color: var(--color-text); }
+:root[data-system-theme='aurora'] :is(.brand-logo__wordmark b, .app-topbar__brand b) { color: var(--color-teal); }
+:root[data-system-theme='aurora'] .brand-logo:hover .brand-logo__mark { filter: drop-shadow(0 0 12px rgb(69 220 196 / 38%)); }
