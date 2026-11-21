@@ -8,13 +8,15 @@
     "server"
   ],
   "scripts": {
-    "dev": "concurrently -k -n client,server -c cyan,magenta \"npm:dev:client\" \"npm:dev:server\"",
-    "dev:client": "npm run dev --prefix client",
-    "dev:server": "npm run dev --prefix server",
+    "dev:server": "npm run dev --workspace=the-system-server",
+    "dev:client": "npm run dev --workspace=the-system-client",
     "build": "npm run build --prefix client",
+    "test:browser": "playwright test --config=playwright.config.cjs",
+    "test:browser:smoke": "playwright test --config=playwright.config.cjs tests/browser/smoke.spec.cjs",
+    "browser:routes": "node scripts/discover-browser-routes.cjs",
     "start": "npm run start --prefix server"
   },
   "devDependencies": {
-    "concurrently": "^9.1.2"
+    "@playwright/test": "^1.65.1"
   }
 }
