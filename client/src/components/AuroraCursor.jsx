@@ -11,7 +11,7 @@ const NATIVE_POINTER_TARGET = '[data-native-cursor]';
 
 export default function AuroraCursor({ initialPointer = null }) {
   const preferenceContext = useOptionalUserPreferences();
-  const { loading: authLoading } = useAuth();
+  const { restoringSession } = useAuth();
   const preferences = preferenceContext?.preferences || createDefaultUserPreferences();
   const reducedMotion = useReducedMotion();
   const cursorRef = useRef(null);
@@ -21,8 +21,8 @@ export default function AuroraCursor({ initialPointer = null }) {
   const clickTimeoutsRef = useRef(new Set());
   const [pointerSupported, setPointerSupported] = useState(false);
   const preferencesReady = preferenceContext?.ready ?? true;
-  const cursorEnabled = pointerSupported && preferencesReady && !authLoading && preferences.appearance.voidShardCursor && !reducedMotion;
-  const rippleEnabled = pointerSupported && preferencesReady && !authLoading && preferences.appearance.clickRipple && !reducedMotion && !preferences.appearance.reduceDecorativeEffects;
+  const cursorEnabled = pointerSupported && preferencesReady && !restoringSession && preferences.appearance.voidShardCursor && !reducedMotion;
+  const rippleEnabled = pointerSupported && preferencesReady && !restoringSession && preferences.appearance.clickRipple && !reducedMotion && !preferences.appearance.reduceDecorativeEffects;
   if (initialPointer?.inside) pendingPositionRef.current = initialPointer;
 
   useCursorTopLayer(cursorRef, cursorEnabled || rippleEnabled);
@@ -37,7 +37,6 @@ export default function AuroraCursor({ initialPointer = null }) {
 
   useEffect(() => {
     const root = document.documentElement;
-    root.classList.toggle('has-aurora-cursor', cursorEnabled);
     const cursor = cursorRef.current;
     if (!cursor || (!cursorEnabled && !rippleEnabled)) return () => root.classList.remove('has-aurora-cursor');
 
@@ -53,9 +52,16 @@ export default function AuroraCursor({ initialPointer = null }) {
       const nativeTarget = Boolean(event.target instanceof Element && event.target.closest(NATIVE_POINTER_TARGET));
       cursor.classList.toggle('is-native-mode', nativeTarget);
       positionerRef.current?.classList.toggle('is-offscreen', nativeTarget);
+      root.classList.toggle('has-aurora-cursor', cursorEnabled && !nativeTarget);
       if (!frameRef.current) frameRef.current = window.requestAnimationFrame(renderPosition);
     };
-    const leave = () => positionerRef.current?.classList.add('is-offscreen');
+    const leave = () => {
+      positionerRef.current?.classList.add('is-offscreen');
+      cursor.classList.remove('is-hovering', 'is-native-mode');
+      root.classList.remove('has-aurora-cursor');
+      window.cancelAnimationFrame(frameRef.current);
+      frameRef.current = 0;
+    };
     const over = (event) => cursor.classList.toggle('is-hovering', Boolean(event.target instanceof Element && event.target.closest(HOVERABLE)));
     const press = (event) => {
       if (!rippleEnabled || event.pointerType === 'touch') return;
@@ -76,6 +82,7 @@ export default function AuroraCursor({ initialPointer = null }) {
     const unsubscribeEnter = cursorEnabled ? subscribeCursorRuntimeEvent('enter', track) : () => {};
     const unsubscribeLeave = cursorEnabled ? subscribeCursorRuntimeEvent('leave', leave) : () => {};
     const unsubscribeOver = cursorEnabled ? subscribeCursorRuntimeEvent('over', over) : () => {};
+    const unsubscribeOverTarget = cursorEnabled ? subscribeCursorRuntimeEvent('over', track) : () => {};
     const unsubscribeDown = rippleEnabled ? subscribeCursorRuntimeEvent('down', press) : () => {};
     const unsubscribeVisibility = cursorEnabled ? subscribeCursorRuntimeEvent('visibility', () => { if (document.hidden) leave(); }) : () => {};
     if (cursorEnabled && initialPointer?.inside) track({ ...initialPointer, pointerType: 'mouse', target: document.elementFromPoint(initialPointer.x, initialPointer.y) });
@@ -86,6 +93,7 @@ export default function AuroraCursor({ initialPointer = null }) {
       unsubscribeEnter();
       unsubscribeLeave();
       unsubscribeOver();
+      unsubscribeOverTarget();
       unsubscribeDown();
       unsubscribeVisibility();
       window.cancelAnimationFrame(frameRef.current);

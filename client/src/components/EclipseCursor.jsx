@@ -37,7 +37,6 @@ export default function EclipseCursor({ initialPointer = null }) {
   useEffect(() => {
     const root = rootRef.current;
     const documentRoot = document.documentElement;
-    documentRoot.classList.toggle('has-eclipse-cursor', cursorEnabled);
     if (!root || (!cursorEnabled && !clickEnabled)) {
       return () => documentRoot.classList.remove('has-eclipse-cursor');
     }
@@ -55,12 +54,16 @@ export default function EclipseCursor({ initialPointer = null }) {
       const nativeTarget = Boolean(event.target instanceof Element && event.target.closest(NATIVE_POINTER_TARGET));
       root.classList.toggle('is-native-mode', nativeTarget);
       pointerRef.current?.classList.toggle('is-offscreen', nativeTarget);
+      documentRoot.classList.toggle('has-eclipse-cursor', cursorEnabled && !nativeTarget);
       if (!frameRef.current) frameRef.current = window.requestAnimationFrame(render);
     };
     const hover = (event) => root.classList.toggle('is-hovering', Boolean(event.target instanceof Element && event.target.closest(HOVERABLE)));
     const leave = () => {
       pointerRef.current?.classList.add('is-offscreen');
-      root.classList.remove('is-hovering', 'is-pressed');
+      root.classList.remove('is-hovering', 'is-pressed', 'is-native-mode');
+      documentRoot.classList.remove('has-eclipse-cursor');
+      window.cancelAnimationFrame(frameRef.current);
+      frameRef.current = 0;
     };
     const press = (event) => {
       if (!clickEnabled || event.pointerType === 'touch') return;
@@ -86,6 +89,7 @@ export default function EclipseCursor({ initialPointer = null }) {
     const unsubscribeEnter = cursorEnabled ? subscribeCursorRuntimeEvent('enter', restore) : () => {};
     const unsubscribeLeave = cursorEnabled ? subscribeCursorRuntimeEvent('leave', leave) : () => {};
     const unsubscribeHover = cursorEnabled ? subscribeCursorRuntimeEvent('over', hover) : () => {};
+    const unsubscribeOverTarget = cursorEnabled ? subscribeCursorRuntimeEvent('over', track) : () => {};
     const unsubscribeDown = clickEnabled ? subscribeCursorRuntimeEvent('down', press) : () => {};
     const unsubscribeVisibility = cursorEnabled ? subscribeCursorRuntimeEvent('visibility', () => { if (document.hidden) leave(); }) : () => {};
     if (cursorEnabled && initialPointer?.inside) track({ ...initialPointer, pointerType: 'mouse', target: document.elementFromPoint(initialPointer.x, initialPointer.y) });
@@ -96,6 +100,7 @@ export default function EclipseCursor({ initialPointer = null }) {
       unsubscribeEnter();
       unsubscribeLeave();
       unsubscribeHover();
+      unsubscribeOverTarget();
       unsubscribeDown();
       unsubscribeVisibility();
       window.cancelAnimationFrame(frameRef.current);

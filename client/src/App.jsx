@@ -187,6 +187,13 @@ function ThemeCursor() {
     // Include the viewport edge: Chromium reports scrollbar drags at the last
     // viewport pixel, and hiding the cursor there exposes the native pointer.
     const inViewport = (event) => isViewportPoint(event.clientX, event.clientY);
+    const suspendPointer = (event) => {
+      const previous = pointerRef.current;
+      pointerRef.current = { ...previous, inside: false, buttons: 0 };
+      // Leave handlers are idempotent and must also clear theme cursor state
+      // if a renderer was activated by pointerover before the move listener.
+      dispatchCursorRuntimeEvent('leave', event);
+    };
     const rememberPointer = (event) => {
       if (event.pointerType === 'touch' || !inViewport(event)) return;
       const previous = pointerRef.current;
@@ -210,12 +217,13 @@ function ThemeCursor() {
       dispatchCursorRuntimeEvent('enter', event);
     };
     const pointerLeave = (event) => {
-      // Native browser scrollbars can dispatch a leave with no related DOM
-      // target. Keep the custom cursor alive while the pointer is still in
-      // viewport coordinates so scrollbar drags do not switch cursor modes.
-      if (event.pointerType === 'touch' || inViewport(event) || event.buttons || pointerRef.current.buttons) return;
-      pointerRef.current = { ...pointerRef.current, inside: false, buttons: 0 };
-      dispatchCursorRuntimeEvent('leave', event);
+      if (event.pointerType === 'touch') return;
+      // Chromium can report a leave at the viewport edge during scrollbar
+      // dragging. Preserve that in-page drag, but trust a normal leave even if
+      // its rounded coordinates are still on an inclusive viewport boundary.
+      const dragging = Boolean(event.buttons || pointerRef.current.buttons);
+      if (dragging && inViewport(event)) return;
+      suspendPointer(event);
     };
     const pointerOver = (event) => {
       if (event.pointerType !== 'touch') dispatchCursorRuntimeEvent('over', event);
@@ -242,7 +250,11 @@ function ThemeCursor() {
       }
     };
     const scroll = (event) => dispatchCursorRuntimeEvent('scroll', event);
-    const visibilityChange = (event) => dispatchCursorRuntimeEvent('visibility', event);
+    const visibilityChange = (event) => {
+      if (document.hidden) suspendPointer(event);
+      dispatchCursorRuntimeEvent('visibility', event);
+    };
+    const loseWindowFocus = (event) => suspendPointer(event);
 
     // Capture at document level so controls and nested scrolling regions that
     // stop bubbling still update the fixed cursor. Window listeners retain
@@ -259,6 +271,8 @@ function ThemeCursor() {
     document.addEventListener('pointerover', pointerOver, { passive: true });
     document.addEventListener('scroll', scroll, { passive: true, capture: true });
     document.addEventListener('visibilitychange', visibilityChange);
+    window.addEventListener('blur', loseWindowFocus);
+    window.addEventListener('pagehide', loseWindowFocus);
     return () => {
       document.removeEventListener('pointermove', rememberPointer, true);
       document.removeEventListener('mousemove', rememberPointer, true);
@@ -272,6 +286,8 @@ function ThemeCursor() {
       document.removeEventListener('pointerover', pointerOver);
       document.removeEventListener('scroll', scroll, true);
       document.removeEventListener('visibilitychange', visibilityChange);
+      window.removeEventListener('blur', loseWindowFocus);
+      window.removeEventListener('pagehide', loseWindowFocus);
     };
   }, []);
 

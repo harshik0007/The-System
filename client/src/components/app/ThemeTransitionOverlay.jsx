@@ -106,14 +106,10 @@ export default function ThemeTransitionOverlay({ theme, startedAt, saved = false
     const priorOverflow = document.body.style.overflow;
     const priorDocumentOverflow = document.documentElement.style.overflow;
     const priorFocus = document.activeElement;
-    const hadCustomCursor = document.documentElement.classList.contains('has-void-shard-cursor');
-    const hadAuroraCursor = document.documentElement.classList.contains('has-aurora-cursor');
-    const hadEclipseCursor = document.documentElement.classList.contains('has-eclipse-cursor');
     const overlay = overlayRef.current;
 
     if (appRoot) appRoot.inert = true;
     document.body.classList.add('theme-transition-overlay-active');
-    document.documentElement.classList.remove('has-void-shard-cursor');
     document.body.style.overflow = 'hidden';
     document.documentElement.style.overflow = 'hidden';
     overlay?.focus({ preventScroll: true });
@@ -133,17 +129,6 @@ export default function ThemeTransitionOverlay({ theme, startedAt, saved = false
       window.removeEventListener('keydown', keepFocusInOverlay, true);
       if (appRoot) appRoot.inert = priorInert;
       document.body.classList.remove('theme-transition-overlay-active');
-      if (document.documentElement.dataset.systemTheme === 'aurora') {
-        document.documentElement.classList.remove('has-void-shard-cursor');
-        document.documentElement.classList.remove('has-eclipse-cursor');
-        if (hadAuroraCursor) document.documentElement.classList.add('has-aurora-cursor');
-      } else if (document.documentElement.dataset.systemTheme === 'eclipse') {
-        document.documentElement.classList.remove('has-void-shard-cursor', 'has-aurora-cursor');
-        if (hadEclipseCursor) document.documentElement.classList.add('has-eclipse-cursor');
-      } else {
-        document.documentElement.classList.remove('has-aurora-cursor', 'has-eclipse-cursor');
-        if (hadCustomCursor) document.documentElement.classList.add('has-void-shard-cursor');
-      }
       document.body.style.overflow = priorOverflow;
       document.documentElement.style.overflow = priorDocumentOverflow;
       if (priorFocus instanceof HTMLElement && priorFocus.isConnected && !appRoot?.inert) {

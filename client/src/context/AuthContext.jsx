@@ -26,6 +26,7 @@ function saveMemberScope(member) {
 export function AuthProvider({ children }) {
   const [member, setMember] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [restoringSession, setRestoringSession] = useState(true);
   const [error, setError] = useState('');
   const [capabilities, setCapabilities] = useState(null);
   const sequence = useRef(0);
@@ -51,7 +52,10 @@ export function AuthProvider({ children }) {
       }
       return null;
     } finally {
-      if (requestSequence === sequence.current) setLoading(false);
+      if (requestSequence === sequence.current) {
+        setLoading(false);
+        setRestoringSession(false);
+      }
     }
   }, [commitMember]);
 
@@ -67,6 +71,7 @@ export function AuthProvider({ children }) {
       sequence.current += 1;
       commitMember(null);
       setLoading(false);
+      setRestoringSession(false);
     };
     window.addEventListener('system:auth-unauthorized', handleUnauthorized);
     return () => window.removeEventListener('system:auth-unauthorized', handleUnauthorized);
@@ -80,12 +85,21 @@ export function AuthProvider({ children }) {
 
   const login = useCallback(async (credentials) => {
     const requestSequence = ++sequence.current;
+    // The login screen is already interactive, so this is no longer session
+    // restoration. Keep global UI such as the custom cursor mounted while the
+    // credential request is pending or returning a warning.
+    setRestoringSession(false);
     setLoading(true);
     try {
       const result = await authService.login(credentials);
       if (requestSequence === sequence.current) commitMember(result.member);
       return result;
-    } finally { if (requestSequence === sequence.current) setLoading(false); }
+    } finally {
+      if (requestSequence === sequence.current) {
+        setLoading(false);
+        setRestoringSession(false);
+      }
+    }
   }, [commitMember]);
 
   const completeGoogleSignup = useCallback(async (details) => {
@@ -129,10 +143,10 @@ export function AuthProvider({ children }) {
   }, [commitMember]);
 
   const value = useMemo(() => ({
-    member, loading, error, capabilities, refresh, signUp, login, completeGoogleSignup,
+    member, loading, restoringSession, error, capabilities, refresh, signUp, login, completeGoogleSignup,
     resetPassword, changePassword, regenerateRecoveryCodes, updateIdentity,
     usernameAvailability, googlePending, logout, deleteAccount,
-  }), [member, loading, error, capabilities, refresh, signUp, login, completeGoogleSignup,
+  }), [member, loading, restoringSession, error, capabilities, refresh, signUp, login, completeGoogleSignup,
     resetPassword, changePassword, regenerateRecoveryCodes, updateIdentity,
     usernameAvailability, googlePending, logout, deleteAccount]);
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

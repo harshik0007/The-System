@@ -20,7 +20,7 @@ function isTextSelectable(target) {
 
 export default function VoidShardCursor({ initialPointer = null }) {
   const preferenceContext = useOptionalUserPreferences();
-  const { loading: authLoading } = useAuth();
+  const { restoringSession } = useAuth();
   const preferences = preferenceContext?.preferences || createDefaultUserPreferences();
   const reducedMotion = useReducedMotion();
   const cursorRef = useRef(null);
@@ -47,8 +47,8 @@ export default function VoidShardCursor({ initialPointer = null }) {
   const motionAllowed = !reducedMotion && !systemRequestsReducedMotion;
   const obsidianTheme = preferences.appearance.theme === 'obsidian';
   const preferencesReady = preferenceContext?.ready ?? true;
-  const cursorEnabled = pointerSupported && preferencesReady && !authLoading && preferences.appearance.voidShardCursor && motionAllowed;
-  const rippleEnabled = pointerSupported && preferencesReady && !authLoading && preferences.appearance.clickRipple && motionAllowed;
+  const cursorEnabled = pointerSupported && preferencesReady && !restoringSession && preferences.appearance.voidShardCursor && motionAllowed;
+  const rippleEnabled = pointerSupported && preferencesReady && !restoringSession && preferences.appearance.clickRipple && motionAllowed;
   const clickEffectEnabled = rippleEnabled && (!obsidianTheme || !preferences.appearance.reduceDecorativeEffects);
   const active = cursorEnabled || clickEffectEnabled;
   if (initialPointer) pointerPositionRef.current = initialPointer;
@@ -70,11 +70,6 @@ export default function VoidShardCursor({ initialPointer = null }) {
   }, []);
 
   useEffect(() => {
-    document.documentElement.classList.toggle('has-void-shard-cursor', cursorEnabled);
-    return () => document.documentElement.classList.remove('has-void-shard-cursor');
-  }, [cursorEnabled]);
-
-  useEffect(() => {
     if (!active) return undefined;
 
     const root = cursorRef.current;
@@ -90,6 +85,7 @@ export default function VoidShardCursor({ initialPointer = null }) {
       if (!cursorEnabled) return;
       const nativeTarget = Boolean(closestElement(target, NATIVE_POINTER_SELECTOR));
       root.classList.toggle('is-native-mode', nativeTarget);
+      document.documentElement.classList.toggle('has-void-shard-cursor', cursorEnabled && !nativeTarget);
       if (nativeTarget) {
         if (motion.hovering) {
           motion.hovering = false;
@@ -287,6 +283,7 @@ export default function VoidShardCursor({ initialPointer = null }) {
 
     const suspendCursor = () => {
       pointerPositionRef.current.inside = false;
+      document.documentElement.classList.remove('has-void-shard-cursor');
       root.classList.add('is-offscreen');
       root.classList.remove('is-hovering', 'is-pressed');
       motion.hovering = false;
@@ -311,12 +308,9 @@ export default function VoidShardCursor({ initialPointer = null }) {
     };
 
     const handleVisibilityChange = () => {
-      if (document.hidden) {
-        window.cancelAnimationFrame(frameRef.current);
-        frameRef.current = 0;
-      } else if (motion.initialized) {
-        queueFrame();
-      }
+      // Never resume from an old coordinate after leaving the tab. A fresh
+      // pointer event will position the artwork once it is back in the page.
+      if (document.hidden) suspendCursor();
     };
 
     const handlePointerCancel = (event) => {
@@ -340,6 +334,7 @@ export default function VoidShardCursor({ initialPointer = null }) {
     const unsubscribeUp = cursorEnabled ? subscribeCursorRuntimeEvent('up', handlePointerUp) : () => {};
     const unsubscribeCancel = cursorEnabled ? subscribeCursorRuntimeEvent('cancel', handlePointerCancel) : () => {};
     const unsubscribeVisibility = cursorEnabled ? subscribeCursorRuntimeEvent('visibility', handleVisibilityChange) : () => {};
+    const unsubscribeOver = cursorEnabled ? subscribeCursorRuntimeEvent('over', (event) => syncHover(event?.target)) : () => {};
     if (cursorEnabled) document.addEventListener('selectionchange', handleSelectionChange);
 
     const lastPointer = pointerPositionRef.current;
@@ -361,6 +356,7 @@ export default function VoidShardCursor({ initialPointer = null }) {
       unsubscribeUp();
       unsubscribeCancel();
       unsubscribeVisibility();
+      unsubscribeOver();
       document.removeEventListener('selectionchange', handleSelectionChange);
       window.cancelAnimationFrame(frameRef.current);
       window.clearTimeout(pressTimerRef.current);
@@ -372,6 +368,7 @@ export default function VoidShardCursor({ initialPointer = null }) {
       }
       ripple?.classList.remove('is-active');
       impact?.classList.remove('is-active');
+      document.documentElement.classList.remove('has-void-shard-cursor');
       root.className = 'void-shard-cursor is-offscreen';
     };
   }, [active, clickEffectEnabled, cursorEnabled, obsidianTheme]);
