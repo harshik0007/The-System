@@ -1,0 +1,83 @@
+/* Transient system feedback uses fixed semantic colors so status meaning stays
+   consistent across every equipped theme. */
+.system-flash-stack {
+  position: fixed;
+  z-index: var(--z-toast, 1100);
+  top: max(14px, env(safe-area-inset-top));
+  right: max(14px, env(safe-area-inset-right));
+  display: grid;
+  width: min(390px, calc(100vw - 28px));
+  max-height: calc(100dvh - 28px);
+  gap: 9px;
+  overflow: auto;
+  padding: 1px;
+  pointer-events: none;
+  scrollbar-width: thin;
+}
+
+.system-flash {
+  --flash-color: #74d6ba;
+  --flash-glow: rgb(54 191 146 / 11%);
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr) 28px;
+  align-items: center;
+  gap: 11px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid color-mix(in srgb, var(--flash-color) 39%, #25364a);
+  border-left: 3px solid var(--flash-color);
+  border-radius: 9px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--flash-color) 8%, #152131), #09111c 76%);
+  box-shadow: 0 12px 35px rgb(0 0 0 / 42%), 0 0 22px var(--flash-glow);
+  color: #edf5ff;
+  pointer-events: auto;
+  animation: system-flash-enter 180ms ease-out both;
+}
+
+.system-flash--success { --flash-color: #72d7a5; --flash-glow: rgb(54 191 115 / 13%); }
+.system-flash--error { --flash-color: #ff737e; --flash-glow: rgb(242 61 78 / 14%); }
+.system-flash--warning { --flash-color: #f0bd69; --flash-glow: rgb(240 171 61 / 11%); }
+.system-flash--info { --flash-color: #70c9ec; --flash-glow: rgb(53 168 220 / 11%); }
+
+.system-flash__icon {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--flash-color) 34%, transparent);
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--flash-color) 10%, #0b1320);
+  color: var(--flash-color);
+}
+.system-flash__icon .app-icon { width: 16px; height: 16px; }
+.system-flash p { min-width: 0; margin: 0; color: #e6edf6; font-size: .8rem; line-height: 1.45; overflow-wrap: anywhere; }
+.system-flash > button {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: #9aabbd;
+  cursor: pointer;
+}
+.system-flash > button:hover { border-color: color-mix(in srgb, var(--flash-color) 35%, transparent); color: var(--flash-color); }
+.system-flash > button:focus-visible { outline: 2px solid var(--flash-color); outline-offset: 2px; }
+.system-flash > button .app-icon { width: 14px; height: 14px; }
+
+body.theme-transition-overlay-active .system-flash-stack { visibility: hidden; }
+
+@keyframes system-flash-enter {
+  from { opacity: 0; transform: translate3d(0, -5px, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+@media (max-width: 540px) {
+  .system-flash-stack { right: 10px; width: calc(100vw - 20px); max-height: calc(100dvh - 20px); }
+  .system-flash { gap: 9px; padding: 10px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .system-flash { animation: none; }
+}

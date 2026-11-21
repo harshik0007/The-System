@@ -3,24 +3,23 @@ import { useLocation } from 'react-router-dom';
 import { applicationNavigationItems } from '../../data/applicationNavigation.js';
 import AppIcon from './AppIcon.jsx';
 import AppNotificationPanel from './AppNotificationPanel.jsx';
-import MemberProfileMenu from './MemberProfileMenu.jsx';
 import { Link } from 'react-router-dom';
-import { useTaskSchedule } from '../../context/TaskScheduleContext.jsx';
+import { useTaskBackend } from '../../context/TaskBackendContext.jsx';
 import { DISCIPLINE_POINTS_CAP } from '../../data/disciplineConfig.js';
-import { useAccountActions } from '../../context/AccountActionsContext.jsx';
 import { useNotificationCenter } from '../../context/NotificationCenterContext.jsx';
 
 const titles = new Map(applicationNavigationItems.map((item) => [item.path, item.label]));
 
 export default function AppTopbar({ isMobile, sidebarExpanded, onNavigationToggle }) {
   const location = useLocation();
-  const { recoveryState, disciplineState } = useTaskSchedule();
+  const { gracePoints: serverGracePoints, progression: serverProgression, disciplineSummary } = useTaskBackend();
+  const gracePointBalance = disciplineSummary?.gracePointBalance ?? serverProgression?.progression?.gracePoints ?? serverGracePoints?.balance ?? null;
+  const disciplinePointBalance = disciplineSummary?.dpBalance ?? serverProgression?.progression?.disciplinePoints ?? null;
+  const disciplinePointMaximum = Number(disciplineSummary?.disciplinePointWalletCap ?? DISCIPLINE_POINTS_CAP);
   const { unreadCount } = useNotificationCenter();
-  const { requestLogout } = useAccountActions();
   const [openPanel, setOpenPanel] = useState(null);
   const topbarRef = useRef(null);
   const notificationTriggerRef = useRef(null);
-  const profileTriggerRef = useRef(null);
   const title = location.pathname === '/app/tasks/create'
     ? 'Create Schedule'
     : location.pathname === '/app/notifications'
@@ -34,9 +33,8 @@ export default function AppTopbar({ isMobile, sidebarExpanded, onNavigationToggl
     };
     const handleKeyDown = (event) => {
       if (event.key !== 'Escape') return;
-      const trigger = openPanel === 'profile' ? profileTriggerRef.current : notificationTriggerRef.current;
       setOpenPanel(null);
-      requestAnimationFrame(() => trigger?.focus());
+      requestAnimationFrame(() => notificationTriggerRef.current?.focus());
     };
     document.addEventListener('pointerdown', handlePointerDown);
     document.addEventListener('keydown', handleKeyDown);
@@ -48,11 +46,6 @@ export default function AppTopbar({ isMobile, sidebarExpanded, onNavigationToggl
 
   const togglePanel = (panel) => {
     setOpenPanel((current) => current === panel ? null : panel);
-  };
-
-  const handleSignOut = () => {
-    setOpenPanel(null);
-    requestLogout();
   };
 
   return (
@@ -71,11 +64,11 @@ export default function AppTopbar({ isMobile, sidebarExpanded, onNavigationToggl
       </div>
       <div className="app-topbar__actions">
         <nav className="app-topbar-balances" aria-label="Current balances">
-          <Link className="app-topbar-balance app-topbar-balance--grace" to="/app/discipline" aria-label={`Grace Points: ${recoveryState.gracePoints}`} title="Grace Points">
-            <AppIcon name="shield" /><span>GP</span><strong>{recoveryState.gracePoints}</strong>
+          <Link className="app-topbar-balance app-topbar-balance--grace" to="/app/discipline" aria-label={`Grace Points: ${gracePointBalance ?? 'loading'}`} title="Grace Points">
+            <AppIcon name="shield" /><span>GP</span><strong>{gracePointBalance ?? '—'}</strong>
           </Link>
-          <Link className="app-topbar-balance app-topbar-balance--discipline" to="/app/discipline" aria-label={`Discipline Points: ${disciplineState.dpBalance.toFixed(2)} of ${DISCIPLINE_POINTS_CAP.toFixed(2)}`} title="Discipline Points">
-            <AppIcon name="activity" /><span>DP</span><strong>{disciplineState.dpBalance.toFixed(2)}</strong><i>/ {DISCIPLINE_POINTS_CAP.toFixed(2)}</i>
+          <Link className="app-topbar-balance app-topbar-balance--discipline" to="/app/discipline" aria-label={`Discipline Points: ${disciplinePointBalance === null ? 'loading' : `${Number(disciplinePointBalance).toFixed(2)} of ${disciplinePointMaximum.toFixed(2)}`}`} title="Discipline Points">
+            <AppIcon name="activity" /><span>DP</span><strong>{disciplinePointBalance === null ? '—' : Number(disciplinePointBalance).toFixed(2)}</strong><i>/ {disciplinePointMaximum.toFixed(2)}</i>
           </Link>
         </nav>
         <button
@@ -90,13 +83,6 @@ export default function AppTopbar({ isMobile, sidebarExpanded, onNavigationToggl
           <AppIcon name="bell" />
           {unreadCount > 0 && <><span className="app-topbar__notification-count" aria-hidden="true">{unreadCount > 99 ? '99+' : unreadCount}</span><span className="app-topbar__notification-unread-dot" aria-hidden="true" /></>}
         </button>
-        <MemberProfileMenu
-          open={openPanel === 'profile'}
-          triggerRef={profileTriggerRef}
-          onToggle={() => togglePanel('profile')}
-          onClose={() => setOpenPanel(null)}
-          onSignOut={handleSignOut}
-        />
         {openPanel === 'notifications' && <AppNotificationPanel onClose={() => setOpenPanel(null)} />}
       </div>
     </header>

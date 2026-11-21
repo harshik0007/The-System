@@ -1,0 +1,27 @@
+.task-card__manage { position: relative; flex: 0 0 auto; margin-left: 7px; }
+.task-card__manage-trigger { display: inline-flex; width: 36px; min-width: 36px; min-height: 36px; align-items: center; justify-content: center; padding: 0; border: 1px solid rgb(116 178 212 / 24%); border-radius: 6px; background: linear-gradient(145deg, rgb(21 42 61 / 88%), rgb(12 25 39 / 92%)); box-shadow: inset 0 1px rgb(255 255 255 / 4%); color: #c4d7e6; font: 550 .6rem/1 var(--font-body); white-space: nowrap; cursor: pointer; transition: border-color var(--motion-fast), color var(--motion-fast), background var(--motion-fast), box-shadow var(--motion-fast); }
+.task-card__manage-trigger:hover { border-color: rgb(87 207 231 / 48%); background: linear-gradient(145deg, rgb(24 62 82 / 92%), rgb(13 34 49 / 96%)); box-shadow: inset 0 1px rgb(255 255 255 / 6%), 0 0 14px rgb(53 184 217 / 9%); color: #e8faff; }
+.task-card__manage-trigger > span { color: #9ccddd; font-size: 1.05rem; font-weight: 700; letter-spacing: .04em; line-height: 1; }
+.task-card__manage.is-open .task-card__manage-trigger { border-color: rgb(86 202 226 / 44%); color: #e1f8ff; }
+.task-card__manage-menu { z-index: 11000; display: grid; width: min(218px, calc(100vw - 24px)); gap: 3px; overflow: visible; padding: 8px; border: 1px solid rgb(111 193 221 / 34%); border-radius: 10px; background: radial-gradient(ellipse at 0 0, rgb(42 111 145 / 19%), transparent 52%), linear-gradient(150deg, #13253a, #091321 78%); box-shadow: 0 20px 48px rgb(0 0 0 / 48%), 0 0 22px rgb(55 172 210 / 10%), inset 0 1px rgb(255 255 255 / 5%); transform-origin: top right; animation: task-menu-arrive 130ms ease-out both; }
+.task-card__manage-menu::before { padding: 3px 8px 7px; color: #6e9ab5; content: 'TASK ACTIONS'; font: 600 .68rem/1.2 var(--font-body); letter-spacing: .1em; }
+.task-card__manage-menu button { display: flex; min-width: 0; min-height: 42px; align-items: center; gap: 10px; padding: 8px 9px; border: 1px solid transparent; border-radius: 6px; background: transparent; color: #c5d7e6; text-align: left; font: 550 .78rem/1.35 var(--font-body); cursor: pointer; transition: color var(--motion-fast), background var(--motion-fast), border-color var(--motion-fast); }
+.task-card__manage-menu button > .app-icon { width: 16px; height: 16px; flex: 0 0 auto; color: #75bad2; }
+.task-card__manage-menu button > span { display: flex; min-width: 0; flex: 1; align-items: center; justify-content: space-between; gap: 10px; }
+.task-card__manage-menu button > span > i { color: #7895a9; font: normal 1rem/1 var(--font-body); }
+.task-card__manage-menu button:hover:not(:disabled), .task-card__manage-menu button:focus-visible:not(:disabled) { border-color: rgb(87 201 230 / 22%); background: linear-gradient(100deg, rgb(55 149 181 / 17%), rgb(29 74 101 / 12%)); color: #e7faff; }
+.task-card__manage-menu button:focus-visible { outline: 2px solid #72daf0; outline-offset: 1px; }
+.task-card__manage-menu button:active:not(:disabled) { background: rgb(39 135 174 / 28%); }
+.task-card__manage-menu button:disabled { border-color: transparent; background: transparent; color: #778ca0; cursor: not-allowed; }
+.task-card__manage-menu button:disabled > .app-icon { color: #718498; }
+.task-card__manage-menu small { margin-top: 3px; padding: 9px 8px 4px; border-top: 1px solid rgb(139 181 225 / 12%); color: #d1b485; font-size: .72rem; line-height: 1.5; }
+.task-card__manage-menu button.is-destructive { margin-top: 3px; border-top-color: rgb(139 181 225 / 10%); color: #e88b91; }
+.task-card__manage-menu button.is-destructive > .app-icon { color: #df7b84; }
+.task-card__manage-menu button.is-destructive:hover:not(:disabled), .task-card__manage-menu button.is-destructive:focus-visible:not(:disabled) { border-color: rgb(224 103 116 / 28%); background: rgb(171 48 65 / 15%); color: #ffb0b5; }
+.task-card__manage-menu button.is-destructive:hover:not(:disabled) > .app-icon { color: #ffadb4; }
+@keyframes task-menu-arrive { from { opacity: 0; transform: translateY(-3px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .task-card__manage-menu { animation: none; }
+  .task-card__manage-trigger, .task-card__manage-menu button { transition: none; }
+}
