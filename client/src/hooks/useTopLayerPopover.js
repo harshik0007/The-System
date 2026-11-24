@@ -1,13 +1,7 @@
 import { useEffect } from 'react';
 
-/** Share inclusive viewport-edge checks across every theme cursor renderer. */
-export function isViewportPoint(x, y, width = window.innerWidth, height = window.innerHeight) {
-  return Number.isFinite(x) && Number.isFinite(y)
-    && x >= 0 && y >= 0 && x <= width && y <= height;
-}
-
-/** Keeps the active decorative cursor above dialogs while leaving all input untouched. */
-export default function useCursorTopLayer(rootRef, active) {
+/** Keeps decorative, non-interactive overlays above dialogs and popovers. */
+export default function useTopLayerPopover(rootRef, active) {
   useEffect(() => {
     const root = rootRef.current;
     if (!root || !active || typeof root.showPopover !== 'function') return undefined;
@@ -17,13 +11,10 @@ export default function useCursorTopLayer(rootRef, active) {
       if (promoting || !root.isConnected) return;
       promoting = true;
       try {
-        // Reopening an already-open manual popover moves it to the end of the
-        // browser top layer. That matters when a dialog or another popover was
-        // opened after the cursor.
         if (root.matches(':popover-open')) root.hidePopover();
         root.showPopover();
       } catch {
-        // The high, shared cursor layer remains the fallback on older browsers.
+        // The fixed overlay remains a fallback if the browser lacks popovers.
       } finally {
         promoting = false;
       }
@@ -49,19 +40,8 @@ export default function useCursorTopLayer(rootRef, active) {
       try {
         if (root.matches(':popover-open')) root.hidePopover();
       } catch {
-        // The node may already be disconnected as its theme renderer unmounts.
+        // The node may already be disconnected as its overlay unmounts.
       }
     };
   }, [active, rootRef]);
-}
-
-export function dispatchCursorRuntimeEvent(name, sourceEvent) {
-  window.dispatchEvent(new CustomEvent(`the-system:cursor:${name}`, { detail: sourceEvent }));
-}
-
-export function subscribeCursorRuntimeEvent(name, handler) {
-  const eventName = `the-system:cursor:${name}`;
-  const forward = (event) => handler(event.detail);
-  window.addEventListener(eventName, forward);
-  return () => window.removeEventListener(eventName, forward);
 }

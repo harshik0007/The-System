@@ -1,9 +1,6 @@
-import { lazy, Suspense, useEffect, useRef } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter, Navigate, Outlet, Route, useLocation } from 'react-router-dom';
-import VoidShardCursor from './components/VoidShardCursor.jsx';
-import AuroraCursor from './components/AuroraCursor.jsx';
-import EclipseCursor from './components/EclipseCursor.jsx';
-import SingularityCursor from './components/SingularityCursor.jsx';
+import ThemeClickEffects from './components/ThemeClickEffects.jsx';
 import PageTransition from './components/PageTransition.jsx';
 import RouteErrorBoundary from './components/RouteErrorBoundary.jsx';
 import EmergencyPauseAtmosphere from './components/app/EmergencyPauseAtmosphere.jsx';
@@ -15,7 +12,6 @@ import { UserPreferencesProvider, useUserPreferences } from './context/UserPrefe
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import { SignUpDraftProvider } from './context/SignUpDraftContext.jsx';
 import { FlashMessageProvider } from './context/FlashMessageContext.jsx';
-import { dispatchCursorRuntimeEvent, isViewportPoint } from './hooks/useCursorTopLayer.js';
 import { isAuthenticatedExperiencePath } from './utils/routePaths.js';
 
 const routeLoaders = {
@@ -179,125 +175,6 @@ function ApplicationErrorBoundary({ children }) {
   return <RouteErrorBoundary resetKey={pathname}>{children}</RouteErrorBoundary>;
 }
 
-function ThemeCursor() {
-  const { preferences } = useUserPreferences();
-  const pointerRef = useRef({ x: 0, y: 0, inside: false, buttons: 0 });
-
-  useEffect(() => {
-    // Include the viewport edge: Chromium reports scrollbar drags at the last
-    // viewport pixel, and hiding the cursor there exposes the native pointer.
-    const inViewport = (event) => isViewportPoint(event.clientX, event.clientY);
-    const suspendPointer = (event) => {
-      const previous = pointerRef.current;
-      pointerRef.current = { ...previous, inside: false, buttons: 0 };
-      // Leave handlers are idempotent and must also clear theme cursor state
-      // if a renderer was activated by pointerover before the move listener.
-      dispatchCursorRuntimeEvent('leave', event);
-    };
-    const rememberPointer = (event) => {
-      if (event.pointerType === 'touch' || !inViewport(event)) return;
-      const previous = pointerRef.current;
-      if (previous.inside && previous.x === event.clientX && previous.y === event.clientY) return;
-      pointerRef.current = {
-        x: event.clientX,
-        y: event.clientY,
-        inside: true,
-        buttons: typeof event.buttons === 'number' ? event.buttons : previous.buttons,
-      };
-      dispatchCursorRuntimeEvent('move', event);
-    };
-    const pointerEnter = (event) => {
-      if (event.pointerType === 'touch' || !inViewport(event)) return;
-      pointerRef.current = {
-        x: event.clientX,
-        y: event.clientY,
-        inside: true,
-        buttons: typeof event.buttons === 'number' ? event.buttons : 0,
-      };
-      dispatchCursorRuntimeEvent('enter', event);
-    };
-    const pointerLeave = (event) => {
-      if (event.pointerType === 'touch') return;
-      // Chromium can report a leave at the viewport edge during scrollbar
-      // dragging. Preserve that in-page drag, but trust a normal leave even if
-      // its rounded coordinates are still on an inclusive viewport boundary.
-      const dragging = Boolean(event.buttons || pointerRef.current.buttons);
-      if (dragging && inViewport(event)) return;
-      suspendPointer(event);
-    };
-    const pointerOver = (event) => {
-      if (event.pointerType !== 'touch') dispatchCursorRuntimeEvent('over', event);
-    };
-    const pointerDown = (event) => {
-      if (event.pointerType !== 'touch') {
-        pointerRef.current = { ...pointerRef.current, buttons: event.buttons || 1 };
-        dispatchCursorRuntimeEvent('down', event);
-      }
-    };
-    const pointerUp = (event) => {
-      if (event.pointerType !== 'touch') {
-        pointerRef.current = { ...pointerRef.current, buttons: 0 };
-        if (inViewport(event)) rememberPointer(event);
-        else pointerLeave({ pointerType: event.pointerType, clientX: event.clientX, clientY: event.clientY, buttons: 0 });
-        dispatchCursorRuntimeEvent('up', event);
-      }
-    };
-    const pointerCancel = (event) => {
-      if (event.pointerType !== 'touch') {
-        pointerRef.current = { ...pointerRef.current, buttons: 0 };
-        dispatchCursorRuntimeEvent('cancel', event);
-        if (!inViewport(event)) pointerLeave({ pointerType: event.pointerType, clientX: event.clientX, clientY: event.clientY, buttons: 0 });
-      }
-    };
-    const scroll = (event) => dispatchCursorRuntimeEvent('scroll', event);
-    const visibilityChange = (event) => {
-      if (document.hidden) suspendPointer(event);
-      dispatchCursorRuntimeEvent('visibility', event);
-    };
-    const loseWindowFocus = (event) => suspendPointer(event);
-
-    // Capture at document level so controls and nested scrolling regions that
-    // stop bubbling still update the fixed cursor. Window listeners retain
-    // coverage for browser scrollbar drag events; duplicate points are ignored.
-    document.addEventListener('pointermove', rememberPointer, { passive: true, capture: true });
-    document.addEventListener('mousemove', rememberPointer, { passive: true, capture: true });
-    window.addEventListener('pointermove', rememberPointer, { passive: true });
-    window.addEventListener('mousemove', rememberPointer, { passive: true });
-    window.addEventListener('pointerenter', pointerEnter, { passive: true });
-    window.addEventListener('pointerleave', pointerLeave, { passive: true });
-    window.addEventListener('pointerdown', pointerDown, { passive: true });
-    window.addEventListener('pointerup', pointerUp, { passive: true });
-    window.addEventListener('pointercancel', pointerCancel, { passive: true });
-    document.addEventListener('pointerover', pointerOver, { passive: true });
-    document.addEventListener('scroll', scroll, { passive: true, capture: true });
-    document.addEventListener('visibilitychange', visibilityChange);
-    window.addEventListener('blur', loseWindowFocus);
-    window.addEventListener('pagehide', loseWindowFocus);
-    return () => {
-      document.removeEventListener('pointermove', rememberPointer, true);
-      document.removeEventListener('mousemove', rememberPointer, true);
-      window.removeEventListener('pointermove', rememberPointer);
-      window.removeEventListener('mousemove', rememberPointer);
-      window.removeEventListener('pointerenter', pointerEnter);
-      window.removeEventListener('pointerleave', pointerLeave);
-      window.removeEventListener('pointerdown', pointerDown);
-      window.removeEventListener('pointerup', pointerUp);
-      window.removeEventListener('pointercancel', pointerCancel);
-      document.removeEventListener('pointerover', pointerOver);
-      document.removeEventListener('scroll', scroll, true);
-      document.removeEventListener('visibilitychange', visibilityChange);
-      window.removeEventListener('blur', loseWindowFocus);
-      window.removeEventListener('pagehide', loseWindowFocus);
-    };
-  }, []);
-
-  const initialPointer = pointerRef.current;
-  if (preferences.appearance.theme === 'aurora') return <AuroraCursor initialPointer={initialPointer} />;
-  if (preferences.appearance.theme === 'eclipse') return <EclipseCursor initialPointer={initialPointer} />;
-  if (preferences.appearance.theme === 'galaxion') return <SingularityCursor initialPointer={initialPointer} enabled={preferences.appearance.voidShardCursor} clickEffectEnabled={preferences.appearance.clickRipple} />;
-  return <VoidShardCursor initialPointer={initialPointer} />;
-}
-
 function AuthenticatedApplicationRuntime({ children }) {
   const { member } = useAuth();
 
@@ -372,7 +249,7 @@ export default function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </PageTransition>
       </AuthenticatedApplicationRuntime>
-      <ThemeCursor />
+      <ThemeClickEffects />
       </ApplicationErrorBoundary>
       </UserPreferencesProvider>
       </SignUpDraftProvider>

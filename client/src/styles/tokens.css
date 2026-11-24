@@ -68,18 +68,10 @@
   --scrollbar-thumb: #30495f;
   --scrollbar-thumb-hover: #456b86;
   --scrollbar-thumb-active: #5d91ad;
-  --cursor-color: #63cfff;
-  --cursor-color-secondary: #4de0ef;
-  --cursor-void: #07101b;
-  --cursor-glow: rgb(53 176 255 / 34%);
-  --cursor-size: 34px;
-  --cursor-height: 42px;
-  --cursor-fragment-size: 16px;
   --z-sidebar: 40;
   --z-modal: 1000;
   --z-tooltip: 1050;
   --z-toast: 1100;
-  --z-cursor: 1200;
   --z-theme-transition: 1300;
   /* DM Sans is the single product typeface; hierarchy comes from size and weight. */
   --font-body: 'DM Sans', system-ui, sans-serif;

@@ -7,8 +7,6 @@
 @property --color-muted { syntax: '<color>'; inherits: true; initial-value: #9aaec5; }
 @property --color-accent { syntax: '<color>'; inherits: true; initial-value: #69bfff; }
 @property --color-cyan { syntax: '<color>'; inherits: true; initial-value: #4de0ef; }
-@property --cursor-color { syntax: '<color>'; inherits: true; initial-value: #63cfff; }
-@property --cursor-color-secondary { syntax: '<color>'; inherits: true; initial-value: #4de0ef; }
 @property --surface-page { syntax: '<color>'; inherits: true; initial-value: #070b13; }
 @property --surface-app { syntax: '<color>'; inherits: true; initial-value: #0b1220; }
 @property --surface-sidebar { syntax: '<color>'; inherits: true; initial-value: #09121d; }
@@ -149,10 +147,6 @@
   --button-secondary-text: #F5F7FA;
   --selection-bg: #FF8A3D;
   --selection-text: #201006;
-  --cursor-color: #FF8A3D;
-  --cursor-color-secondary: #FFC166;
-  --cursor-void: #0B0B0F;
-  --cursor-glow: rgb(255 138 61 / 36%);
   --scrollbar-track: #0B0B0F;
   --scrollbar-thumb: #34363B;
   --scrollbar-thumb-hover: #55575D;
@@ -192,8 +186,6 @@
     --surface-empty 550ms cubic-bezier(.22,.61,.36,1),
     --surface-notification 550ms cubic-bezier(.22,.61,.36,1),
     --border-divider 550ms cubic-bezier(.22,.61,.36,1),
-    --cursor-color 550ms cubic-bezier(.22,.61,.36,1),
-    --cursor-color-secondary 550ms cubic-bezier(.22,.61,.36,1);
 }
 
 :root[data-system-theme] body { background: var(--color-bg); color: var(--color-text); }
@@ -425,18 +417,6 @@
 .leaderboard-public-profile[data-system-theme='obsidian'] .leaderboard-back-link { color: var(--color-accent); }
 .leaderboard-public-profile[data-system-theme='obsidian'] :is(th, thead) { background: var(--surface-table-head); color: var(--color-muted); }
 
-/* Obsidian colors the existing VOID SHARD; its shape, settings, and pointer behavior stay intact. */
-:root[data-system-theme='obsidian'] .void-shard-pointer-fill stop:first-child { stop-color: #80502D; }
-:root[data-system-theme='obsidian'] .void-shard-pointer-fill stop:nth-child(2) { stop-color: #211710; }
-:root[data-system-theme='obsidian'] .void-shard-pointer-fill stop:last-child { stop-color: #61381F; }
-:root[data-system-theme='obsidian'] .void-shard-pointer-light stop:first-child { stop-color: #FFC166; }
-:root[data-system-theme='obsidian'] .void-shard-pointer-light stop:last-child { stop-color: #FF8A3D; }
-:root[data-system-theme='obsidian'] .void-shard-art--fragment-a path,
-:root[data-system-theme='obsidian'] .void-shard-art--fragment-b path { fill: #352116; stroke: var(--cursor-color-secondary); }
-:root[data-system-theme='obsidian'] .void-shard-cursor.is-hovering .void-shard-pointer-edge { stroke: #FFE1AE; filter: drop-shadow(0 0 7px rgb(255 138 61 / 72%)); }
-:root[data-system-theme='obsidian'] .void-shard-cursor.is-hovering .void-shard-art--fragment-a,
-:root[data-system-theme='obsidian'] .void-shard-cursor.is-hovering .void-shard-art--fragment-b { filter: drop-shadow(0 0 6px rgb(255 193 102 / 54%)); }
-
 .theme-transition-wash {
   --transition-accent: #69bfff;
   --transition-secondary: #4de0ef;
@@ -455,7 +435,6 @@
   isolation: isolate;
   opacity: 1;
   pointer-events: auto;
-  cursor: progress;
   overscroll-behavior: contain;
   touch-action: none;
   animation: theme-overlay-enter 220ms ease-out both;
@@ -510,7 +489,6 @@
 }
 .theme-transition-wash.is-exiting { opacity: 0; animation: none; transition: opacity 450ms ease; }
 .theme-transition-wash.is-exiting .theme-transition-wash__panel { transform: translateY(-4px) scale(.99); transition: transform 450ms ease; }
-.theme-transition-overlay-active .void-shard-cursor { display: none !important; }
 :root.theme-transition-running body,
 :root.theme-transition-running .app-layout,
 :root.theme-transition-running .app-sidebar,

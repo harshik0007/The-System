@@ -1,0 +1,110 @@
+/* Click feedback uses a transparent, non-interactive top layer. The browser's
+   native pointer remains visible and in control everywhere. */
+.theme-click-effects[popover="manual"] {
+  position: fixed;
+  inset: 0;
+  display: none;
+  width: 100vw;
+  height: 100vh;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  pointer-events: none;
+}
+.theme-click-effects:popover-open { display: block; }
+.theme-click-wave { position: absolute; z-index: 1; pointer-events: none; }
+
+.theme-click-wave--dark-navy { width: 42px; height: 42px; opacity: 0; }
+.theme-click-wave--dark-navy path { stroke: #4DE0EF; stroke-width: 1; stroke-linejoin: bevel; filter: drop-shadow(0 0 5px rgb(53 176 255 / 34%)); }
+.theme-click-wave--dark-navy { animation: theme-click-shard-ripple 330ms cubic-bezier(.2, .7, .2, 1) both; }
+@keyframes theme-click-shard-ripple {
+  0% { opacity: .5; transform: scale(.18) rotate(0deg); }
+  100% { opacity: 0; transform: scale(1.3) rotate(18deg); }
+}
+
+.theme-click-wave--aurora,
+.theme-click-wave--eclipse {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(.25);
+}
+.theme-click-wave--aurora {
+  margin: -11px 0 0 -11px;
+  border: 1px solid rgb(142 223 255 / 82%);
+  background: radial-gradient(circle, rgb(181 162 255 / 36%), rgb(69 220 196 / 8%) 55%, transparent 72%);
+  box-shadow: 0 0 16px rgb(146 112 255 / 45%), inset 0 0 8px rgb(69 220 196 / 42%);
+  animation: aurora-click-expand 720ms cubic-bezier(.16,.72,.25,1) both;
+}
+.theme-click-wave--aurora::before,
+.theme-click-wave--aurora::after {
+  position: absolute;
+  inset: 3px;
+  border: 1px solid rgb(69 220 196 / 65%);
+  border-radius: inherit;
+  content: '';
+  animation: aurora-click-fracture 560ms ease-out both;
+}
+.theme-click-wave--aurora::after { inset: -5px; border-color: rgb(181 162 255 / 50%); animation-delay: 80ms; }
+@keyframes aurora-click-expand { to { opacity: 0; transform: translate(-50%, -50%) scale(3.4); } }
+@keyframes aurora-click-fracture { to { opacity: 0; transform: scale(1.8) rotate(28deg); } }
+
+.theme-click-wave--eclipse {
+  border: 1px solid rgb(200 201 224 / 84%);
+  background: radial-gradient(circle, rgb(167 139 250 / 23%), transparent 68%);
+  box-shadow: 0 0 12px rgb(118 87 255 / 36%);
+  animation: eclipse-click-wave 580ms cubic-bezier(.14,.6,.22,1) both;
+}
+.theme-click-wave--eclipse::before,
+.theme-click-wave--eclipse::after {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  border: 1px solid #E7DFFF;
+  content: '';
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+.theme-click-wave--eclipse::after { width: 30px; height: 30px; border-color: rgb(167 139 250 / 55%); border-radius: 50%; }
+@keyframes eclipse-click-wave { 0% { opacity: .75; transform: translate(-50%, -50%) scale(.25); } 70% { opacity: .45; } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.7); } }
+
+.theme-click-wave--galaxion {
+  width: 72px;
+  height: 56px;
+  opacity: 0;
+  overflow: visible;
+  transform: translate(-50%, -50%) scale(.44);
+  animation: galaxion-click-wave 340ms ease-out both;
+}
+.theme-click-wave--galaxion ellipse { fill: none; stroke: #A8B9DC; stroke-width: .8; opacity: .72; filter: drop-shadow(0 0 3px rgb(82 125 205 / 45%)); }
+@keyframes galaxion-click-wave { 0% { opacity: .88; transform: translate(-50%, -50%) scale(.44); } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1); } }
+
+:root[data-system-theme='obsidian'] .obsidian-click-impact { position: absolute; top: 0; left: 0; width: 82px; height: 82px; overflow: visible; transform: translate3d(var(--impact-x, -100px), var(--impact-y, -100px), 0); pointer-events: none; }
+:root[data-system-theme='obsidian'] .obsidian-click-impact > span { position: absolute; top: 50%; left: 50%; display: block; opacity: 0; pointer-events: none; }
+:root[data-system-theme='obsidian'] .obsidian-impact-ring { width: var(--ring-size); height: var(--ring-size); border: 1px solid rgb(255 193 102 / 84%); border-radius: 50%; box-shadow: 0 0 8px rgb(255 138 61 / 48%); transform: translate(-50%, -50%) scale(.2); }
+:root[data-system-theme='obsidian'] .obsidian-impact-fragment { width: 5px; height: 12px; background: linear-gradient(180deg, #FFF0CC, #FF8A3D 68%, transparent); clip-path: polygon(35% 0, 100% 44%, 55% 100%, 0 68%); }
+:root[data-system-theme='obsidian'] .obsidian-impact-particle { width: 3px; height: 3px; border-radius: 50%; background: #FFC166; box-shadow: 0 0 6px rgb(255 193 102 / 80%); }
+:root[data-system-theme='obsidian'] .obsidian-click-impact.is-active::before { position: absolute; inset: 35px; border-radius: 50%; background: #FFF0CC; box-shadow: 0 0 22px 7px rgb(255 138 61 / 62%); content: ''; animation: obsidian-impact-core 500ms ease-out both; }
+:root[data-system-theme='obsidian'] .obsidian-click-impact.is-active .obsidian-impact-ring { animation: obsidian-impact-ring 560ms cubic-bezier(.15, .7, .25, 1) both; }
+:root[data-system-theme='obsidian'] .obsidian-click-impact.is-active .obsidian-impact-ring:nth-child(2) { animation-delay: 45ms; }
+:root[data-system-theme='obsidian'] .obsidian-click-impact.is-active .obsidian-impact-ring:nth-child(3) { animation-delay: 95ms; }
+:root[data-system-theme='obsidian'] .obsidian-click-impact.is-active .obsidian-impact-fragment { animation: obsidian-impact-fragment 620ms cubic-bezier(.15, .7, .25, 1) both; transform: rotate(var(--fragment-angle)) translateY(-5px); }
+:root[data-system-theme='obsidian'] .obsidian-click-impact.is-active .obsidian-impact-particle { animation: obsidian-impact-particle 590ms ease-out both; transform: rotate(var(--fragment-angle)) translateY(-6px); }
+@keyframes obsidian-impact-core { 0% { opacity: 0; transform: scale(.25); } 20% { opacity: 1; } 100% { opacity: 0; transform: scale(1.5); } }
+@keyframes obsidian-impact-ring { 0% { opacity: .9; transform: translate(-50%, -50%) scale(.15); } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.35); } }
+@keyframes obsidian-impact-fragment { 0% { opacity: .95; } 100% { opacity: 0; transform: rotate(var(--fragment-angle)) translateY(-30px) scale(.55); } }
+@keyframes obsidian-impact-particle { 0% { opacity: .9; } 100% { opacity: 0; transform: rotate(var(--fragment-angle)) translateY(-24px) scale(.45); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-click-wave { display: none !important; animation: none !important; }
+  .theme-click-wave::before,
+  .theme-click-wave::after { display: none !important; animation: none !important; }
+  .obsidian-click-impact,
+  .obsidian-click-impact * { display: none !important; animation: none !important; }
+}

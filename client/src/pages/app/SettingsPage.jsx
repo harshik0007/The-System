@@ -544,8 +544,7 @@ export default function SettingsPage() {
                 {themeFeedback && <p className={`settings-theme-feedback is-${themeFeedback.type}`} role={themeFeedback.type === 'error' ? 'alert' : 'status'}>{themeFeedback.text}</p>}
               </div>
               <div className="settings-toggle-list">
-                <Toggle title={preferences.appearance.theme === 'aurora' ? 'Aurora cursor' : preferences.appearance.theme === 'eclipse' ? 'Eclipse cursor' : preferences.appearance.theme === 'galaxion' ? 'Singularity Pointer' : 'VOID SHARD cursor'} description="Show the selected theme’s custom pointer on supported desktop devices." checked={draft.appearance.voidShardCursor} onChange={(checked) => update('appearance', 'voidShardCursor', checked)} />
-                <Toggle title="Click ripple" description="Show the selected theme’s click effect. This remains separately controlled from the pointer shape." checked={draft.appearance.clickRipple} onChange={(checked) => update('appearance', 'clickRipple', checked)} />
+                <Toggle title="Click effects" description="Show the selected theme’s visual feedback when you click." checked={draft.appearance.clickRipple} onChange={(checked) => update('appearance', 'clickRipple', checked)} />
                 <Toggle title="Nonessential animations" description="Allow page entrances and decorative interface motion. Functional feedback remains available when off." checked={draft.appearance.nonessentialAnimations} onChange={(checked) => update('appearance', 'nonessentialAnimations', checked)} />
                 <Toggle title="Reduce decorative effects" description="Reduce decorative atmosphere particles and lighting. Emergency Pause status remains visible while active." checked={draft.appearance.reduceDecorativeEffects} onChange={(checked) => update('appearance', 'reduceDecorativeEffects', checked)} />
               </div>

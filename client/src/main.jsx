@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import App from './App.jsx';
 import './styles/tokens.css';
 import './styles/global.css';
-import './styles/void-shard-cursor.css';
+import './styles/click-effects.css';
 import './styles/auth.css';
 import './styles/page-transitions.css';
 import './styles/route-stability.css';
@@ -18,7 +18,6 @@ import './styles/themes/eclipse/index.css';
 import './styles/themes/galaxion/index.css';
 // Shared dialogs and transient messages use the active theme's semantic tokens.
 import './styles/theme-overlays.css';
-import './styles/cursor-runtime.css';
 import './styles/flash-messages.css';
 
 createRoot(document.getElementById('root')).render(

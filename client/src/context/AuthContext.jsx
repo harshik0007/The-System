@@ -86,7 +86,7 @@ export function AuthProvider({ children }) {
   const login = useCallback(async (credentials) => {
     const requestSequence = ++sequence.current;
     // The login screen is already interactive, so this is no longer session
-    // restoration. Keep global UI such as the custom cursor mounted while the
+    // restoration. Keep global UI such as theme click feedback mounted while the
     // credential request is pending or returning a warning.
     setRestoringSession(false);
     setLoading(true);
