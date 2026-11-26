@@ -68,6 +68,7 @@
 }
 .task-builder-back-to-quick-start:hover { transform: translateY(-1px); border-color: var(--border-interactive); background: var(--surface-selected); }
 .task-builder-back-to-quick-start:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: 3px; }
+.task-creation-page[hidden] { display: none !important; }
 
 .quick-start-progress {
   display: grid;
