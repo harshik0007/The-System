@@ -48,7 +48,7 @@ export default function TaskSubmissionDialog({ task, onClose, onSubmit, saving =
           <div className="task-submission__review">
             <p><span>Completion note</span><strong>{note || 'No note added'}</strong></p>
             <p><span>Supporting proof</span><strong>{file?.name || 'No file selected'}</strong></p>
-            <div><AppIcon name="shield" /><p>Submitting records this Task as <strong>Completed immediately</strong>. The note and file name are optional; AI review and XP awards are not active.</p></div>
+            <div><AppIcon name="shield" /><p><strong>AI proof verification isn’t available yet.</strong> Submitting marks this Task completed right away and applies its normal rewards. Your note is saved; only the selected file’s name is recorded.</p></div>
           </div>
         )}
 

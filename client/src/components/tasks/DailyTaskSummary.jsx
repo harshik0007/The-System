@@ -18,7 +18,7 @@ export default function DailyTaskSummary({ metrics }) {
         <AppProgressBar value={metrics.percentage} label="Daily task completion" description={`${metrics.completed} of ${metrics.total} scheduled Tasks are recorded as completed.`} />
       </div>
 
-      <p className="daily-task-summary__note">Submit a scheduled Task to record it as completed. Proof is optional and is not AI-verified.</p>
+      <p className="daily-task-summary__note">Submit a scheduled Task to record it as completed. Proof is optional; AI verification isn’t available yet.</p>
     </section>
   );
 }
