@@ -13,6 +13,7 @@ import AppIcon from './AppIcon.jsx';
 import { taskApi } from '../../services/taskApi.js';
 import '../../styles/app-shell.css';
 import '../../styles/discipline.css';
+import '../../styles/profile-task-layout-fixes.css';
 
 const pauseResumeFormatter = new Intl.DateTimeFormat('en-IN', {
   timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short',

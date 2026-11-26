@@ -1,0 +1,36 @@
+.app-layout .personal-best-card__rank-content {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
+}
+
+.app-layout .personal-best-card__rank-content > div {
+  display: grid;
+  min-width: 0;
+  flex: 1 1 auto;
+  gap: 4px;
+}
+
+.app-layout .personal-best-card__badge.rank-badge-aura {
+  display: block;
+  width: 48px;
+  min-width: 48px;
+  flex: 0 0 48px;
+  overflow: hidden;
+}
+
+.app-layout .personal-best-card__badge.rank-badge-aura .rank-badge {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.app-layout .task-completion-pending {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.app-layout .task-completion-pending > .app-icon { flex: 0 0 auto; }
+.app-layout .task-completion-pending > span { min-width: 0; flex: 1 1 auto; }
