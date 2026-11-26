@@ -6,6 +6,7 @@ import AppIcon from '../../components/app/AppIcon.jsx';
 import PageLoadingSkeleton, { SkeletonLine } from '../../components/app/PageLoadingSkeleton.jsx';
 import ProfileAvatar from '../../components/app/MemberAvatar.jsx';
 import { taskApi } from '../../services/taskApi.js';
+import { updateFirstRunProgress } from '../../utils/firstRunProgress.js';
 import {
   buildLeaderboardResults,
   getLeaderboardCategoryValue,
@@ -120,7 +121,10 @@ export default function LeaderboardPage() {
     const controller = new AbortController();
     setLoading(true);
     setError('');
-    taskApi.leaderboard({ signal: controller.signal }).then(setSnapshot).catch((requestError) => {
+    taskApi.leaderboard({ signal: controller.signal }).then((data) => {
+      setSnapshot(data);
+      updateFirstRunProgress({ leaderboardVisited: true });
+    }).catch((requestError) => {
       if (requestError?.name !== 'AbortError') setError(requestError?.message || 'The leaderboard could not be loaded.');
     }).finally(() => {
       if (!controller.signal.aborted) setLoading(false);

@@ -180,18 +180,18 @@
 .quick-start-task-row { min-width: 0; padding: 12px; border: 1px solid var(--silver-border); border-radius: var(--silver-radius-control); background: var(--surface-card-nested); }
 .quick-start-task-row__top { display: grid; grid-template-columns: 34px minmax(0, 1fr) 40px; align-items: center; gap: 9px; }
 .quick-start-task-row__number { display: grid; width: 32px; height: 32px; place-items: center; border: 1px solid var(--border-interactive); border-radius: 9px; background: var(--surface-selected); color: var(--silver-indigo); font-size: 12px; font-weight: 700; }
-.quick-start-task-row__name input { min-height: 42px; }
-.quick-start-icon-button { display: grid; width: 40px; height: 40px; place-items: center; border: 1px solid var(--silver-border); border-radius: var(--silver-radius-control); background: var(--surface-card); color: var(--color-muted); cursor: pointer; transition: border-color var(--motion-fast), background var(--motion-fast), color var(--motion-fast); }
+.quick-start-task-row__name input { min-height: 44px; }
+.quick-start-icon-button { display: grid; width: 44px; height: 44px; place-items: center; border: 1px solid var(--silver-border); border-radius: var(--silver-radius-control); background: var(--surface-card); color: var(--color-muted); cursor: pointer; transition: border-color var(--motion-fast), background var(--motion-fast), color var(--motion-fast); }
 .quick-start-icon-button .app-icon { width: 17px; height: 17px; }
 .quick-start-icon-button:hover { border-color: var(--silver-danger); background: var(--silver-danger-soft); color: var(--silver-danger); }
 .quick-start-task-row__links { display: flex; flex-wrap: wrap; gap: 7px 17px; padding: 9px 0 0 43px; }
-.quick-start-text-button { min-height: 32px; padding: 4px 0; border: 0; background: transparent; color: var(--silver-indigo-hover); font: inherit; font-size: 13px; font-weight: 600; text-align: left; cursor: pointer; }
+.quick-start-text-button { min-height: 44px; padding: 4px 0; border: 0; background: transparent; color: var(--silver-indigo-hover); font: inherit; font-size: 13px; font-weight: 600; text-align: left; cursor: pointer; }
 .quick-start-text-button:hover { color: var(--silver-indigo); text-decoration: underline; text-underline-offset: 3px; }
 .quick-start-task-row__details { margin: 10px 0 0 43px; }
 .quick-start-day-picker { margin: 10px 0 0 43px; padding: 0; border: 0; }
 .quick-start-day-picker legend, .quick-start-forfeit-options legend { margin-bottom: 8px; color: var(--color-text); font-size: 14px; font-weight: 650; }
 .quick-start-day-picker__chips, .quick-start-forfeit-options__chips { display: flex; flex-wrap: wrap; gap: 7px; }
-.quick-start-day-chip, .quick-start-chip { min-height: 40px; padding: 0 12px; border: 1px solid var(--silver-border); border-radius: 999px; background: var(--surface-card); color: var(--color-text); font: inherit; font-size: 13px; cursor: pointer; transition: border-color var(--motion-fast), background var(--motion-fast), color var(--motion-fast), transform var(--motion-fast); }
+.quick-start-day-chip, .quick-start-chip { min-height: 44px; padding: 0 12px; border: 1px solid var(--silver-border); border-radius: 999px; background: var(--surface-card); color: var(--color-text); font: inherit; font-size: 13px; cursor: pointer; transition: border-color var(--motion-fast), background var(--motion-fast), color var(--motion-fast), transform var(--motion-fast); }
 .quick-start-day-chip:hover, .quick-start-chip:hover { transform: translateY(-1px); border-color: var(--border-interactive); }
 .quick-start-day-chip.is-selected, .quick-start-chip.is-selected { border-color: var(--silver-indigo); background: var(--surface-selected); color: var(--silver-indigo-hover); box-shadow: inset 0 0 0 1px var(--silver-indigo); }
 .quick-start-day-validation { display: grid; gap: 6px; }
@@ -273,7 +273,7 @@
   .quick-start-task-row__number { width: 28px; height: 28px; }
   .quick-start-task-row__links { padding-left: 36px; }
   .quick-start-task-row__details, .quick-start-day-picker { margin-left: 36px; }
-  .quick-start-day-chip, .quick-start-chip { min-height: 40px; padding-inline: 10px; }
+  .quick-start-day-chip, .quick-start-chip { min-height: 44px; padding-inline: 10px; }
   .quick-start-review { padding: 12px; }
   .quick-start-review__tasks { grid-template-columns: 1fr; }
   .quick-start-review__heading { flex-direction: column; }

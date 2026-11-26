@@ -11,10 +11,12 @@ import AppProgressBar from '../../components/app/AppProgressBar.jsx';
 import GracePointSummary from '../../components/app/GracePointSummary.jsx';
 import DisciplinePointsSummary from '../../components/app/DisciplinePointsSummary.jsx';
 import EmergencyPauseControls from '../../components/app/EmergencyPauseControls.jsx';
+import FirstRunChecklist from '../../components/app/FirstRunChecklist.jsx';
 import { APPEARANCE_THEMES } from '../../data/appearanceThemes.js';
 import { useTaskBackend } from '../../context/TaskBackendContext.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { RECOVERY_STATUS } from '../../utils/recoveryQuestManager.js';
+import { getFirstRunProgress } from '../../utils/firstRunProgress.js';
 import { selectEligibleTaskOccurrences } from '../../utils/taskOccurrenceSelection.js';
 import { getNextAppearanceThemeReward } from '../../data/appearanceThemes.js';
 import '../../styles/public-pages.css';
@@ -79,6 +81,12 @@ export default function DashboardPage() {
     lifetimeLongestStreak: serverDiscipline?.lifetimeLongestStreak ?? serverProgression?.lifetimeLongestStreak ?? 0,
   };
   const recentEvents = [];
+  const savedFirstRunProgress = getFirstRunProgress();
+  const firstRunProgress = {
+    planCreated: Boolean(serverSchedule) || savedFirstRunProgress.planCreated,
+    firstTaskCompleted: savedFirstRunProgress.firstTaskCompleted || displayedXp > 0 || todayTasks.some((task) => task.completed),
+    leaderboardVisited: savedFirstRunProgress.leaderboardVisited,
+  };
 
   useLayoutEffect(() => {
     if (reduceMotion || !pageRef.current) return undefined;
@@ -114,6 +122,9 @@ export default function DashboardPage() {
         <div><p className="app-eyebrow">PLAYER OVERVIEW</p><h1>Welcome back, {member?.username || 'member'}.</h1><p>Your progress is built through consistent action.</p></div>
         <span className="app-demo-label"><i aria-hidden="true" />LIVE PROGRESSION</span>
       </header>
+
+      <FirstRunChecklist progress={firstRunProgress} />
+
 
       <div className="dashboard-feature-grid">
         <section className="app-panel dashboard-rank-panel dashboard-reveal" aria-labelledby="dashboard-rank-heading" style={{ '--rank-accent': rank.color }}>

@@ -1,12 +1,15 @@
 import { useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import AppIcon from '../app/AppIcon.jsx';
+import QuickStartIntro from '../app/QuickStartIntro.jsx';
 import { TermText } from '../app/Term.jsx';
 import { useTaskBackend } from '../../context/TaskBackendContext.jsx';
 import { useReducedMotion } from '../../hooks/useReducedMotion.js';
 import { createIdempotencyKey, taskApi } from '../../services/taskApi.js';
 import { getScheduleValidation } from '../../utils/taskScheduleBuilder.js';
+import { hasSeenQuickStartIntro, updateFirstRunProgress } from '../../utils/firstRunProgress.js';
 import '../../styles/quick-start.css';
+import '../../styles/first-run-help.css';
 
 const WEEKDAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 const SHORT_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -113,6 +116,7 @@ export default function QuickStartScheduleBuilder({ onCancel }) {
   const saveLockRef = useRef(false);
   const idempotencyKeyRef = useRef(createIdempotencyKey());
   const [step, setStep] = useState(1);
+  const [introComplete, setIntroComplete] = useState(hasSeenQuickStartIntro);
   const [tasks, setTasks] = useState([]);
   const [selectedPack, setSelectedPack] = useState('');
   const [pasteText, setPasteText] = useState('');
@@ -257,6 +261,7 @@ export default function QuickStartScheduleBuilder({ onCancel }) {
     };
     try {
       await taskApi.createSchedule(payload, idempotencyKeyRef.current);
+      updateFirstRunProgress({ planCreated: true });
       await refresh();
       idempotencyKeyRef.current = createIdempotencyKey();
       navigate('/app/dashboard', { replace: true, state: { quickStartCreated: true, firstTaskName } });
@@ -267,6 +272,10 @@ export default function QuickStartScheduleBuilder({ onCancel }) {
       setSaving(false);
     }
   };
+
+  if (!introComplete) return <main className={`quick-start-page${reducedMotion ? ' is-reduced-motion' : ''}`} aria-label="Quick Start setup">
+    <QuickStartIntro onDone={() => setIntroComplete(true)} />
+  </main>;
 
   return <main className={`quick-start-page${reducedMotion ? ' is-reduced-motion' : ''}`} aria-labelledby="quick-start-title">
     <header className="quick-start-page__header">

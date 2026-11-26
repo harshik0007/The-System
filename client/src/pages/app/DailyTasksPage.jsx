@@ -14,8 +14,10 @@ import { useReducedMotion } from '../../hooks/useReducedMotion.js';
 import { getDailyTaskMetrics } from '../../utils/dailyTaskProgress.js';
 import { selectEligibleTaskOccurrences } from '../../utils/taskOccurrenceSelection.js';
 import { formatTaskDateKey } from '../../utils/taskScheduleBuilder.js';
+import { updateFirstRunProgress } from '../../utils/firstRunProgress.js';
 import { createIdempotencyKey, taskApi } from '../../services/taskApi.js';
 import '../../styles/daily-tasks.css';
+import '../../styles/first-run-help.css';
 
 function taskForCard(task, number) {
   const action = task.accountabilityAction || {};
@@ -118,6 +120,7 @@ export default function DailyTasksPage() {
     setSubmissionError('');
     try {
       const result = await taskApi.completeOccurrence(occurrenceId, submission, idempotencyKeyRef.current);
+      updateFirstRunProgress({ firstTaskCompleted: true });
       idempotencyKeyRef.current = createIdempotencyKey();
       setSubmissionTarget(null);
       await refresh();
@@ -172,7 +175,7 @@ export default function DailyTasksPage() {
       </div>}
 
       {!schedule && !loading && !error && <section className="app-panel daily-task-empty daily-task-reveal" aria-labelledby="daily-task-empty-title">
-        <p className="app-eyebrow">NO ACTIVE SCHEDULE</p><h2 id="daily-task-empty-title">Create your Daily Schedule</h2><p>Set a repeating cycle, schedule at least seven original Tasks on each cycle day, and save them to THE SYSTEM.</p><Link className="button button--primary" to="/app/tasks/create">Start schedule setup <span aria-hidden="true">↗</span></Link>
+        <p className="app-eyebrow">YOUR FIRST STEP</p><h2 id="daily-task-empty-title">Set up your 7 daily Tasks (about 2 minutes)</h2><p>Choose a starter plan or add your own Tasks. You can edit your plan later.</p><Link className="button button--primary" to="/app/tasks/create">Set up my daily Tasks <span aria-hidden="true">↗</span></Link>
       </section>}
 
       {schedule && <section className="daily-task-list-section" aria-labelledby="daily-task-list-title">
