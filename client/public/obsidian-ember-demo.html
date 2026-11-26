@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#f3efe6">
+  <title>THE SYSTEM — 1 idea · Spotlight Progression</title>
+  <style>
+    :root{color-scheme:light;--paper:#f3efe6;--paper-light:#fbfaf6;--ink:#28343b;--ink-soft:#4d5b60;--muted:#6d7776;--line:#d7d6cb;--sun:#f3c34f;--sun-soft:#f8e6a7;--clay:#d9785a;--peach:#f1ae91;--sage:#9cafa1;--sage-light:#dce6dd;--sky:#a8c4d4;--sky-light:#e4edf1;--coffee:#685345;--white:#fffdf8;--serif:Georgia,"Times New Roman",serif;font-family:Inter,Manrope,"Segoe UI",sans-serif}
+    *{box-sizing:border-box}html{min-width:320px;background:var(--paper);scroll-behavior:smooth;scroll-padding-top:88px}body{margin:0;color:var(--ink);background:var(--paper);line-height:1.5}a{color:inherit;text-decoration:none}button{font:inherit}::selection{background:var(--sun);color:var(--ink)}
+    .wrap{width:min(calc(100% - 56px),1180px);margin-inline:auto}
+    .scroll-progress{position:fixed;inset:0 0 auto;z-index:40;height:3px;pointer-events:none;background:transparent}.scroll-progress span{display:block;width:100%;height:100%;transform:scaleX(var(--scroll-progress,0));transform-origin:left center;background:linear-gradient(90deg,var(--clay),var(--sun),var(--sage),var(--sky))}
+    .spotlight-beam{position:fixed;inset:0;z-index:12;pointer-events:none;opacity:0;background:radial-gradient(ellipse 310px 235px at var(--beam-x,86vw) var(--beam-y,16vh),rgb(255 232 156 / 36%) 0%,rgb(239 161 111 / 20%) 35%,rgb(157 183 165 / 9%) 58%,transparent 78%);mix-blend-mode:multiply;will-change:opacity,background}
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+    .nav{position:sticky;top:0;z-index:30;border-bottom:1px solid rgb(40 52 59 / 10%);background:rgb(243 239 230 / 88%);backdrop-filter:blur(14px)}.nav-inner{height:76px;display:flex;align-items:center;justify-content:space-between;gap:25px}.brand{display:flex;align-items:center;gap:11px;font-size:13px;font-weight:800;letter-spacing:.14em;white-space:nowrap}.brand svg{width:34px;height:38px;color:var(--clay)}.brand b{color:var(--clay)}.links{display:flex;align-items:center;gap:29px;color:#536065;font-size:12px;font-weight:600}.links a{transition:color .2s}.links a:hover{color:var(--clay)}.nav-actions{display:flex;align-items:center;gap:14px}.nav-login{font-size:12px;font-weight:650;color:#4d595d}.button{display:inline-flex;min-height:47px;align-items:center;justify-content:center;gap:13px;padding:0 19px;border:1px solid #c78b43;border-radius:7px;background:var(--sun);box-shadow:0 5px 0 rgb(104 83 69 / 12%);color:#263238;font-size:12px;font-weight:800;transition:transform .2s,box-shadow .2s,background .2s}.button:hover{transform:translateY(-2px);background:#ffcf5d;box-shadow:0 8px 16px rgb(104 83 69 / 14%)}.button-quiet{border-color:rgb(40 52 59 / 24%);background:transparent;box-shadow:none;color:var(--ink)}.button-quiet:hover{background:var(--white);box-shadow:none}
+    .hero{position:relative;isolation:isolate;min-height:calc(100svh - 76px);display:grid;grid-template-columns:1fr .93fr;align-items:center;gap:60px;padding:80px 0 86px}.hero:before{position:absolute;z-index:-1;top:2%;right:4%;width:min(53vw,650px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 43% 42%,rgb(243 195 79 / 48%),rgb(241 174 145 / 36%) 33%,rgb(168 196 212 / 24%) 57%,transparent 70%);filter:blur(1px);content:""}.eyebrow{display:flex;align-items:center;gap:10px;margin:0 0 20px;color:#8b5738;font-size:10px;font-weight:850;letter-spacing:.18em;text-transform:uppercase}.eyebrow:before{width:27px;height:2px;background:var(--clay);content:""}.hero h1{max-width:660px;margin:0 0 22px;font-size:clamp(50px,6.5vw,78px);font-weight:680;letter-spacing:-.075em;line-height:.95}.hero h1 .soft{color:var(--ink-soft);font-family:var(--serif);font-weight:500;font-style:italic}.hero-copy{max-width:500px;margin:0 0 29px;color:#5d6a6c;font-size:16px;line-height:1.8}.actions{display:flex;flex-wrap:wrap;gap:12px}.hero-note{display:flex;align-items:center;gap:9px;margin-top:30px;color:#68736f;font-size:10px;font-weight:650;letter-spacing:.05em}.hero-note i{width:7px;height:7px;border-radius:50%;background:#76927c;box-shadow:0 0 0 4px rgb(156 175 161 / 22%)}
+    .spotlight-word{position:relative;display:inline-block;isolation:isolate}.spotlight-ink{position:absolute;inset:0;z-index:1;pointer-events:none;color:transparent;-webkit-text-fill-color:transparent;background:linear-gradient(100deg,#d9785a 0%,#eabf4f 48%,#87a99d 100%);background-clip:text;-webkit-background-clip:text;opacity:0;filter:drop-shadow(0 2px 10px rgb(212 154 76 / 28%))}
+    .hero-art{position:relative;min-height:485px;display:grid;place-items:center}.sun-orbit{position:absolute;width:min(100%,450px);aspect-ratio:1;border:1px solid rgb(104 83 69 / 20%);border-radius:50%;transform:rotate(-24deg) scaleY(.58)}.sun-orbit:before,.sun-orbit:after{position:absolute;inset:12%;border:1px solid rgb(217 120 90 / 26%);border-radius:50%;content:""}.sun-orbit:after{inset:28%;border-color:rgb(104 83 69 / 17%)}.sun-core{position:absolute;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle at 38% 34%,#fff7d9 0 3%,#f4cf68 22%,#f0a17c 48%,rgb(217 120 90 / 34%) 62%,transparent 73%);box-shadow:0 22px 65px rgb(190 133 78 / 18%)}.story-card{position:relative;width:min(100%,365px);padding:23px;border:1px solid rgb(104 83 69 / 19%);border-radius:13px;background:rgb(255 253 248 / 92%);box-shadow:0 28px 70px rgb(62 67 59 / 14%);transform:rotate(2deg)}.story-top{display:flex;align-items:center;justify-content:space-between;padding-bottom:16px;border-bottom:1px solid #e7e3d9}.story-label{color:#8d684f;font-size:9px;font-weight:850;letter-spacing:.13em}.story-stamp{width:34px;height:34px;display:grid;place-items:center;border:1px solid #dfbc62;border-radius:50%;color:#93603c;font-size:13px}.story-title{margin:21px 0 5px;font-family:var(--serif);font-size:27px;font-weight:500;letter-spacing:-.04em}.story-copy{margin:0;color:#78817c;font-size:10px}.story-steps{display:grid;gap:9px;margin-top:20px}.story-step{display:flex;align-items:center;gap:11px;padding:10px 11px;border-radius:7px;background:#f5f1e7}.story-step:nth-child(2){background:#f9eee7}.story-step:nth-child(3){background:#eaf0eb}.step-dot{width:22px;height:22px;display:grid;place-items:center;border:1px solid #c78b43;border-radius:50%;color:#8a5f3d;font-size:9px;font-weight:800}.story-step strong{font-size:10px}.story-step small{margin-left:auto;color:#7a817d;font-size:8px}.floating-note{position:absolute;right:-4%;bottom:8%;padding:13px 16px;border:1px solid rgb(104 83 69 / 17%);border-radius:8px;background:#e4edf1;box-shadow:0 16px 35px rgb(62 67 59 / 12%);color:#3d555e;font-size:10px;font-weight:700}.floating-note span{display:block;margin-top:3px;color:#718189;font-size:8px;font-weight:500}
+    .scroll-hint{position:absolute;bottom:20px;left:50%;display:flex;align-items:center;gap:10px;transform:translateX(-50%);color:#8b8d84;font-size:9px;font-weight:750;letter-spacing:.14em;text-transform:uppercase}.scroll-hint i{position:relative;width:1px;height:29px;background:#b9a887}.scroll-hint i:after{position:absolute;bottom:0;left:-3px;width:6px;height:6px;border-right:1px solid var(--coffee);border-bottom:1px solid var(--coffee);transform:rotate(45deg);content:""}
+    .section{padding:110px 0}.section-head{max-width:690px;margin:0 auto 48px;text-align:center}.section-head .eyebrow{justify-content:center}.section-head h2{margin:0;font-size:clamp(35px,5vw,58px);font-weight:630;letter-spacing:-.065em;line-height:1.02}.section-head h2 em{color:var(--clay);font-family:var(--serif);font-weight:500}.section-head p{max-width:550px;margin:16px auto 0;color:#667270;font-size:14px;line-height:1.8}
+    .intro{background:var(--sky-light)}.intro-grid{display:grid;grid-template-columns:.85fr 1.15fr;gap:70px;align-items:start}.intro-title{margin:0;font-size:clamp(38px,5.7vw,68px);font-weight:620;letter-spacing:-.07em;line-height:.98}.intro-title em{color:#597989;font-family:var(--serif);font-weight:500}.intro-copy{max-width:610px;color:#56666b;font-size:15px;line-height:1.9}.intro-copy p{margin:0 0 15px}.principles{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:42px}.principle{min-height:104px;padding:19px;border:1px solid rgb(40 52 59 / 12%);border-radius:9px;background:rgb(255 253 248 / 80%)}.principle span{display:block;margin-bottom:13px;color:#a47447;font-size:10px;font-weight:850;letter-spacing:.12em}.principle strong{font-size:13px}
+    .how{background:#f6e8dc}.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.step-card{min-height:240px;padding:22px;border-radius:10px;background:var(--white);box-shadow:0 12px 28px rgb(104 83 69 / 7%)}.step-card:nth-child(2){background:#f8efcc}.step-card:nth-child(3){background:#e2ece5}.step-card:nth-child(4){background:#e4edf1}.step-meta{display:flex;align-items:center;justify-content:space-between;color:#827466;font-size:9px;font-weight:850;letter-spacing:.12em}.step-icon{width:35px;height:35px;display:grid;place-items:center;border:1px solid rgb(104 83 69 / 17%);border-radius:50%;color:#a8644c;font-size:16px}.step-card h3{margin:31px 0 9px;font-size:16px;letter-spacing:-.03em}.step-card p{margin:0;color:#65716c;font-size:11px;line-height:1.75}
+    .daily{background:#fbfaf6}.daily-grid{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:center}.daily-copy h2{max-width:500px;margin:0 0 18px;font-size:clamp(36px,5vw,58px);font-weight:630;letter-spacing:-.065em;line-height:1.02}.daily-copy h2 em{color:#9c674d;font-family:var(--serif);font-weight:500}.daily-copy p{max-width:500px;color:#65716e;font-size:14px;line-height:1.85}.cycle-card{padding:25px;border:1px solid #dbd8ce;border-radius:12px;background:#fffdf8;box-shadow:0 20px 50px rgb(51 63 56 / 8%)}.cycle-top{display:flex;justify-content:space-between;gap:12px;align-items:center}.cycle-top strong{font-size:12px}.cycle-top span{color:#927b5e;font-size:9px}.cycle-line{position:relative;height:4px;margin:23px 0 20px;border-radius:5px;background:#ebe7dc}.cycle-line i{position:absolute;inset:0 auto 0 0;width:0;border-radius:5px;background:linear-gradient(90deg,var(--clay),var(--sun),var(--sage));transform-origin:left}.cycle-days{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}.cycle-day{display:grid;aspect-ratio:1;place-items:center;border:1px solid #d9d8ce;border-radius:50%;background:#f6f4ed;color:#8b8e86;font-size:9px;font-weight:700}.cycle-day:nth-child(2){background:#f8edc7;border-color:#e5c879;color:#6e5a3e}.cycle-caption{display:flex;justify-content:space-between;margin-top:15px;color:#7d827d;font-size:9px}
+    .rank-journey{min-height:100svh;display:grid;place-items:center;overflow:hidden;background:linear-gradient(140deg,#dce6dd 0%,#edf0e4 52%,#f2e5d8 100%)}.journey-inner{width:min(calc(100% - 56px),1180px);padding:60px 0}.journey-heading{max-width:740px;margin:0 auto 58px;text-align:center}.journey-heading h2{margin:0;font-size:clamp(38px,5.7vw,69px);font-weight:630;letter-spacing:-.07em;line-height:.98}.journey-heading h2 em{color:#8d654e;font-family:var(--serif);font-weight:500}.journey-heading p{max-width:510px;margin:15px auto 0;color:#66756b;font-size:13px;line-height:1.8}.rank-rail{position:relative;padding-top:6px}.rank-line{position:absolute;top:28px;left:4%;right:4%;height:2px;background:rgb(104 83 69 / 20%)}.rank-line i{display:block;width:100%;height:100%;background:linear-gradient(90deg,#728e7e,#e2af4c,#d9785a);transform:scaleX(0);transform-origin:left}.rank-nodes{position:relative;display:grid;grid-template-columns:repeat(7,1fr);gap:10px}.rank-node{display:flex;align-items:center;flex-direction:column;text-align:center}.rank-node .node-dot{width:44px;height:44px;display:grid;place-items:center;border:1px solid rgb(104 83 69 / 32%);border-radius:50%;background:#f8f4e8;color:#805f46;font-size:10px;font-weight:850;box-shadow:0 0 0 7px rgb(255 253 248 / 35%)}.rank-node strong{margin-top:16px;font-size:12px}.rank-node small{margin-top:5px;color:#718077;font-size:9px;line-height:1.5}.journey-note{max-width:620px;margin:47px auto 0;padding:15px 18px;border:1px solid rgb(104 83 69 / 18%);border-radius:9px;background:rgb(255 253 248 / 68%);color:#627168;font-size:11px;line-height:1.75;text-align:center}.journey-note b{color:#8e5c40}
+    .closing{position:relative;overflow:hidden;margin:48px auto 55px;padding:75px 30px;border:1px solid #d3ae50;border-radius:15px;background:radial-gradient(circle at 82% 15%,rgb(255 255 255 / 42%),transparent 20rem),linear-gradient(115deg,#f2c852,#f5d980 55%,#f2b899);text-align:center}.closing:after{position:absolute;top:-95px;left:-50px;width:260px;height:260px;border:1px solid rgb(104 83 69 / 16%);border-radius:50%;box-shadow:0 0 0 22px rgb(255 255 255 / 9%),0 0 0 46px rgb(255 255 255 / 7%);content:""}.closing .eyebrow{justify-content:center;color:#74563c}.closing .eyebrow:before{background:#875c3d}.closing h2{position:relative;margin:0;font-size:clamp(39px,5.4vw,67px);font-weight:640;letter-spacing:-.07em;line-height:.98}.closing h2 em{color:#8e5745;font-family:var(--serif);font-weight:500}.closing p{position:relative;margin:17px 0 26px;color:#5e5c4f;font-size:13px}.closing .button{position:relative;border-color:#6a5846;background:#34454b;color:#fbf6e9;box-shadow:0 6px 0 rgb(40 52 59 / 12%)}.closing .button:hover{background:#26383e}
+    .journey-links{display:flex;justify-content:center;gap:22px;flex-wrap:wrap;margin-top:18px;color:#765842;font-size:10px;font-weight:750}.journey-links a{padding-bottom:3px;border-bottom:1px solid rgb(104 83 69 / 28%);transition:color .2s,border-color .2s}.journey-links a:hover{color:#c46d53;border-color:#c46d53}
+    .rank-node{appearance:none;border:0;background:transparent;color:inherit;cursor:pointer;transition:transform .22s ease,filter .22s ease}.rank-node:hover{transform:translateY(-5px)}.rank-node:focus-visible{outline:2px solid #af7148;outline-offset:5px;border-radius:8px}.rank-node.is-spotlit .node-dot{border-color:#d78a4e;background:#faeab9;color:#6b4837;box-shadow:0 0 0 7px rgb(255 253 248 / 55%),0 0 28px rgb(230 177 69 / 48%)}.rank-node.is-spotlit strong{color:#9c5d3e}
+    .step-card,.principle,.cycle-card,.story-card{transform-style:preserve-3d;transition:box-shadow .25s ease,border-color .25s ease}.step-card:hover,.principle:hover,.cycle-card:hover{box-shadow:0 22px 45px rgb(62 67 59 / 14%);border-color:rgb(184 135 76 / 48%)}
+    @media(prefers-reduced-motion:reduce){.spotlight-beam{display:none}.rank-node,.button,.step-card,.principle,.cycle-card{transition:none}}
+    @media(max-width:950px){.hero{gap:24px}.steps{grid-template-columns:repeat(2,1fr)}.daily-grid{gap:35px}.rank-node small{max-width:85px}}
+    @media(max-width:700px){.wrap,.journey-inner{width:min(calc(100% - 34px),1180px)}.nav-inner{height:66px}.links{display:none}.nav-actions{gap:8px}.nav-login{padding:7px}.nav-actions .button{min-height:40px;padding-inline:12px}.hero{min-height:0;grid-template-columns:1fr;padding:65px 0 80px;gap:8px}.hero h1{font-size:clamp(49px,14vw,74px)}.hero-copy{font-size:14px}.hero-art{min-height:350px}.story-card{width:min(100%,345px)}.sun-orbit{width:340px}.sun-core{width:180px;height:180px}.floating-note{right:0;bottom:0}.scroll-hint{bottom:18px}.section{padding:78px 0}.intro-grid,.daily-grid{grid-template-columns:1fr;gap:25px}.intro-title{font-size:clamp(38px,11vw,58px)}.principles{grid-template-columns:1fr;gap:9px;margin-top:27px}.principle{min-height:76px}.principle span{margin-bottom:7px}.steps{grid-template-columns:1fr}.step-card{min-height:180px}.step-card h3{margin-top:22px}.cycle-card{padding:18px}.journey-inner{padding:70px 0}.journey-heading{margin-bottom:36px}.rank-rail{overflow-x:auto;padding:6px 4px 14px;scrollbar-width:thin}.rank-nodes{width:730px;grid-template-columns:repeat(7,88px)}.rank-line{left:25px;right:25px}.journey-note{margin-top:28px}.rank-journey{min-height:0}.closing{margin-top:27px;margin-bottom:28px;padding:60px 18px}.closing:after{width:170px;height:170px;top:-90px}}
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.spotlight-ink{display:none}[data-reveal]{opacity:1!important;transform:none!important}.scroll-progress span{transition:none!important}}
+  </style>
+</head>
+<body>
+  <div class="scroll-progress" id="scroll-progress" aria-hidden="true"><span></span></div><div class="spotlight-beam" id="spotlight-beam" aria-hidden="true"></div><p class="sr-only" id="spotlight-status" aria-live="polite"></p>
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="brand" href="#top" aria-label="THE SYSTEM home">
+        <svg viewBox="0 0 40 44" fill="none" aria-hidden="true"><path d="M20 2.7 36 11.9v20.2L20 41.3 4 32.1V11.9L20 2.7Z" stroke="currentColor" stroke-width="1.7"/><path d="m20 8.5 11 6.3v12.7l-11 6.3-11-6.3V14.8l11-6.3Z" stroke="currentColor"/><path d="m20 14 2 4.3 4.5 1.7-4.5 1.7-2 4.3-2-4.3-4.5-1.7 4.5-1.7 2-4.3Z" stroke="currentColor"/></svg>
+        <span>THE <b>SYSTEM</b></span>
+      </a>
+      <nav class="links" aria-label="Main navigation"><a href="#how">How it works</a><a href="#practice">Daily practice</a><a href="#journey">Progression</a></nav>
+      <div class="nav-actions"><a class="nav-login" href="/login">Sign in</a><a class="button" href="#start">Begin your journey <span aria-hidden="true">↗</span></a></div>
+    </div>
+  </header>
+  <main id="top">
+    <section class="wrap hero" aria-labelledby="hero-title">
+      <div class="hero-copy-wrap">
+        <p class="eyebrow">A personal progression framework</p>
+        <h1 id="hero-title"><span class="spotlight-word" data-spotlight-target>Progress is built.</span><br><span class="soft">one day at a time.</span></h1>
+        <p class="hero-copy">Choose what matters. Build a daily rhythm around it. See the effort you put in become part of your story.</p>
+        <div class="actions"><a class="button" href="#start">Find your next step <span aria-hidden="true">↗</span></a><a class="button button-quiet" href="#how">Explore the system <span aria-hidden="true">↓</span></a></div>
+        <div class="hero-note"><i aria-hidden="true"></i><span>Your goals. Your pace. Your proof.</span></div>
+      </div>
+      <div class="hero-art" aria-label="Illustration of a personal daily practice">
+        <div class="sun-orbit" aria-hidden="true"></div><div class="sun-core" aria-hidden="true"></div>
+        <article class="story-card">
+          <div class="story-top"><span class="story-label">A PRACTICE THAT IS YOURS</span><span class="story-stamp" aria-hidden="true">✳</span></div>
+          <h2 class="story-title">One day at a time.</h2><p class="story-copy">A clear path from intention to action.</p>
+          <div class="story-steps"><div class="story-step"><span class="step-dot">01</span><strong>Choose a direction</strong><small>INTENTION</small></div><div class="story-step"><span class="step-dot">02</span><strong>Show up for the work</strong><small>ACTION</small></div><div class="story-step"><span class="step-dot">03</span><strong>Recognize your progress</strong><small>REFLECTION</small></div></div>
+        </article>
+        <div class="floating-note">Progress is personal<span>Make the next step yours.</span></div>
+      </div>
+      <a class="scroll-hint" href="#idea"><span>Scroll to explore</span><i aria-hidden="true"></i></a>
+    </section>
+    <section class="section intro" id="idea">
+      <div class="wrap">
+        <div class="intro-grid">
+          <div data-reveal><p class="eyebrow">The idea</p><h2 class="intro-title"><span class="spotlight-word" data-spotlight-target>A clearer way.</span><br><em>to move forward.</em></h2></div>
+          <div class="intro-copy" data-reveal><p>THE SYSTEM connects your daily Tasks, the accountability you choose for yourself, and your long-term progression in one place.</p><p>It does not decide what matters to you. It gives your own intentions a structure you can return to, one deliberate day at a time.</p></div>
+        </div>
+        <div class="principles"><article class="principle" data-reveal><span>01 / CHOOSE</span><strong>Choose with intention.</strong></article><article class="principle" data-reveal><span>02 / ACT</span><strong>Show up for the work.</strong></article><article class="principle" data-reveal><span>03 / NOTICE</span><strong>Recognize your progress.</strong></article></div>
+      </div>
+    </section>
+    <section class="section how" id="how">
+      <div class="wrap">
+        <div class="section-head" data-reveal><p class="eyebrow">A simple process</p><h2>Make the next step <em>clear.</em></h2><p>Your schedule connects what you plan to do with how you reflect and progress.</p></div>
+        <div class="steps">
+          <article class="step-card" data-reveal><div class="step-meta"><span>THE PRACTICE / 01</span><span class="step-icon">◎</span></div><h3>Build your schedule</h3><p>Shape a repeating cycle of daily Tasks around the work you want to do.</p></article>
+          <article class="step-card" data-reveal><div class="step-meta"><span>THE PRACTICE / 02</span><span class="step-icon">⌁</span></div><h3>Choose accountability</h3><p>Set a personal Accountability Action for each Task before you need it.</p></article>
+          <article class="step-card" data-reveal><div class="step-meta"><span>THE PRACTICE / 03</span><span class="step-icon">◈</span></div><h3>Return and recover</h3><p>A missed scheduled Task can activate its linked Recovery Quest.</p></article>
+          <article class="step-card" data-reveal><div class="step-meta"><span>THE PRACTICE / 04</span><span class="step-icon">↗</span></div><h3>See the long view</h3><p>Records, XP, Levels and Ranks help make your progress visible.</p></article>
+        </div>
+      </div>
+    </section>
+    <section class="section daily" id="practice">
+      <div class="wrap daily-grid">
+        <div class="daily-copy" data-reveal><p class="eyebrow">A rhythm you shape</p><h2>Progress grows through <em>repeated practice.</em></h2><p>Choose a cycle length that suits your routine, then set the Tasks you want to return to each day. The schedule is yours to shape and refine.</p><a class="button button-quiet" href="#journey">See the progression path <span aria-hidden="true">↓</span></a></div>
+        <div class="cycle-card" data-reveal><div class="cycle-top"><strong>Your repeating cycle</strong><span>1–7 DAYS</span></div><div class="cycle-line"><i class="cycle-fill"></i></div><div class="cycle-days" aria-label="A seven-day cycle"><span class="cycle-day">01</span><span class="cycle-day">02</span><span class="cycle-day">03</span><span class="cycle-day">04</span><span class="cycle-day">05</span><span class="cycle-day">06</span><span class="cycle-day">07</span></div><div class="cycle-caption"><span>Plan the rhythm</span><span>Return to the work</span></div></div>
+      </div>
+    </section>
+    <section class="rank-journey" id="journey" aria-labelledby="journey-title">
+      <div class="journey-inner">
+        <div class="journey-heading"><p class="eyebrow" style="justify-content:center">The progression path</p><h2 id="journey-title">Seven ranks.<br><em>One unfolding journey.</em></h2><p>Every stage reflects the work that brought you there, with room to keep moving forward.</p></div>
+        <div class="rank-rail"><div class="rank-line"><i class="rank-fill"></i></div><div class="rank-nodes"><button class="rank-node" type="button" data-rank-spotlight data-rank="07" aria-label="Spotlight Rank 07, Origin"><span class="node-dot">07</span><strong>Origin</strong><small>Start with intention</small></button><button class="rank-node" type="button" data-rank-spotlight data-rank="06" aria-label="Spotlight Rank 06, Ember"><span class="node-dot">06</span><strong>Ember</strong><small>Build a pattern</small></button><button class="rank-node" type="button" data-rank-spotlight data-rank="05" aria-label="Spotlight Rank 05, Surge"><span class="node-dot">05</span><strong>Surge</strong><small>Create momentum</small></button><button class="rank-node" type="button" data-rank-spotlight data-rank="04" aria-label="Spotlight Rank 04, Vector"><span class="node-dot">04</span><strong>Vector</strong><small>Find direction</small></button><button class="rank-node" type="button" data-rank-spotlight data-rank="03" aria-label="Spotlight Rank 03, Apex"><span class="node-dot">03</span><strong>Apex</strong><small>Strengthen your practice</small></button><button class="rank-node" type="button" data-rank-spotlight data-rank="02" aria-label="Spotlight Rank 02, Zenith"><span class="node-dot">02</span><strong>Zenith</strong><small>Reach a higher standard</small></button><button class="rank-node" type="button" data-rank-spotlight data-rank="01" aria-label="Spotlight Rank 01, Continuum"><span class="node-dot">01</span><strong>Continuum</strong><small>Keep becoming</small></button></div></div>
+        <p class="journey-note">A long view for the work you choose. <b>Your progress remains yours.</b></p><div class="journey-links"><a href="/ranks">Explore Rank information ↗</a><a href="/badges">Explore Badge information ↗</a></div>
+      </div>
+    </section>
+    <section class="wrap closing" id="start">
+      <p class="eyebrow">The next step is yours</p>
+      <h2>Begin with what<br><em>matters to you.</em></h2>
+      <p>Choose a direction. Create a rhythm. Start where you are.</p>
+      <a class="button" href="/signup">Create your account <span aria-hidden="true">↗</span></a>
+    </section>
+  </main>
+  <script src="vendor/gsap.min.js"></script>
+  <script src="vendor/ScrollTrigger.min.js"></script>
+    <script>
+    (() => {
+      const gsap = window.gsap;
+      const ScrollTrigger = window.ScrollTrigger;
+      const beam = document.getElementById("spotlight-beam");
+      const status = document.getElementById("spotlight-status");
+      if (!gsap || !ScrollTrigger || !beam) return;
+      gsap.registerPlugin(ScrollTrigger);
+      const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const firstTarget = document.querySelector("#hero-title [data-spotlight-target]");
+      const textTargets = Array.from(document.querySelectorAll("[data-spotlight-target]"));
+      let activeTarget = null;
+      let allowTracking = false;
+
+      const beamPosition = (target) => {
+        const rect = target.getBoundingClientRect();
+        return { x: rect.left + rect.width * 0.56, y: rect.top + rect.height * 0.52 };
+      };
+      const updateBeamPosition = (target) => {
+        if (!target) return;
+        const { x, y } = beamPosition(target);
+        gsap.set(beam, { "--beam-x": x + "px", "--beam-y": y + "px" });
+      };
+      const spotlight = (target, options = {}) => {
+        if (!target) return;
+        if (activeTarget && activeTarget !== target) {
+          const oldInk = activeTarget.querySelector(".spotlight-ink");
+          if (oldInk) gsap.to(oldInk, { opacity: 0, duration: reducedMotion ? 0 : 0.35, overwrite: true });
+          activeTarget.classList.remove("is-spotlit");
+        }
+        allowTracking = false;
+        activeTarget = target;
+        target.classList.add("is-spotlit");
+        const overlay = target.querySelector(".spotlight-ink");
+        if (overlay) gsap.to(overlay, { opacity: 1, duration: reducedMotion ? 0 : 0.45, overwrite: true });
+        updateBeamPosition(target);
+        const position = beamPosition(target);
+        gsap.to(beam, {
+          opacity: options.opacity ?? 0.95,
+          "--beam-x": position.x + "px",
+          "--beam-y": position.y + "px",
+          duration: reducedMotion ? 0 : (options.duration ?? 0.82),
+          ease: "power2.out",
+          overwrite: true
+        });
+        if (status && options.announce) status.textContent = options.announce;
+      };
+      const dimSpotlight = () => {
+        gsap.to(beam, { opacity: 0.12, duration: reducedMotion ? 0 : 0.65, ease: "power2.out", overwrite: true });
+        if (activeTarget && activeTarget.matches("[data-rank-spotlight]")) activeTarget.classList.remove("is-spotlit");
+        activeTarget = null;
+      };
+
+      gsap.set(beam, { "--beam-x": Math.max(0, window.innerWidth * 0.88) + "px", "--beam-y": Math.max(0, window.innerHeight * 0.16) + "px", opacity: 0 });
+      if (!reducedMotion) {
+        gsap.fromTo(".hero-art", { y: 12 }, { y: -12, duration: 4.5, ease: "sine.inOut", yoyo: true, repeat: -1 });
+        gsap.to(".floating-note", { y: -9, duration: 3.2, ease: "sine.inOut", yoyo: true, repeat: -1 });
+        gsap.to(".sun-orbit", { rotation: "+=4", duration: 18, ease: "none", repeat: -1, yoyo: true });
+        gsap.utils.toArray("[data-reveal]").forEach((element) => {
+          gsap.fromTo(element, { autoAlpha: 0, y: 28 }, {
+            autoAlpha: 1, y: 0, duration: 0.78, ease: "power3.out",
+            scrollTrigger: { trigger: element, start: "top 86%", toggleActions: "play none none reverse" }
+          });
+        });
+        gsap.to(".hero-art", {
+          yPercent: -8, ease: "none",
+          scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: 0.8 }
+        });
+        gsap.fromTo(".cycle-fill", { scaleX: 0 }, {
+          scaleX: 1, ease: "none",
+          scrollTrigger: { trigger: ".cycle-card", start: "top 75%", end: "bottom 35%", scrub: 0.8 }
+        });
+        gsap.to("#scroll-progress span", {
+          scaleX: 1, ease: "none",
+          scrollTrigger: { trigger: document.documentElement, start: "top top", end: "bottom bottom", scrub: 0.2 }
+        });
+        gsap.utils.toArray(".step-card,.principle,.cycle-card").forEach((card) => {
+          card.addEventListener("pointerenter", () => gsap.to(card, { y: -7, scale: 1.012, duration: 0.24, ease: "power2.out", overwrite: true }));
+          card.addEventListener("pointerleave", () => gsap.to(card, { y: 0, scale: 1, duration: 0.34, ease: "power2.out", overwrite: true }));
+        });
+        textTargets.forEach((target) => {
+          const ink = document.createElement("span");
+          ink.className = "spotlight-ink";
+          ink.setAttribute("aria-hidden", "true");
+          ink.textContent = target.textContent;
+          target.appendChild(ink);
+          ScrollTrigger.create({
+            trigger: target,
+            start: "top 64%",
+            end: "bottom 38%",
+            onEnter: () => spotlight(target, { opacity: 0.9 }),
+            onEnterBack: () => spotlight(target, { opacity: 0.9 }),
+            onUpdate: () => { if (activeTarget === target && allowTracking) updateBeamPosition(target); },
+            onLeave: dimSpotlight,
+            onLeaveBack: dimSpotlight
+          });
+        });
+        if (firstTarget) requestAnimationFrame(() => spotlight(firstTarget, { duration: 1.15, opacity: 0.92 }));
+        gsap.fromTo(".rank-fill", { scaleX: 0 }, {
+          scaleX: 1, ease: "none",
+          scrollTrigger: { trigger: ".rank-journey", start: "top 75%", end: "bottom 30%", scrub: 0.7 }
+        });
+        gsap.fromTo(".rank-node", { autoAlpha: 0.45, y: 10 }, {
+          autoAlpha: 1, y: 0, stagger: 0.08, duration: 0.7, ease: "power2.out",
+          scrollTrigger: { trigger: ".rank-nodes", start: "top 80%", toggleActions: "play none none reverse" }
+        });
+        const pin = gsap.matchMedia();
+        pin.add("(min-width: 850px)", () => {
+          ScrollTrigger.create({
+            trigger: ".rank-journey", start: "top top", end: "+=780", pin: true, scrub: 0.35, anticipatePin: 1,
+            onEnter: dimSpotlight, onEnterBack: dimSpotlight
+          });
+        });
+      } else if (firstTarget) {
+        const firstInk = document.createElement("span");
+        firstInk.className = "spotlight-ink";
+        firstInk.setAttribute("aria-hidden", "true");
+        firstInk.textContent = firstTarget.textContent;
+        firstTarget.appendChild(firstInk);
+        gsap.set(firstInk, { opacity: 1 });
+      }
+
+      document.querySelectorAll("[data-rank-spotlight]").forEach((button) => {
+        button.addEventListener("click", () => spotlight(button, {
+          duration: 0.55,
+          opacity: 0.98,
+          announce: "Spotlight on Rank " + button.dataset.rank + "."
+        }));
+      });
+      window.addEventListener("resize", () => {
+        if (activeTarget) updateBeamPosition(activeTarget);
+      }, { passive: true });
+      window.addEventListener("pagehide", () => {
+        gsap.killTweensOf("*");
+        ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+      }, { once: true });
+    })();
+  </script>
+</body>
+</html>
+
+
+

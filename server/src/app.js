@@ -10,6 +10,7 @@ import { createApiV1Router } from './routes/apiV1.js';
 import { createAuthSessionMiddleware, createExpressSessionMiddleware } from './services/authSessionService.js';
 import { createCsrfProtection } from './middleware/csrfProtection.js';
 import { requireAuthenticatedUser } from './middleware/requireAuthenticatedUser.js';
+import { createApiAccessGuard } from './middleware/apiAccess.js';
 
 export function createApp({
   databaseReady = isDatabaseReady,
@@ -55,8 +56,10 @@ export function createApp({
   app.use('/api/v1', passportMiddleware.initialize());
   app.use('/api/v1', passportMiddleware.session());
   app.use('/api/v1', resolvedAuthIdentityMiddleware);
+  app.use('/api/v1', createApiAccessGuard({ identityMiddleware: testIdentityMiddleware || requireAuthenticatedUser }));
   // Keep CSRF validation ahead of every API handler so rejected mutations
   // cannot perform domain work before the client refreshes and retries once.
+  // Private API routes are rejected above before CSRF or domain handling.
   app.use('/api/v1', createCsrfProtection({ trustedOrigins, nodeEnv, testIdentityInjected: Boolean(testIdentityMiddleware) }));
   app.use('/api/v1', createApiV1Router({ identityMiddleware: testIdentityMiddleware || requireAuthenticatedUser, passport: passportMiddleware }));
   app.use(notFoundHandler);

@@ -7,8 +7,8 @@ const asyncHandler = (handler) => (request, response, next) => {
 
 export function createLeaderboardRouter({ identityMiddleware } = {}) {
   const router = Router();
-  router.get('/leaderboard', asyncHandler(controller.getRankings));
-  router.get('/leaderboard/profiles/:publicHandle', asyncHandler(controller.getPublicProfile));
+  router.get('/leaderboard', identityMiddleware, asyncHandler(controller.getRankings));
+  router.get('/leaderboard/profiles/:publicHandle', identityMiddleware, asyncHandler(controller.getPublicProfile));
   router.get('/leaderboard/profile-settings', identityMiddleware, asyncHandler(controller.getProfileSettings));
   router.put('/leaderboard/profile-settings', identityMiddleware, asyncHandler(controller.updateProfileSettings));
   return router;
