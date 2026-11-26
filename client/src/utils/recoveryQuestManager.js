@@ -117,7 +117,7 @@ export function completeRecoveryQuest(state, questId, completionDate = new Date(
     date: completionDate,
     questId,
     title: 'Recovery Quest completed',
-    detail: `Completed the Accountability Action linked to “${quest.originalTaskName}”. No XP was awarded.`,
+    detail: `Completed the Forfeit linked to “${quest.originalTaskName}”. No XP was awarded.`,
   };
   return {
     ...state,

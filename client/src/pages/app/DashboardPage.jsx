@@ -5,6 +5,7 @@ import { ranks } from '../../data/ranks.js';
 import { useReducedMotion } from '../../hooks/useReducedMotion.js';
 import RankBadge from '../../components/ranks/RankBadge.jsx';
 import AppIcon from '../../components/app/AppIcon.jsx';
+import { TermText } from '../../components/app/Term.jsx';
 import PageLoadingSkeleton from '../../components/app/PageLoadingSkeleton.jsx';
 import AppProgressBar from '../../components/app/AppProgressBar.jsx';
 import GracePointSummary from '../../components/app/GracePointSummary.jsx';
@@ -134,7 +135,7 @@ export default function DashboardPage() {
         </section>
 
         <section className="app-panel dashboard-level-panel dashboard-reveal" aria-labelledby="dashboard-level-heading">
-          <div className="app-panel__heading"><div><p className="app-eyebrow">LEVEL & XP · YOUR PROGRESS</p><h2 id="dashboard-level-heading">Progress snapshot</h2></div><span className="dashboard-level-panel__icon"><AppIcon name="spark" /></span></div>
+          <div className="app-panel__heading"><div><p className="app-eyebrow"><TermText>LEVEL & XP · YOUR PROGRESS</TermText></p><h2 id="dashboard-level-heading">Progress snapshot</h2></div><span className="dashboard-level-panel__icon"><AppIcon name="spark" /></span></div>
           <div className="dashboard-level-panel__values"><div><span>Current Level</span><strong>{String(serverRun?.level ?? currentLevel).padStart(2, '0')}</strong></div><div><span>Total XP</span><strong>{displayedXp.toLocaleString('en-US')}</strong></div></div>
           <AppProgressBar value={levelProgress.percent} label="Progress to next Level" description={`${levelProgress.earnedInLevel} of ${levelProgress.requirement} XP toward the next Level.`} />
           {progressionXp && <p className="dashboard-level-panel__remaining">{Number(progressionXp.xpRemaining).toLocaleString('en-US')} XP remaining to Level {progressionXp.currentLevel + 1}</p>}
@@ -211,6 +212,7 @@ export default function DashboardPage() {
             {taskDataLoading && <li className="dashboard-task-list__loading" role="status" aria-label="Loading scheduled Tasks"><i /><i /><i /></li>}
             {taskDataError && <li className="dashboard-task-list__empty">Task data is unavailable. Open Daily Tasks to retry.</li>}
           </ul>
+          <Link className="app-action-link" to="/rules#the-60-second-version">Rules in 60 seconds <AppIcon name="arrow" /></Link>
           <Link className="app-panel__footer-link" to="/app/tasks">View All Tasks <AppIcon name="arrow" /></Link>
         </section>
 

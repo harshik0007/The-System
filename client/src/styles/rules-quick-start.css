@@ -1,0 +1,76 @@
+.rules-quick-start {
+  margin: 0 0 34px;
+  padding: clamp(20px, 3vw, 32px);
+  border: 1px solid var(--silver-border, #E2E5EE);
+  border-radius: var(--silver-radius-card, 16px);
+  background: var(--silver-surface, #FFFFFF);
+  box-shadow: var(--silver-shadow-card, 0 10px 32px rgb(25 34 53 / 7%));
+  color: var(--silver-text, #192235);
+}
+
+.rules-quick-start > .app-eyebrow {
+  margin: 0 0 6px;
+  color: var(--silver-indigo, #5965D8);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .12em;
+}
+
+.rules-quick-start > h2,
+.rules-full-heading {
+  margin: 0 0 20px;
+  color: var(--silver-text, #192235);
+  font: 700 clamp(1.35rem, 3vw, 1.75rem)/1.2 var(--font-display, system-ui, sans-serif);
+}
+
+.rules-quick-start__items { display: grid; gap: 10px; }
+
+.rules-quick-start__item {
+  min-width: 0;
+  border: 1px solid var(--silver-border, #E2E5EE);
+  border-radius: 12px;
+  background: var(--silver-surface-soft, #F6F7FB);
+}
+
+.rules-quick-start__item summary {
+  display: flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  color: var(--silver-text, #192235);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  list-style: none;
+}
+
+.rules-quick-start__item summary::-webkit-details-marker { display: none; }
+.rules-quick-start__item summary::marker { content: ''; }
+.rules-quick-start__item summary > span { color: var(--silver-indigo, #5965D8); font-size: 20px; line-height: 1; }
+.rules-quick-start__item[open] summary > span { transform: rotate(45deg); }
+.rules-quick-start__item summary:focus-visible { outline: 3px solid var(--focus-ring, #5965D8); outline-offset: 2px; border-radius: 10px; }
+
+.rules-quick-start__body {
+  padding: 0 16px 16px;
+  color: var(--silver-muted, #626C7C);
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.rules-quick-start__body ol,
+.rules-quick-start__body ul { display: grid; gap: 8px; margin: 0; padding-left: 22px; }
+.rules-quick-start__body li { padding-left: 2px; }
+.rules-quick-start__body li::marker { color: var(--silver-indigo, #5965D8); font-weight: 700; }
+.rules-full-heading { margin-top: 30px; }
+
+@media (max-width: 600px) {
+  .rules-quick-start { padding: 18px 14px; }
+  .rules-quick-start__item summary { padding-inline: 12px; }
+  .rules-quick-start__body { padding-inline: 12px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rules-quick-start__item summary > span { transition: none; }
+}

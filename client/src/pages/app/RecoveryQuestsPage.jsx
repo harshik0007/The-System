@@ -54,7 +54,7 @@ function QuestCard({ quest, onComplete, paused = false }) {
         </div>
         <span className="recovery-quest-card__connector" aria-hidden="true"><AppIcon name="arrow" /></span>
         <div className="recovery-quest-card__action">
-          <span>ACCOUNTABILITY ACTION</span>
+          <span>FORFEIT</span>
           <strong>{quest.accountabilityActionTitle}</strong>
           <p>{quest.accountabilityActionDescription}</p>
         </div>
@@ -161,13 +161,13 @@ export default function RecoveryQuestsPage() {
       {feedback && <p className="recovery-feedback" role="status"><AppIcon name="shield" />{feedback}<button type="button" aria-label="Dismiss message" onClick={() => setFeedback('')}><AppIcon name="close" /></button></p>}
 
       <section className="recovery-quest-section" aria-labelledby="recovery-quest-list-title">
-        <div className="recovery-quest-section__heading"><div><p className="app-eyebrow">YOUR COMMITMENTS</p><h2 id="recovery-quest-list-title">Recovery Quest record</h2><p>Only the Accountability Action attached to a missed task becomes a Recovery Quest.</p></div></div>
+        <div className="recovery-quest-section__heading"><div><p className="app-eyebrow">YOUR COMMITMENTS</p><h2 id="recovery-quest-list-title">Recovery Quest record</h2><p>Only the Forfeit attached to a missed task becomes a Recovery Quest.</p></div></div>
         <div className="recovery-tabs" role="group" aria-label="Filter Recovery Quests">
           {filters.map((item) => <button key={item.id} type="button" aria-pressed={filter === item.id} className={filter === item.id ? 'is-selected' : ''} onClick={() => setFilter(item.id)}>{item.label}<span>{item.id === 'all' ? quests.length : counts[item.id] ?? 0}</span></button>)}
         </div>
         {recoveryLoading && !recoveryLoaded && quests.length === 0 ? <PageLoadingSkeleton variant="rows" compact label="Loading Recovery Quest records" /> : filteredQuests.length ? <div className="recovery-quest-list">
           {filteredQuests.map((quest) => <QuestCard key={quest.id} quest={quest} onComplete={setConfirmQuest} paused={isEmergencyPauseActive} />)}
-        </div> : <div className="recovery-empty-state"><span><AppIcon name="recovery" /></span><h3>{filter === 'active' ? 'No active Recovery Quests' : 'No records in this view'}</h3><p>{filter === 'active' ? 'When an original scheduled Task is finalized as missed, its saved Accountability Action appears here.' : 'Completed, expired and threshold-cleared records remain available in All.'}</p></div>}
+        </div> : <div className="recovery-empty-state"><span><AppIcon name="recovery" /></span><h3>{filter === 'active' ? 'No active Recovery Quests' : 'No records in this view'}</h3><p>{filter === 'active' ? 'When an original scheduled Task is finalized as missed, its saved Forfeit appears here.' : 'Completed, expired and threshold-cleared records remain available in All.'}</p></div>}
       </section>
 
       <div className="recovery-rules-grid">
@@ -182,7 +182,7 @@ export default function RecoveryQuestsPage() {
           <p className="app-eyebrow">COMPLETION CONFIRMATION</p>
           <h2 id="recovery-confirm-title">Complete this Recovery Quest?</h2>
           <p id="recovery-confirm-description">Confirm that you completed the action committed to when this task was missed.</p>
-          <div className="recovery-confirm-modal__details"><span>ORIGINAL MISSED TASK</span><strong>{confirmQuest.sourceTaskName}</strong><span>ACCOUNTABILITY ACTION</span><strong>{confirmQuest.accountabilityActionTitle}</strong><p>{confirmQuest.accountabilityActionDescription}</p></div>
+          <div className="recovery-confirm-modal__details"><span>ORIGINAL MISSED TASK</span><strong>{confirmQuest.sourceTaskName}</strong><span>FORFEIT</span><strong>{confirmQuest.accountabilityActionTitle}</strong><p>{confirmQuest.accountabilityActionDescription}</p></div>
           <p className="recovery-confirm-modal__note">Completion is saved to this progression run. It does not require proof, restore Grace Points or award XP.</p>
           <div className="recovery-confirm-modal__actions"><button type="button" className="recovery-confirm-modal__cancel" onClick={() => setConfirmQuest(null)}>Keep Active</button><button type="button" className="recovery-complete-button" disabled={isEmergencyPauseActive || submitting} onClick={confirmCompletion}>{submitting ? 'Saving…' : 'Confirm Completion'}</button></div>
         </section>

@@ -56,8 +56,8 @@ export function getScheduleValidation(cycleLength, startDate, tasks) {
   for (const [index, task] of tasks.entries()) {
     if (!task.name.trim()) issues.push({ type: 'task', taskId: task.id, message: `Task ${index + 1} needs a name.` });
     if (!task.cycleDays.length) issues.push({ type: 'task', taskId: task.id, message: `Task “${task.name || `Task ${index + 1}`}” needs at least one cycle day.` });
-    if (!task.actionTitle.trim()) issues.push({ type: 'action', taskId: task.id, message: `Add an Accountability Action title for “${task.name || `Task ${index + 1}`}”.` });
-    if (!task.actionDescription.trim()) issues.push({ type: 'action', taskId: task.id, message: `Add an Accountability Action description for “${task.name || `Task ${index + 1}`}”.` });
+    if (!task.actionTitle.trim()) issues.push({ type: 'action', taskId: task.id, message: `Add a Forfeit title for “${task.name || `Task ${index + 1}`}”.` });
+    if (!task.actionDescription.trim()) issues.push({ type: 'action', taskId: task.id, message: `Add a Forfeit description for “${task.name || `Task ${index + 1}`}”.` });
   }
 
   return { valid: issues.length === 0, issues, dayCounts };

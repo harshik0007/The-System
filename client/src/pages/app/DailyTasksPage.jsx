@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import gsap from 'gsap';
 import AppIcon from '../../components/app/AppIcon.jsx';
+import Term, { TermText } from '../../components/app/Term.jsx';
 import PageLoadingSkeleton, { SkeletonLine } from '../../components/app/PageLoadingSkeleton.jsx';
 import DailyTaskSummary from '../../components/tasks/DailyTaskSummary.jsx';
 import TaskCard from '../../components/tasks/TaskCard.jsx';
@@ -156,8 +157,9 @@ export default function DailyTasksPage() {
         </div>
         <div className="daily-tasks-header__meta">
           <span className="app-demo-label"><i aria-hidden="true" />YOUR SCHEDULE</span>
+          <Link className="app-action-link" to="/rules#the-60-second-version">Rules in 60 seconds <AppIcon name="arrow" /></Link>
           <Link className="button button--primary daily-tasks-create-link" to="/app/tasks/create">{schedule ? 'Manage Tasks' : 'Create Schedule'} <span aria-hidden="true">↗</span></Link>
-          <div className="daily-tasks-date"><AppIcon name="clock" /><span><strong>{todayLabel || <SkeletonLine width="medium" label="Loading IST date" />}</strong><small>Daily deadline · 12:00 AM IST (India Standard Time)</small></span></div>
+          <div className="daily-tasks-date"><AppIcon name="clock" /><span><strong>{todayLabel || <SkeletonLine width="medium" label="Loading IST date" />}</strong><small>Daily deadline · 12:00 AM <Term term="IST">IST</Term> (India Standard Time)</small></span></div>
         </div>
       </header>
 
@@ -190,7 +192,7 @@ export default function DailyTasksPage() {
           />)}
         </ol>}
         {!loading && currentDayTasks.length === 0 && <div className="task-builder-empty daily-task-reveal"><span aria-hidden="true">—</span><p>No Task occurrences are scheduled for this IST cycle day.</p><small>Tasks assigned to other cycle days remain in your active schedule.</small></div>}
-        <p className="task-completion-pending daily-task-reveal" role="note"><AppIcon name="clock" />Completing a Task applies its saved XP share, current Rank multiplier and daily cap. Optional proof details are not AI-verified.</p>
+        <p className="task-completion-pending daily-task-reveal" role="note"><AppIcon name="clock" /><span><TermText>Completing a Task applies its saved XP share, current Rank multiplier and daily cap. Optional proof details are not AI-verified.</TermText></span></p>
       </section>}
 
       {changeTarget && <TaskChangeDialog

@@ -3,7 +3,7 @@ import SurfaceCard from '../components/SurfaceCard.jsx';
 
 const steps = [
   { number: '01', icon: '◎', title: 'Follow your Task schedule', copy: 'Work through 7 daily Tasks arranged in your repeating 1–7-day cycle.' },
-  { number: '02', icon: '⌁', title: 'Choose Accountability Actions', copy: 'Give every Task its own Accountability Action, selected by you in advance.' },
+  { number: '02', icon: '⌁', title: 'Choose Forfeits', copy: 'Give every Task its own Forfeit, selected by you in advance.' },
   { number: '03', icon: '◈', title: 'Recover and complete', copy: 'A missed Task activates its linked Recovery Quest for a 3-day Recovery Window.' },
   { number: '04', icon: '↗', title: 'Earn XP and progress', copy: 'Complete Tasks to earn base XP and completion milestone bonuses across seven Ranks.' },
 ];

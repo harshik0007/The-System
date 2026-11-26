@@ -54,8 +54,8 @@ export default function TaskChangeDialog({ task, mode, cycleLength, tasks = [], 
   const issues = [];
   if (draft && mode === 'edit') {
     if (!draft.name.trim()) issues.push('Task name is required.');
-    if (!draft.actionTitle.trim()) issues.push('An Accountability Action title is required.');
-    if (!draft.actionDescription.trim()) issues.push('An Accountability Action description is required.');
+    if (!draft.actionTitle.trim()) issues.push('A Forfeit title is required.');
+    if (!draft.actionDescription.trim()) issues.push('A Forfeit description is required.');
     if (draft.name === current.name && draft.description === current.description && draft.actionTitle === current.actionTitle && draft.actionDescription === current.actionDescription) issues.push('Make at least one change before continuing.');
   }
   if (draft && mode === 'reschedule') {
@@ -109,7 +109,7 @@ export default function TaskChangeDialog({ task, mode, cycleLength, tasks = [], 
           {mode === 'edit' && <>
             <label className="task-change-field" htmlFor="change-task-name">Task name <span>Required</span><input id="change-task-name" value={draft.name} maxLength={100} aria-invalid={attempted && !draft.name.trim()} onChange={(event) => update('name', event.target.value)} /></label>
             <label className="task-change-field" htmlFor="change-task-description">Description <span>Optional</span><textarea id="change-task-description" rows="2" maxLength={300} value={draft.description} onChange={(event) => update('description', event.target.value)} /></label>
-            <section className="task-change-action-fields" aria-labelledby="change-action-heading"><div><p className="app-eyebrow">ACCOUNTABILITY ACTION · REQUIRED</p><h3 id="change-action-heading">Update this Task’s action</h3></div>
+            <section className="task-change-action-fields" aria-labelledby="change-action-heading"><div><p className="app-eyebrow">FORFEIT · REQUIRED</p><h3 id="change-action-heading">Update this Task’s action</h3></div>
               <label className="task-change-field" htmlFor="change-action-title">Action title <span>Required</span><input id="change-action-title" value={draft.actionTitle} maxLength={100} aria-invalid={attempted && !draft.actionTitle.trim()} onChange={(event) => update('actionTitle', event.target.value)} /></label>
               <label className="task-change-field" htmlFor="change-action-description">Action description <span>Required</span><textarea id="change-action-description" rows="2" maxLength={300} value={draft.actionDescription} aria-invalid={attempted && !draft.actionDescription.trim()} onChange={(event) => update('actionDescription', event.target.value)} /></label>
             </section>
@@ -120,12 +120,12 @@ export default function TaskChangeDialog({ task, mode, cycleLength, tasks = [], 
           {(attempted && issues.length > 0 || counts.some((day) => !day.valid)) && <div className="task-change-validation" role="alert"><strong>Change needs attention</strong><ul>{issues.map((issue) => <li key={issue}>{issue}</li>)}{counts.filter((day) => !day.valid).map((day) => <li key={day.dayNumber}>Cycle Day {String(day.dayNumber).padStart(2, '0')} would have {day.count} Tasks; at least 7 are required.</li>)}</ul></div>}
           {!canModify && <p className="task-change-validation" role="alert">No weekly Task changes remain. The allowance resets Monday in IST.</p>}
           {error && <p className="task-change-validation" role="alert">{error}</p>}
-          <p className="task-change-history-note"><AppIcon name="shield" />This update applies from the next IST date. Existing and current-day occurrence snapshots keep their original Task and Accountability Action details.</p>
+          <p className="task-change-history-note"><AppIcon name="shield" />This update applies from the next IST date. Existing and current-day occurrence snapshots keep their original Task and Forfeit details.</p>
           <footer><button type="button" className="task-change-button task-change-button--quiet" onClick={onClose}>Cancel</button><button type="submit" className="task-change-button task-change-button--primary" disabled={Boolean(issues.length) || !canModify}>{mode === 'reschedule' ? 'Review new schedule' : 'Review changes'}<span aria-hidden="true">→</span></button></footer>
         </form> : <div className="task-change-dialog__body">
           <div className="task-change-type"><span>CHANGE TYPE</span><strong>{LABELS[mode]}</strong></div>
           {mode === 'edit' ? <div className="task-change-comparison"><div className="task-change-comparison__labels"><span>CURRENT</span><span>PROPOSED</span></div>
-            {[['Task name', current.name, draft.name], ['Description', current.description || 'Not provided', draft.description || 'Not provided'], ['Accountability Action title', current.actionTitle, draft.actionTitle], ['Accountability Action description', current.actionDescription, draft.actionDescription]].map(([label, before, after]) => <div className="task-change-comparison__row" key={label}><strong>{label}</strong><div><span>{before || 'Not provided'}</span><span>{after || 'Not provided'}</span></div></div>)}
+            {[['Task name', current.name, draft.name], ['Description', current.description || 'Not provided', draft.description || 'Not provided'], ['Forfeit title', current.actionTitle, draft.actionTitle], ['Forfeit description', current.actionDescription, draft.actionDescription]].map(([label, before, after]) => <div className="task-change-comparison__row" key={label}><strong>{label}</strong><div><span>{before || 'Not provided'}</span><span>{after || 'Not provided'}</span></div></div>)}
           </div> : <div className="task-change-comparison"><div className="task-change-comparison__labels"><span>CURRENT CYCLE DAYS</span><span>NEW CYCLE DAYS</span></div><div className="task-change-comparison__row"><strong>Schedule</strong><div><span>{current.cycleDays.map((day) => labelForDay(day, cycleLength)).join(', ')}</span><span>{draft.cycleDays.map((day) => labelForDay(day, cycleLength)).join(', ')}</span></div></div></div>}
           <div className="task-change-result"><p className="app-eyebrow">RESULTING DAILY TASK COUNTS</p><div>{counts.map((day) => <span className={day.valid ? '' : 'is-invalid'} key={day.dayNumber}>Day {String(day.dayNumber).padStart(2, '0')} <b>{day.count}/7+</b></span>)}</div></div>
           <div className="task-change-allowance-summary"><div><span>ALLOWANCE BEFORE</span><strong>{allowance.used} / {allowance.maximum} used · {allowance.remaining} remaining</strong></div><div><span>ALLOWANCE AFTER</span><strong>{allowance.used + 1} / {allowance.maximum} used · {Math.max(0, allowance.remaining - 1)} remaining</strong></div></div>

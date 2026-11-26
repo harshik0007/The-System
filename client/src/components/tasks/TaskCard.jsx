@@ -24,7 +24,7 @@ export default function TaskCard({ task, onSubmit, onMarkMissed, onMarkCompleted
             <div className="task-card__title-row"><h3 id={`task-title-${task.id}`}>{task.name}</h3><span className={`task-status task-status--${task.status}`}><i aria-hidden="true" />{STATUS_LABELS[task.status]}</span></div>
             <p>{task.description}</p>
             <button className="task-card__details-toggle" type="button" aria-expanded={expanded} aria-controls={detailsId} onClick={() => setExpanded((value) => !value)}>
-              <AppIcon name="shield" />{expanded ? 'Hide task details' : 'View Accountability Action'}<span aria-hidden="true">{expanded ? '−' : '+'}</span>
+              <AppIcon name="shield" />{expanded ? 'Hide task details' : 'View Forfeit'}<span aria-hidden="true">{expanded ? '−' : '+'}</span>
             </button>
           </div>
           <div className="task-card__action">
@@ -40,10 +40,10 @@ export default function TaskCard({ task, onSubmit, onMarkMissed, onMarkCompleted
           <div className="task-card__expanded" id={detailsId}>
             <p className="task-card__description-detail">{task.details}</p>
             <div className="task-accountability-action">
-              <div className="task-accountability-action__heading"><AppIcon name="shield" /><span>ACCOUNTABILITY ACTION</span></div>
+              <div className="task-accountability-action__heading"><AppIcon name="shield" /><span>FORFEIT</span></div>
               <p>{task.accountabilityAction}</p>
               {task.accountabilityActionDescription && <p className="task-accountability-action__description">{task.accountabilityActionDescription}</p>}
-              {!backendMode && task.status === 'missed' && <div className="task-card__recovery-note"><p>This task’s own Accountability Action is shown as the Recovery Quest in this preview. The ordinary missed task does not carry forward.</p><Link to="/app/recovery-quests">View Recovery Quests <span aria-hidden="true">↗</span></Link></div>}
+              {!backendMode && task.status === 'missed' && <div className="task-card__recovery-note"><p>This task’s own Forfeit is shown as the Recovery Quest in this preview. The ordinary missed task does not carry forward.</p><Link to="/app/recovery-quests">View Recovery Quests <span aria-hidden="true">↗</span></Link></div>}
             </div>
             {!backendMode && task.status === 'submitted' && <div className="task-card__preview-review"><p>Preview only: no proof is checked or verified.</p><button type="button" disabled={paused} onClick={() => onMarkCompleted(task.id)}>Set Completed for preview</button></div>}
             {!backendMode && isScheduled && <button className="task-card__miss-preview" type="button" disabled={paused} onClick={() => onMarkMissed(task.id)}>Mark missed in this preview</button>}

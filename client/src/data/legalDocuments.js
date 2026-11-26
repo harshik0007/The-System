@@ -3,15 +3,15 @@ const draft = 'Draft — pending legal review';
 export const legalDocuments = {
   terms: { title: 'Terms & Conditions', updated: 'Draft for review', sections: [
     ['status', 'Document status', `${draft}. This is a product-planning draft, not final legally binding terms. No legal entity, governing law, jurisdiction, or effective date is stated here.`],
-    ['service', 'Service overview', 'THE SYSTEM is being designed around daily Tasks, user-selected Accountability Actions, Recovery Quests and progression. Features may remain unavailable until implemented.'],
+    ['service', 'Service overview', 'THE SYSTEM is being designed around daily Tasks, user-selected Forfeits, Recovery Quests and progression. Features may remain unavailable until implemented.'],
     ['tasks', 'Tasks and changes', 'The current product design schedules at least 7 Tasks per day in a repeating 1–7-day cycle. New Tasks are free and take effect on the next IST date. Up to 3 existing Task edits, reschedules or deletions are allowed per Monday–Sunday IST week. This draft requires legal review.'],
-    ['recovery', 'Recovery and Grace Points', 'Each Task has its own user-selected Accountability Action. Missing a Task activates its associated Recovery Quest with a 3-day Recovery Window. Grace Points start at 3. Exhausting them causes a Progression Reset that preserves the account.'],
+    ['recovery', 'Recovery and Grace Points', 'Each Task has its own user-selected Forfeit. Missing a Task activates its associated Recovery Quest with a 3-day Recovery Window. Grace Points start at 3. Exhausting them causes a Progression Reset that preserves the account.'],
     ['progression', 'XP and Ranks', 'Tasks award base XP, with additional XP based on overall Task completion and bonuses at 25%, 50%, 75% and 100%. Exact task XP formulas are not specified. Rank progression starts at Rank 07 Origin and advances through Ember, Surge, Vector, Apex and Zenith to Rank 01 Continuum. Recurring Discipline Point rewards and daily Rank XP percentages are specified in the product rules; one-time Rank-entry XP remains pending configuration.'],
     ['review', 'Items for review', 'Operator identity, jurisdiction, dispute processes, user eligibility, service availability, changes, liability, termination and other binding terms require approved content and professional review. No subscription, payment, refund or cancellation terms are included because these features are not established.'],
   ] },
   privacy: { title: 'Privacy Policy', updated: 'Draft for review', sections: [
     ['status', 'Document status', `${draft}. This is not a compliance statement or final privacy notice. The product is not ready to make public legal-compliance claims.`],
-    ['data', 'Information the product may handle', 'The proposed product may handle account details, Task schedules, Accountability Actions, evidence submissions, verification outcomes, XP, Grace Points, progression records and technical diagnostics. Exact fields and purposes require confirmation before launch.'],
+    ['data', 'Information the product may handle', 'The proposed product may handle account details, Task schedules, Forfeits, evidence submissions, verification outcomes, XP, Grace Points, progression records and technical diagnostics. Exact fields and purposes require confirmation before launch.'],
     ['evidence', 'Evidence handling', 'Original proof is intended to be deleted from THE SYSTEM storage after final verification and successful deletion confirmation. A verification receipt without the original proof is retained. A deletion confirmation for our storage does not control copies or retention held by third-party processors.'],
     ['third-parties', 'Third-party processing', 'OpenAI API may assist with image or document verification; external platform APIs may verify activity. Evidence sent to a provider can be processed under that provider’s systems and retention practices. Exact providers, terms and retention must be confirmed and disclosed before use.'],
     ['retention', 'Retention and deletion', 'Account data, receipts, backups, operational logs and request handling periods have not been finalized. See the Data Retention draft. Progression Reset preserves the account while resetting progression; its exact data scope is not yet defined.'],
@@ -25,13 +25,13 @@ export const legalDocuments = {
   ] },
   'acceptable-use': { title: 'Acceptable Use Policy', updated: 'Draft for review', sections: [
     ['status', 'Document status', `${draft}. This is proposed guidance, not a finalized enforcement policy.`],
-    ['conduct', 'Safe, respectful Accountability Actions', 'Choose Accountability Actions that are safe, reasonable and respectful of other people. An action must be chosen by the Member for its Task; unrelated generic Recovery Quests are not generated.'],
+    ['conduct', 'Safe, respectful Forfeits', 'Choose Forfeits that are safe, reasonable and respectful of other people. An action must be chosen by the Member for its Task; unrelated generic Recovery Quests are not generated.'],
     ['evidence', 'Evidence integrity', 'Submit evidence relevant to the Task and do not knowingly manipulate submissions or attempt duplicate XP awards. Exact review and dispute processes remain unresolved.'],
     ['enforcement', 'Enforcement', 'Operational review and enforcement procedures require product and legal approval. Exhausting Grace Points causes a Progression Reset that preserves the account.'],
   ] },
   'community-guidelines': { title: 'Community Guidelines', updated: 'Draft for review', sections: [
     ['status', 'Document status', `${draft}. Community features and moderation operations are not established.`],
-    ['respect', 'Respect and safety', 'Choose Accountability Actions that respect your wellbeing, other people’s boundaries and safety. An action should not require another person to participate or disclose private information.'],
+    ['respect', 'Respect and safety', 'Choose Forfeits that respect your wellbeing, other people’s boundaries and safety. An action should not require another person to participate or disclose private information.'],
     ['identity', 'Member identity', 'Member or User are neutral terms while identity naming is undecided. The seven identity-name candidates are not official and should not be treated as product or Rank names.'],
     ['support', 'Reporting and moderation', 'Reporting channels, moderation staffing, response times and appeals have not been defined. No availability promise is made.'],
   ] },

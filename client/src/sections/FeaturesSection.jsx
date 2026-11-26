@@ -3,7 +3,7 @@ import SurfaceCard from '../components/SurfaceCard.jsx';
 
 const features = [
   { index: 'A / 01', icon: '⌖', title: 'A daily Task schedule', copy: 'Follow 7 Tasks each day in a repeating cycle of 1–7 days.' },
-  { index: 'A / 02', icon: '▤', title: 'Recovery by your design', copy: 'Link each Task to an Accountability Action you choose. A missed Task activates its Recovery Quest.' },
+  { index: 'A / 02', icon: '▤', title: 'Recovery by your design', copy: 'Link each Task to a Forfeit you choose. A missed Task activates its Recovery Quest.' },
   { index: 'A / 03', icon: '◇', title: 'XP and seven Ranks', copy: 'Earn base XP and completion milestone bonuses. Ranks provide rank-specific XP benefits and profile badges.' },
   { index: 'A / 04', icon: '⟡', title: 'Monthly Analysis', copy: 'Compare any available months in your current progression run.' },
 ];
