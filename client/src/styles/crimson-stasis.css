@@ -24,9 +24,113 @@
 
 .crimson-stasis[data-document-visible='false'] { transition: none; }
 
+.crimson-stasis__mist,
+.crimson-stasis__edge {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.crimson-stasis__mist {
+  overflow: hidden;
+  opacity: 0.55;
+}
+
+.crimson-stasis__mist::before {
+  position: absolute;
+  inset: -8%;
+  background:
+    radial-gradient(ellipse 78% 54% at 50% 1%, rgb(var(--stasis-lavender-rgb) / 0.34), transparent 72%),
+    radial-gradient(ellipse 84% 60% at 50% 101%, rgb(var(--stasis-blush-rgb) / 0.19), transparent 72%),
+    radial-gradient(ellipse 42% 62% at 0% 82%, rgb(var(--stasis-rose-rgb) / 0.11), transparent 78%),
+    radial-gradient(ellipse 42% 62% at 100% 82%, rgb(var(--stasis-rose-rgb) / 0.11), transparent 78%);
+  content: '';
+  animation:
+    stasis-mist-drift var(--stasis-mist-drift-ms) ease-in-out infinite alternate,
+    stasis-global-breath var(--stasis-breath-ms) ease-in-out infinite alternate;
+  will-change: transform, opacity;
+}
+
+.crimson-stasis__edge {
+  opacity: 0.36;
+  animation: stasis-edge-breath var(--stasis-breath-ms) ease-in-out infinite alternate;
+  will-change: opacity;
+}
+
+.crimson-stasis__edge::before {
+  position: absolute;
+  inset: 0;
+  box-shadow:
+    inset 0 0 150px rgb(var(--stasis-crimson-rgb) / 0.15),
+    inset 0 0 360px rgb(var(--stasis-rose-rgb) / 0.09);
+  content: '';
+}
+
+.crimson-stasis:not([data-system-theme='dark-navy']) .crimson-stasis__mist { opacity: 0.45; }
+
+.crimson-stasis:not([data-system-theme='dark-navy']) .crimson-stasis__mist::before {
+  background:
+    radial-gradient(ellipse 78% 54% at 50% 1%, rgb(var(--stasis-lavender-rgb) / 0.1), transparent 72%),
+    radial-gradient(ellipse 84% 60% at 50% 101%, rgb(var(--stasis-blush-rgb) / 0.07), transparent 72%),
+    radial-gradient(ellipse 42% 62% at 0% 82%, rgb(var(--stasis-rose-rgb) / 0.035), transparent 78%),
+    radial-gradient(ellipse 42% 62% at 100% 82%, rgb(var(--stasis-rose-rgb) / 0.035), transparent 78%);
+}
+
+.crimson-stasis:not([data-system-theme='dark-navy']) .crimson-stasis__edge::before {
+  box-shadow:
+    inset 0 0 150px rgb(var(--stasis-crimson-rgb) / 0.035),
+    inset 0 0 360px rgb(var(--stasis-rose-rgb) / 0.02);
+}
+
+.crimson-stasis[data-system-theme='dark-navy'] .crimson-stasis__mist {
+  mix-blend-mode: var(--stasis-dark-blend);
+  opacity: 0.29;
+}
+
+.crimson-stasis[data-system-theme='dark-navy'] .crimson-stasis__mist::before {
+  background:
+    radial-gradient(ellipse 80% 55% at 50% 0%, rgb(var(--stasis-lavender-rgb) / 0.12), transparent 72%),
+    radial-gradient(ellipse 82% 61% at 50% 103%, rgb(var(--stasis-crimson-rgb) / 0.19), transparent 73%),
+    radial-gradient(ellipse 45% 58% at 0% 82%, rgb(var(--stasis-rose-rgb) / 0.12), transparent 80%),
+    radial-gradient(ellipse 45% 58% at 100% 82%, rgb(var(--stasis-rose-rgb) / 0.12), transparent 80%);
+}
+
+.crimson-stasis.is-static .crimson-stasis__mist::before,
+.crimson-stasis.is-static .crimson-stasis__edge {
+  animation: none;
+  will-change: auto;
+}
+
+.crimson-stasis.is-static .crimson-stasis__mist { opacity: 0.44; }
+.crimson-stasis:not([data-system-theme='dark-navy']).is-static .crimson-stasis__mist { opacity: 0.42; }
+.crimson-stasis[data-system-theme='dark-navy'].is-static .crimson-stasis__mist { opacity: 0.24; }
+
+@keyframes stasis-mist-drift {
+  from { transform: translate3d(-0.6%, -0.3%, 0) scale(1); }
+  to { transform: translate3d(0.6%, 0.4%, 0) scale(1.035); }
+}
+
+@keyframes stasis-global-breath {
+  from { opacity: 0.85; }
+  to { opacity: 1; }
+}
+
+@keyframes stasis-edge-breath {
+  from { opacity: 0.25; }
+  to { opacity: 0.5; }
+}
+
 body.crimson-stasis-running #root {
   position: relative;
   z-index: 1;
 }
 
 body.crimson-stasis-running .app-layout { background: transparent; }
+
+@media (prefers-reduced-motion: reduce) {
+  .crimson-stasis__mist::before,
+  .crimson-stasis__edge { animation: none; }
+  .crimson-stasis__mist { opacity: 0.44; }
+  .crimson-stasis:not([data-system-theme='dark-navy']) .crimson-stasis__mist { opacity: 0.42; }
+  .crimson-stasis[data-system-theme='dark-navy'] .crimson-stasis__mist { opacity: 0.24; }
+}

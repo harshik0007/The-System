@@ -15,6 +15,7 @@ const CRIMSON_STASIS_CONFIG = Object.freeze({
   PARTICLES_MOBILE: 10,
   MAX_ALPHA: 0.35,
   EXIT_PARTICLE_MS: 2600,
+  DARK_BLEND: 'screen',
   COLORS: Object.freeze({
     crimson: '#C8243A', crimsonRgb: '200 36 58',
     rose: '#E8607A', roseRgb: '232 96 122',
@@ -90,6 +91,14 @@ export default function CrimsonStasisAtmosphere({
     '--stasis-reduced-ms': `${CRIMSON_STASIS_CONFIG.REDUCED_MS}ms`,
     '--stasis-enter-ease': CRIMSON_STASIS_CONFIG.EASE,
     '--stasis-exit-ease': CRIMSON_STASIS_CONFIG.EXIT_EASE,
+    '--stasis-breath-ms': `${CRIMSON_STASIS_CONFIG.BREATH_MS}ms`,
+    '--stasis-mist-drift-ms': `${CRIMSON_STASIS_CONFIG.MIST_DRIFT_MS}ms`,
+    '--stasis-crimson-rgb': CRIMSON_STASIS_CONFIG.COLORS.crimsonRgb,
+    '--stasis-rose-rgb': CRIMSON_STASIS_CONFIG.COLORS.roseRgb,
+    '--stasis-blush-rgb': CRIMSON_STASIS_CONFIG.COLORS.blushRgb,
+    '--stasis-lavender-rgb': CRIMSON_STASIS_CONFIG.COLORS.lavenderRgb,
+    '--stasis-dawn-rgb': CRIMSON_STASIS_CONFIG.COLORS.dawnRgb,
+    '--stasis-dark-blend': CRIMSON_STASIS_CONFIG.DARK_BLEND,
   };
 
   return createPortal(
@@ -100,7 +109,10 @@ export default function CrimsonStasisAtmosphere({
       data-system-theme={theme}
       style={configStyle}
       aria-hidden="true"
-    />,
+    >
+      <div className="crimson-stasis__mist" />
+      <div className="crimson-stasis__edge" />
+    </div>,
     document.body,
   );
 }
