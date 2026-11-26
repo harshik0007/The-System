@@ -1,0 +1,16 @@
+.app-layout .notification-item__action-error[role='alert'] {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  grid-column: 1 / -1;
+  margin: 5px 0 0;
+  padding: 9px 11px;
+  border: 1px solid color-mix(in srgb, var(--color-danger) 30%, var(--color-line));
+  border-left: 3px solid var(--color-danger);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--color-danger) 7%, var(--surface-card));
+  color: var(--color-danger);
+  font-size: max(12px, .76rem);
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}

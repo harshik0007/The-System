@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import AppIcon from './AppIcon.jsx';
 import { formatNotificationDateTime, resolveNotificationDestination } from '../../utils/notificationCenter.js';
+import '../../styles/notification-feedback.css';
 
 const categoryIcons = {
   tasks: 'tasks',
@@ -28,8 +29,8 @@ export default function NotificationItem({ notification, compact = false, onMark
     setActionError('');
     try {
       await onMarkRead(notification.id);
-    } catch (error) {
-      setActionError(error?.message || 'This notification could not be marked as read. Retry when the service is available.');
+    } catch {
+      setActionError('This notification could not be updated. Please try again.');
     } finally {
       setMarkingRead(false);
     }
