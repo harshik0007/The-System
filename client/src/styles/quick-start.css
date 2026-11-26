@@ -49,6 +49,25 @@
 }
 .quick-start-customize-link .app-icon { width: 16px; height: 16px; color: var(--silver-indigo); }
 .quick-start-customize-link:hover { transform: translateY(-1px); border-color: var(--border-interactive); background: var(--surface-selected); color: var(--silver-indigo-hover); }
+.task-builder-back-to-quick-start {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 0 12px;
+  border: 1px solid var(--silver-border);
+  border-radius: var(--silver-radius-control);
+  background: var(--surface-card);
+  color: var(--silver-indigo-hover);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.3;
+  text-decoration: none;
+  transition: border-color var(--motion-fast), background var(--motion-fast), transform var(--motion-fast);
+}
+.task-builder-back-to-quick-start:hover { transform: translateY(-1px); border-color: var(--border-interactive); background: var(--surface-selected); }
+.task-builder-back-to-quick-start:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: 3px; }
 
 .quick-start-progress {
   display: grid;
@@ -287,3 +306,5 @@
 }
 
 .quick-start-page.is-reduced-motion *, .quick-start-page.is-reduced-motion *::before, .quick-start-page.is-reduced-motion *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
+.task-creation-page.is-reduced-motion .task-builder-back-to-quick-start { transition: none; }
+@media (prefers-reduced-motion: reduce) { .task-builder-back-to-quick-start { transition: none; } }

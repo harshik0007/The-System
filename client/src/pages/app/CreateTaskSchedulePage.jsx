@@ -338,7 +338,6 @@ export default function CreateTaskSchedulePage() {
   }
   if (currentSchedule) return <ActiveScheduleManager schedule={currentSchedule} tasks={serverTasks} allowance={allowance} todayDate={todayDate} loading={loading} onRefresh={refresh} />;
   const customizeEverything = new URLSearchParams(location.search).get('customize') === '1';
-  if (!customizeEverything) return <QuickStartScheduleBuilder onCancel={() => navigate('/app/tasks')} />;
 
   const selectCycleLength = (length) => {
     setCycleLength(length);
@@ -406,11 +405,15 @@ export default function CreateTaskSchedulePage() {
   };
 
   return (
-    <div className={`task-creation-page${reducedMotion ? ' is-reduced-motion' : ''}`}>
+    <>
+    <div hidden={customizeEverything}>
+      <QuickStartScheduleBuilder onCancel={() => navigate('/app/tasks')} />
+    </div>
+    <div hidden={!customizeEverything} className={`task-creation-page${reducedMotion ? ' is-reduced-motion' : ''}`}>
       {resetNotice && <aside className="task-builder-reset-success" role="status" aria-live="polite"><span aria-hidden="true">✓</span><div><strong>THE SYSTEM has been reset. Your new journey begins now.</strong>{!resetNotice.persisted && <p>This change could not be saved in this browser. Refreshing may restore your previous progress.</p>}</div><button type="button" onClick={() => setResetNotice(null)} aria-label="Dismiss reset confirmation">×</button></aside>}
       {manualReset && <aside className="task-builder-reset-success" role="status" aria-live="polite"><span aria-hidden="true">✓</span><div><strong>Your fresh Progression Run is ready.</strong><p>Your account, Member Since date, Reset Count, Lifetime Longest Streak, preferences and Monthly Analysis history remain. Create a new Task Schedule to continue.</p></div></aside>}
       {automaticReset && <aside className="task-builder-reset-success" role="status" aria-live="polite"><span aria-hidden="true">✓</span><div><strong>Grace Points were exhausted. Your new progression journey is ready.</strong><p>Your identity and lifetime achievements remain. Create a new Task Schedule to continue{automaticReset.resetCount ? ` · Reset ${automaticReset.resetCount}` : ''}.</p></div></aside>}
-      <header className="task-creation-header"><div><p className="app-eyebrow">MY PROGRESS · SCHEDULE BUILDER</p><h1>Create your Daily Schedule</h1><p>Set a repeating cycle, add your Tasks and choose a Forfeit for each one.</p></div><span className="app-demo-label"><i aria-hidden="true" />SCHEDULE READY</span></header>
+      <header className="task-creation-header"><div><p className="app-eyebrow">MY PROGRESS · SCHEDULE BUILDER</p><h1>Create your Daily Schedule</h1><p>Set a repeating cycle, add your Tasks and choose a Forfeit for each one.</p><Link className="task-builder-back-to-quick-start" to="/app/tasks/create"><span aria-hidden="true">←</span> Back to Quick Start</Link></div><span className="app-demo-label"><i aria-hidden="true" />SCHEDULE READY</span></header>
 
       <nav className="task-builder-progress" aria-label="Schedule creation progress">
         {STEPS.map((item, index) => <div className={`task-builder-progress__step${step === item.number ? ' is-current' : ''}${step > item.number ? ' is-complete' : ''}`} key={item.number} aria-current={step === item.number ? 'step' : undefined}><span>{step > item.number ? '✓' : String(item.number).padStart(2, '0')}</span><strong>{item.label}</strong>{index < STEPS.length - 1 && <i aria-hidden="true" />}</div>)}
@@ -440,6 +443,7 @@ export default function CreateTaskSchedulePage() {
       {saveError && <div className="task-builder-validation" role="alert"><AppIcon name="shield" /><div><strong>{saveErrorInfo?.status >= 500 || saveErrorInfo?.code === 'NETWORK_ERROR' ? 'The schedule could not reach the service.' : saveErrorInfo?.code === 'VALIDATION_ERROR' ? 'Review the schedule details.' : 'The schedule could not be saved.'}</strong><p>{saveError}</p>{saveErrorInfo?.details?.length > 0 && <ul>{saveErrorInfo.details.slice(0, 12).map((detail, index) => <li key={`${detail.field || detail.code}-${index}`}>{detail.field ? `${detail.field.replaceAll('.', ' ')} · ` : ''}{detail.code}</li>)}</ul>}{saveErrorInfo?.status !== null && saveErrorInfo?.status !== undefined && <small>HTTP {saveErrorInfo.status} · {saveErrorInfo.code}{saveErrorInfo.requestId ? ` · Request ID ${saveErrorInfo.requestId}` : ''}</small>}</div></div>}
       <p className="task-builder-disclosure"><AppIcon name="activity" />Creating a schedule does not award XP. Completing a regular scheduled Task can earn XP; Forfeits do not.</p>
     </div>
+    </>
   );
 }
 
