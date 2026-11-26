@@ -3,148 +3,157 @@
   z-index: 0;
   inset: 0;
   overflow: hidden;
+  background: transparent;
   opacity: 1;
   pointer-events: none;
   transition: opacity var(--stasis-enter-ms) var(--stasis-enter-ease);
   contain: strict;
 }
 
-.crimson-stasis[data-phase='entering'] {
-  opacity: 0;
-  transition-duration: var(--stasis-enter-ms);
-  transition-timing-function: var(--stasis-enter-ease);
-}
-
-.crimson-stasis[data-phase='leaving'] {
-  opacity: 0;
-  transition-duration: var(--stasis-exit-ms);
-  transition-timing-function: var(--stasis-exit-ease);
-}
-
-.crimson-stasis.is-static {
-  transition-duration: var(--stasis-reduced-ms);
-  transition-timing-function: var(--stasis-enter-ease);
-}
-
+.crimson-stasis[data-phase='entering'] { opacity: 0; transition-duration: var(--stasis-enter-ms); transition-timing-function: var(--stasis-enter-ease); }
+.crimson-stasis[data-phase='active'] { opacity: 1; transition-duration: var(--stasis-enter-ms); transition-timing-function: var(--stasis-enter-ease); }
+.crimson-stasis[data-phase='leaving'] { opacity: 0; transition-duration: var(--stasis-exit-ms); transition-timing-function: var(--stasis-exit-ease); }
+.crimson-stasis.is-static { transition-duration: var(--stasis-reduced-ms); transition-timing-function: var(--stasis-enter-ease); }
 .crimson-stasis[data-document-visible='false'] { transition: none; }
 
 .crimson-stasis__mist,
-.crimson-stasis__edge {
+.crimson-stasis__aurora,
+.crimson-stasis__floor,
+.crimson-stasis__edge,
+.crimson-stasis__beams,
+.crimson-stasis__bokeh {
   position: absolute;
   inset: 0;
   pointer-events: none;
 }
 
-.crimson-stasis__mist {
-  overflow: hidden;
-  opacity: 0.55;
-}
-
+.crimson-stasis__mist { opacity: var(--stasis-mist-alpha); }
 .crimson-stasis__mist::before {
   position: absolute;
-  inset: -8%;
+  inset: -9%;
   background:
-    radial-gradient(ellipse 78% 54% at 50% 1%, rgb(var(--stasis-lavender-rgb) / 0.34), transparent 72%),
-    radial-gradient(ellipse 84% 60% at 50% 101%, rgb(var(--stasis-blush-rgb) / 0.19), transparent 72%),
-    radial-gradient(ellipse 42% 62% at 0% 82%, rgb(var(--stasis-rose-rgb) / 0.11), transparent 78%),
-    radial-gradient(ellipse 42% 62% at 100% 82%, rgb(var(--stasis-rose-rgb) / 0.11), transparent 78%);
+    radial-gradient(ellipse 82% 58% at 50% 0%, rgb(var(--stasis-lavender-rgb) / 0.2), transparent 72%),
+    radial-gradient(ellipse 86% 66% at 50% 103%, rgb(var(--stasis-blush-rgb) / 0.16), transparent 73%),
+    radial-gradient(ellipse 48% 70% at 0% 74%, rgb(var(--stasis-rose-rgb) / 0.09), transparent 79%),
+    radial-gradient(ellipse 48% 70% at 100% 74%, rgb(var(--stasis-rose-rgb) / 0.09), transparent 79%);
   content: '';
-  animation:
-    stasis-mist-drift var(--stasis-mist-drift-ms) ease-in-out infinite alternate,
-    stasis-global-breath var(--stasis-breath-ms) ease-in-out infinite alternate;
+  animation: stasis-mist-drift 64s ease-in-out infinite alternate, stasis-breathe var(--stasis-breath-ms) ease-in-out infinite alternate;
   will-change: transform, opacity;
 }
 
-.crimson-stasis__edge {
-  opacity: 0.36;
-  animation: stasis-edge-breath var(--stasis-breath-ms) ease-in-out infinite alternate;
-  will-change: opacity;
+.crimson-stasis__aurora { overflow: hidden; opacity: var(--stasis-aurora-alpha); mix-blend-mode: normal; }
+.crimson-stasis__aurora span {
+  position: absolute;
+  inset: -28%;
+  border-radius: 50%;
+  filter: blur(82px);
+  will-change: transform;
+}
+.crimson-stasis__aurora span:first-child {
+  background: radial-gradient(ellipse 70% 27% at 45% 44%, rgb(var(--stasis-lavender-rgb) / 0.46), transparent 75%);
+  animation: stasis-aurora-one var(--stasis-layer-duration) ease-in-out infinite alternate;
+}
+.crimson-stasis__aurora span:last-child {
+  background: radial-gradient(ellipse 72% 28% at 54% 58%, rgb(var(--stasis-rose-rgb) / 0.42), transparent 75%);
+  animation: stasis-aurora-two var(--stasis-layer-duration) ease-in-out infinite alternate;
 }
 
+.crimson-stasis__floor {
+  inset: auto 0 0;
+  height: 36vh;
+  opacity: var(--stasis-floor-alpha);
+  background: radial-gradient(ellipse 84% 100% at 50% 100%, rgb(var(--stasis-crimson-rgb) / 0.52), rgb(var(--stasis-blush-rgb) / 0.18) 43%, transparent 78%);
+  animation: stasis-breathe var(--stasis-breath-ms) ease-in-out infinite alternate;
+}
+.crimson-stasis__edge {
+  opacity: var(--stasis-edge-low);
+  animation: stasis-edge-breathe var(--stasis-breath-ms) ease-in-out infinite alternate;
+  will-change: opacity;
+}
 .crimson-stasis__edge::before {
   position: absolute;
   inset: 0;
-  box-shadow:
-    inset 0 0 150px rgb(var(--stasis-crimson-rgb) / 0.15),
-    inset 0 0 360px rgb(var(--stasis-rose-rgb) / 0.09);
+  box-shadow: inset 0 0 160px rgb(var(--stasis-crimson-rgb) / 0.22), inset 0 0 360px rgb(var(--stasis-rose-rgb) / 0.14);
   content: '';
 }
 
-.crimson-stasis__canvas {
+.crimson-stasis__beams { opacity: var(--stasis-beam-alpha); animation: stasis-breathe var(--stasis-breath-ms) ease-in-out infinite alternate; }
+.crimson-stasis__beams span {
   position: absolute;
-  z-index: 2;
-  inset: 0;
-  display: block;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
+  top: -22%;
+  left: calc(var(--stasis-index) * 18% - 6%);
+  width: 28vw;
+  height: 145vh;
+  border-radius: 50%;
+  background: linear-gradient(180deg, rgb(var(--stasis-lavender-rgb) / 0.8), rgb(var(--stasis-blush-rgb) / 0.2) 38%, transparent 76%);
+  filter: blur(22px);
+  transform-origin: 50% 0;
+  animation: stasis-beam-sway var(--stasis-layer-duration) calc(var(--stasis-index) * -4s) ease-in-out infinite alternate;
+  will-change: transform;
 }
 
-.crimson-stasis:not([data-system-theme='dark-navy']) .crimson-stasis__mist { opacity: 0.45; }
+.crimson-stasis__bokeh span {
+  position: absolute;
+  left: calc((var(--stasis-index) * 19%) - 6%);
+  top: calc((var(--stasis-index) * 13%) - 2%);
+  width: clamp(170px, 24vw, 420px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgb(var(--stasis-rose-rgb) / 0.2), rgb(var(--stasis-lavender-rgb) / 0.13) 42%, transparent 72%);
+  opacity: var(--stasis-bokeh-alpha);
+  filter: blur(10px);
+  animation: stasis-bokeh-drift var(--stasis-layer-duration) calc(var(--stasis-index) * -7s) ease-in-out infinite alternate;
+  will-change: transform;
+}
 
-.crimson-stasis:not([data-system-theme='dark-navy']) .crimson-stasis__mist::before {
+.crimson-stasis__canvas { position: absolute; z-index: 2; inset: 0; display: block; width: 100%; height: 100%; pointer-events: none; }
+
+.crimson-stasis[data-system-theme='dark-navy'] .crimson-stasis__aurora,
+.crimson-stasis[data-system-theme='obsidian'] .crimson-stasis__aurora,
+.crimson-stasis[data-system-theme='eclipse'] .crimson-stasis__aurora,
+.crimson-stasis[data-system-theme='galaxion'] .crimson-stasis__aurora { mix-blend-mode: screen; }
+.crimson-stasis[data-system-theme='dark-navy'] .crimson-stasis__mist::before,
+.crimson-stasis[data-system-theme='obsidian'] .crimson-stasis__mist::before,
+.crimson-stasis[data-system-theme='eclipse'] .crimson-stasis__mist::before,
+.crimson-stasis[data-system-theme='galaxion'] .crimson-stasis__mist::before {
   background:
-    radial-gradient(ellipse 78% 54% at 50% 1%, rgb(var(--stasis-lavender-rgb) / 0.1), transparent 72%),
-    radial-gradient(ellipse 84% 60% at 50% 101%, rgb(var(--stasis-blush-rgb) / 0.07), transparent 72%),
-    radial-gradient(ellipse 42% 62% at 0% 82%, rgb(var(--stasis-rose-rgb) / 0.035), transparent 78%),
-    radial-gradient(ellipse 42% 62% at 100% 82%, rgb(var(--stasis-rose-rgb) / 0.035), transparent 78%);
+    radial-gradient(ellipse 82% 58% at 50% 0%, rgb(var(--stasis-lavender-rgb) / 0.15), transparent 72%),
+    radial-gradient(ellipse 86% 66% at 50% 103%, rgb(var(--stasis-crimson-rgb) / 0.23), transparent 73%),
+    radial-gradient(ellipse 48% 70% at 0% 74%, rgb(var(--stasis-rose-rgb) / 0.2), transparent 79%),
+    radial-gradient(ellipse 48% 70% at 100% 74%, rgb(var(--stasis-rose-rgb) / 0.2), transparent 79%);
 }
 
-.crimson-stasis:not([data-system-theme='dark-navy']) .crimson-stasis__edge::before {
-  box-shadow:
-    inset 0 0 150px rgb(var(--stasis-crimson-rgb) / 0.035),
-    inset 0 0 360px rgb(var(--stasis-rose-rgb) / 0.02);
-}
-
-.crimson-stasis[data-system-theme='dark-navy'] .crimson-stasis__mist {
-  mix-blend-mode: var(--stasis-dark-blend);
-  opacity: 0.29;
-}
-
-.crimson-stasis[data-system-theme='dark-navy'] .crimson-stasis__mist::before {
+:root:has(.app-layout[data-app-design='silver']) .crimson-stasis__mist::before {
   background:
-    radial-gradient(ellipse 80% 55% at 50% 0%, rgb(var(--stasis-lavender-rgb) / 0.12), transparent 72%),
-    radial-gradient(ellipse 82% 61% at 50% 103%, rgb(var(--stasis-crimson-rgb) / 0.19), transparent 73%),
-    radial-gradient(ellipse 45% 58% at 0% 82%, rgb(var(--stasis-rose-rgb) / 0.12), transparent 80%),
-    radial-gradient(ellipse 45% 58% at 100% 82%, rgb(var(--stasis-rose-rgb) / 0.12), transparent 80%);
+    radial-gradient(ellipse 82% 58% at 50% 0%, rgb(var(--stasis-lavender-rgb) / 0.19), transparent 72%),
+    radial-gradient(ellipse 86% 66% at 50% 103%, rgb(var(--stasis-blush-rgb) / 0.17), transparent 73%),
+    radial-gradient(ellipse 48% 70% at 0% 74%, rgb(var(--stasis-rose-rgb) / 0.1), transparent 79%),
+    radial-gradient(ellipse 48% 70% at 100% 74%, rgb(var(--stasis-rose-rgb) / 0.1), transparent 79%);
 }
+:root:has(.app-layout[data-app-design='silver']) .crimson-stasis__aurora { mix-blend-mode: normal; }
 
 .crimson-stasis.is-static .crimson-stasis__mist::before,
-.crimson-stasis.is-static .crimson-stasis__edge {
-  animation: none;
-  will-change: auto;
-}
+.crimson-stasis.is-static .crimson-stasis__edge { animation: none; will-change: auto; }
+.crimson-stasis.is-static :is(.crimson-stasis__aurora, .crimson-stasis__floor, .crimson-stasis__beams, .crimson-stasis__bokeh, .crimson-stasis__canvas) { display: none; }
+.crimson-stasis[data-ambient-disabled='true'] :is(.crimson-stasis__beams, .crimson-stasis__bokeh, .crimson-stasis__aurora, .crimson-stasis__floor) { display: none; }
 
-.crimson-stasis.is-static .crimson-stasis__mist { opacity: 0.44; }
-.crimson-stasis:not([data-system-theme='dark-navy']).is-static .crimson-stasis__mist { opacity: 0.42; }
-.crimson-stasis[data-system-theme='dark-navy'].is-static .crimson-stasis__mist { opacity: 0.24; }
+body.crimson-stasis-running #root { position: relative; z-index: 1; }
+body.crimson-stasis-running .app-layout,
+body.crimson-stasis-running .app-layout__main,
+body.crimson-stasis-running .app-layout__content { background: transparent; }
 
-@keyframes stasis-mist-drift {
-  from { transform: translate3d(-0.6%, -0.3%, 0) scale(1); }
-  to { transform: translate3d(0.6%, 0.4%, 0) scale(1.035); }
-}
+:root:has(.app-layout[data-app-design='silver']) body.crimson-stasis-running .app-sidebar,
+:root:has(.app-layout[data-app-design='silver']) body.crimson-stasis-running .app-layout :is(.app-panel, .app-topbar) { background: var(--silver-surface); }
 
-@keyframes stasis-global-breath {
-  from { opacity: 0.85; }
-  to { opacity: 1; }
-}
-
-@keyframes stasis-edge-breath {
-  from { opacity: 0.25; }
-  to { opacity: 0.5; }
-}
-
-body.crimson-stasis-running #root {
-  position: relative;
-  z-index: 1;
-}
-
-body.crimson-stasis-running .app-layout { background: transparent; }
+@keyframes stasis-breathe { from { opacity: 0.9; } to { opacity: 1; } }
+@keyframes stasis-edge-breathe { from { opacity: var(--stasis-edge-low); } to { opacity: var(--stasis-edge-high); } }
+@keyframes stasis-mist-drift { from { transform: translate3d(-0.8%, -0.4%, 0) scale(1); } to { transform: translate3d(0.8%, 0.5%, 0) scale(1.04); } }
+@keyframes stasis-beam-sway { from { transform: translateX(-2vw) rotate(-8deg); } to { transform: translateX(2vw) rotate(8deg); } }
+@keyframes stasis-bokeh-drift { from { transform: translate3d(-2vw, -2vh, 0) scale(0.92); } to { transform: translate3d(2vw, 3vh, 0) scale(1.08); } }
+@keyframes stasis-aurora-one { from { transform: translate3d(-3vw, -3vh, 0) rotate(-8deg) scale(0.94); } to { transform: translate3d(4vw, 4vh, 0) rotate(8deg) scale(1.08); } }
+@keyframes stasis-aurora-two { from { transform: translate3d(3vw, 3vh, 0) rotate(8deg) scale(1.04); } to { transform: translate3d(-4vw, -3vh, 0) rotate(-8deg) scale(0.94); } }
 
 @media (prefers-reduced-motion: reduce) {
-  .crimson-stasis__mist::before,
-  .crimson-stasis__edge { animation: none; }
-  .crimson-stasis__mist { opacity: 0.44; }
-  .crimson-stasis:not([data-system-theme='dark-navy']) .crimson-stasis__mist { opacity: 0.42; }
-  .crimson-stasis[data-system-theme='dark-navy'] .crimson-stasis__mist { opacity: 0.24; }
+  .crimson-stasis__mist::before, .crimson-stasis__edge { animation: none; }
+  .crimson-stasis :is(.crimson-stasis__aurora, .crimson-stasis__floor, .crimson-stasis__beams, .crimson-stasis__bokeh, .crimson-stasis__canvas) { display: none; }
 }

@@ -32,63 +32,6 @@
 :root[data-system-theme='obsidian'] .emergency-pause-modal { border-color: var(--color-line); background: var(--surface-modal); color: var(--color-text); }
 @keyframes obsidian-pause-pulse { 50% { box-shadow: 0 0 15px rgb(255 193 102 / 70%); } }
 
-/* Obsidian's active pause atmosphere uses its own full-screen falling Emberfall canvas. */
-.emergency-pause-atmosphere[data-system-theme='obsidian'] {
-  background: radial-gradient(ellipse at 50% 96%, rgb(255 138 61 / 5%), transparent 60%), linear-gradient(180deg, #15171C, #0B0B0F 42rem);
-}
-
-/* Obsidian normally paints opaque app surfaces. Let its pause-only amber
-   atmosphere show through those surfaces while keeping the graphite palette. */
-:root[data-system-theme='obsidian'] body.emergency-pause-atmosphere-running .app-layout {
-  background: transparent;
-}
-:root[data-system-theme='obsidian'] body.emergency-pause-atmosphere-running .app-sidebar {
-  background: linear-gradient(180deg, rgb(16 18 22 / 82%), rgb(11 11 15 / 86%));
-}
-:root[data-system-theme='obsidian'] body.emergency-pause-atmosphere-running .app-topbar {
-  background: rgb(11 11 15 / 82%);
-}
-:root[data-system-theme='obsidian'] body.emergency-pause-atmosphere-running :is(
-  .app-panel,
-  .settings-content,
-  .settings-nav,
-  .settings-toggle-list,
-  .settings-notification-group,
-  .settings-theme-card,
-  .settings-readonly,
-  .settings-accessibility-grid article,
-  .settings-avatar-choice,
-  .leaderboard-list,
-  .monthly-panel,
-  .monthly-retention-panel,
-  .monthly-balance-card,
-  .recovery-quest-card,
-  .discipline-reward,
-  .task-builder-panel,
-  .task-builder-form,
-  .task-builder-schedule,
-  .task-builder-task,
-  .task-builder-existing-day,
-  .task-action-picker,
-  .task-action-editor,
-  .task-review-day
-) {
-  background-color: rgb(21 23 28 / 78%);
-  background-image: linear-gradient(145deg, rgb(55 39 29 / 22%), rgb(17 18 22 / 12%));
-}
-.emergency-pause-atmosphere[data-system-theme='obsidian'] .emergency-pause-atmosphere__aura::before {
-  background: radial-gradient(ellipse 34% 78% at 0% 49%, rgb(255 138 61 / 22%), transparent 78%), radial-gradient(ellipse 34% 78% at 100% 51%, rgb(255 193 102 / 18%), transparent 79%), radial-gradient(ellipse 70% 34% at 50% 100%, rgb(148 75 32 / 14%), transparent 80%);
-  opacity: .9;
-  animation: obsidian-surge-breathe 15s ease-in-out infinite alternate;
-}
-.emergency-pause-atmosphere[data-system-theme='obsidian'] .emergency-pause-atmosphere__aura::after {
-  box-shadow: inset 0 0 170px rgb(97 47 22 / 17%), inset 0 0 50px rgb(255 138 61 / 10%), inset 0 -10vh 32vh rgb(127 62 24 / 12%);
-  opacity: .84;
-  animation: obsidian-edge-amber-breathe 18s ease-in-out infinite alternate;
-}
-.emergency-pause-atmosphere[data-system-theme='obsidian'] .emergency-pause-atmosphere__active-canvas { position: absolute; z-index: 1; inset: 0; display: block; width: 100%; height: 100%; pointer-events: none; }
-@keyframes obsidian-surge-breathe { from { opacity: .58; } to { opacity: .92; } }
-@keyframes obsidian-edge-amber-breathe { from { opacity: .64; } to { opacity: .88; } }
 @property --obsidian-edge-angle { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
 body.obsidian-emergency-active .emergency-pause-control.is-active { position: relative; isolation: isolate; }
 body.obsidian-emergency-active .emergency-pause-control.is-active::after {
@@ -103,10 +46,6 @@ body.obsidian-emergency-active .emergency-pause-control.is-active::after {
 
 @media (prefers-reduced-motion: reduce) {
   body.obsidian-emergency-active .emergency-pause-control.is-active::after { animation: none; }
-  .emergency-pause-atmosphere[data-system-theme='obsidian'] .emergency-pause-atmosphere__aura::before,
-  .emergency-pause-atmosphere[data-system-theme='obsidian'] .emergency-pause-atmosphere__aura::after { animation: none; }
-  .emergency-pause-atmosphere[data-system-theme='obsidian'] .emergency-pause-atmosphere__aura::before { opacity: .68; }
-  .emergency-pause-atmosphere[data-system-theme='obsidian'] .emergency-pause-atmosphere__aura::after { opacity: .7; }
 }
 .obsidian-emergency-effects-reduced .emergency-pause-control.is-active::after { animation: none; }
 .obsidian-emergency-effects-reduced .emergency-pause-control.is-active { animation: none !important; }
