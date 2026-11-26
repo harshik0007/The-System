@@ -72,7 +72,7 @@ function TutorialStep() {
   ];
 
   return <section className="task-builder-panel task-builder-tutorial" aria-labelledby="schedule-tutorial-title">
-    <StepHeader eyebrow="STEP 01 · HOW THE SYSTEM WORKS" title="Welcome to THE SYSTEM" description="A simple guide before you create your schedule." />
+    <StepHeader eyebrow="STEP 01 · HOW THE SYSTEM WORKS" title="Build your daily plan" description="Choose a cycle and add at least seven small Tasks to each day." />
     <p className="task-builder-tutorial__intro">THE SYSTEM helps you plan your work, complete daily Tasks and improve over time. Create a schedule, follow it every day and build your progress.</p>
     <ol className="task-builder-tutorial__flow" aria-label="How progress works">
       {flow.map((item, index) => <li key={item}><span>{String(index + 1).padStart(2, '0')}</span><strong>{item}</strong></li>)}

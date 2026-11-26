@@ -124,6 +124,7 @@ export default function ProfilePage() {
         disciplineState={{ memberSince, dailyRecords: {}, emergencyPauseDates: [] }}
         schedule={null}
         serverRecords={disciplineCalendar?.records || []}
+        serverToday={summary?.today || null}
         memberSince={disciplineCalendar?.memberSince || memberSince}
         activityLoading={!disciplineCalendar && !disciplineError}
         activityError={disciplineCalendar ? '' : disciplineError}

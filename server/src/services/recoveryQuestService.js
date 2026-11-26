@@ -456,7 +456,7 @@ export async function getCurrentProgressionSnapshot(userId, { now = new Date() }
   if (!run) return { progression: null, resetCount: user.resetCount, lifetimeLongestStreak: user.lifetimeLongestStreak, highestRankAchieved: user.highestRankAchieved, memberSince: user.memberSince, recentReset: null };
   const pauseActive = isEmergencyPauseActive(run, now);
   const today = getIstDateKey(now);
-  const dailyXpRecord = await DailyXpRecord.findOne({ userId, progressionRunId: run._id, date: today });
+  const dailyXpRecord = await DailyXpRecord.findOne({ userId, date: today });
   const xpSummary = buildProgressionXpDto({ run, dailyRecord: dailyXpRecord, date: today });
   const [recentReset] = await ProgressionResetEvent.find({ userId }).sort({ occurredAt: -1 }).limit(1);
   return {

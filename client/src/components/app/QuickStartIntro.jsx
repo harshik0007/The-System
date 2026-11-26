@@ -4,10 +4,10 @@ import { useReducedMotion } from '../../hooks/useReducedMotion.js';
 import { markQuickStartIntroSeen } from '../../utils/firstRunProgress.js';
 
 const CARDS = [
-  { icon: 'tasks', text: 'Pick 7 small Tasks for your day.' },
-  { icon: 'clock', text: 'Tick them off before midnight (India time).' },
-  { icon: 'spark', text: 'Earn XP, build streaks, climb 7 Ranks.' },
-  { icon: 'shield', text: 'Miss one? Do your Forfeit within 72 hours or lose a life.' },
+  { icon: 'tasks', title: 'Build your daily plan', text: 'Choose at least 7 small Tasks for each day in your schedule.' },
+  { icon: 'clock', title: 'Finish before the day resets', text: 'Complete scheduled Tasks before midnight India time, then start fresh the next day.' },
+  { icon: 'spark', title: 'Turn action into progress', text: 'Eligible completed Tasks award XP and move you through seven Ranks, from Origin to Continuum.' },
+  { icon: 'shield', title: 'Know your recovery plan', text: 'If you miss a Task, its linked Recovery Quest gives you 72 hours to complete the Accountability Action you chose.' },
 ];
 
 export default function QuickStartIntro({ onDone }) {
@@ -36,7 +36,7 @@ export default function QuickStartIntro({ onDone }) {
     <div className="first-run-intro__topline"><p className="app-eyebrow">A QUICK GUIDE · {activeIndex + 1} OF {CARDS.length}</p><button className="first-run-intro__skip" type="button" onClick={finish}>Skip intro</button></div>
     <div className="first-run-intro__slide" key={activeIndex} aria-live="polite" aria-atomic="true">
       <span className="first-run-intro__icon"><AppIcon name={card.icon} /></span>
-      <h1 id="first-run-intro-title">Welcome to THE SYSTEM</h1>
+      <h1 id="first-run-intro-title">{card.title}</h1>
       <p>{card.text}</p>
     </div>
     <div className="first-run-intro__bottomline">

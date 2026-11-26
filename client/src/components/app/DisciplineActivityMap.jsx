@@ -177,11 +177,22 @@ export default function DisciplineActivityMap({ disciplineState, schedule, emerg
   const selectedRecord = getRecord(selectedDate);
   const tooltipRecord = tooltipDate ? getRecord(tooltipDate) : null;
   const selectedQualification = qualificationFor(selectedRecord, selectedDate);
+  const serverRecordedCompletionDates = serverMode
+    ? new Set((serverRecords || [])
+      .filter((record) => (record.completedTaskCount ?? record.completedOriginalTaskCount ?? 0) > 0)
+      .map((record) => record.date))
+    : null;
+  const serverTodayCompleted = Number(serverToday?.completedTaskCount ?? serverToday?.completedOriginalTaskCount ?? 0);
+  const serverTodayScheduled = Number(serverToday?.scheduledTaskCount ?? serverToday?.scheduledOriginalTaskCount ?? 0);
+  if (serverMode && serverTodayCompleted > 0 && !serverRecordedCompletionDates.has(todayKey)) {
+    serverRecordedCompletionDates.add(todayKey);
+  }
   const activityDays = serverMode
-    ? (serverRecords || []).filter((record) => (record.completedTaskCount ?? record.completedOriginalTaskCount ?? 0) > 0).length
+    ? serverRecordedCompletionDates.size
     : Object.values(disciplineState.dailyRecords).filter((record) => record.completedTaskCount > 0).length;
+  const serverTodayHasActivity = serverTodayScheduled > 0 || serverTodayCompleted > 0 || Boolean(serverToday?.emergencyPause ?? serverToday?.emergencyPauseProtected);
   const hasActivityData = serverMode
-    ? Boolean(serverRecords?.length || serverToday)
+    ? Boolean(serverRecords?.length || serverTodayHasActivity)
     : Object.keys(disciplineState.dailyRecords || {}).length > 0;
 
   const updateTooltipPosition = () => {

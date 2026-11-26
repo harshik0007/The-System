@@ -126,8 +126,6 @@ export default function DailyTasksPage() {
       updateFirstRunProgress({ firstTaskCompleted: true });
       idempotencyKeyRef.current = createIdempotencyKey();
       setSubmissionTarget(null);
-      await refresh();
-      await refreshRecovery();
       if (result.idempotentReplay) {
         notifyInfo('This Task completion was already recorded. No duplicate XP or Rank reward was added.');
       } else {
@@ -145,6 +143,7 @@ export default function DailyTasksPage() {
           result.progression ? `Current Rank ${result.progression.currentRank.name} · ${result.progression.currentRank.multiplierLabel} · ${Number(result.progression.dailyXp.remaining).toLocaleString('en-US')} daily XP remaining.` : '',
         ].filter(Boolean).join(' '), { duration: 9000 });
       }
+      await Promise.all([refresh({ silent: true }), refreshRecovery()]);
     } catch (requestError) {
       const message = requestError.message || 'The Task completion could not be saved.';
       setSubmissionError(message);

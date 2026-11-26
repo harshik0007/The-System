@@ -65,12 +65,12 @@ export function TaskBackendProvider({ children }) {
   const resetBroadcastRunIdRef = useRef(null);
   const progressionSnapshotRef = useRef(null);
 
-  const refresh = useCallback(async () => {
+  const refresh = useCallback(async ({ silent = false } = {}) => {
     const requestId = ++requestIdRef.current;
     controllerRef.current?.abort();
     const controller = new AbortController();
     controllerRef.current = controller;
-    setLoading(true);
+    if (!silent) setLoading(true);
     setError('');
     setErrorInfo(null);
 
@@ -135,7 +135,7 @@ export function TaskBackendProvider({ children }) {
         details: Array.isArray(requestError?.details) ? requestError.details : [],
       });
     } finally {
-      if (requestId === requestIdRef.current) setLoading(false);
+      if (requestId === requestIdRef.current && !silent) setLoading(false);
     }
   }, []);
 
@@ -300,7 +300,7 @@ export function TaskBackendProvider({ children }) {
   }, [refreshRecovery]);
 
   useEffect(() => {
-    if (pathname !== '/app/tasks' && pathname !== '/app/tasks/create' && pathname !== '/app/dashboard' && pathname !== '/app/discipline' && pathname !== '/app/profile' && pathname !== '/app') return undefined;
+    if (pathname !== '/app/tasks' && pathname !== '/app/tasks/create' && pathname !== '/app/dashboard' && pathname !== '/app/discipline' && pathname !== '/app') return undefined;
     // React StrictMode replays effects in development. Deferring the initial load
     // lets its first setup be canceled before it can issue duplicate requests.
     const timer = window.setTimeout(() => { void refresh(); }, 0);
