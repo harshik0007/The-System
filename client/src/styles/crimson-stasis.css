@@ -66,6 +66,16 @@
   content: '';
 }
 
+.crimson-stasis__canvas {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
 .crimson-stasis:not([data-system-theme='dark-navy']) .crimson-stasis__mist { opacity: 0.45; }
 
 .crimson-stasis:not([data-system-theme='dark-navy']) .crimson-stasis__mist::before {
