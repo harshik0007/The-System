@@ -119,6 +119,7 @@ export default function DisciplinePage() {
     recoveryQuests,
     progression,
     recoveryLoading,
+    refreshRecovery,
     redeemDisciplinePoint,
   } = useTaskBackend();
   const [now, setNow] = useState(Date.now());
@@ -251,6 +252,9 @@ export default function DisciplinePage() {
         serverRecords={activityRecords}
         serverToday={summary?.today || null}
         memberSince={summary?.memberSince || progression?.memberSince}
+        activityLoading={!disciplineCalendar && !disciplineError}
+        activityError={disciplineCalendar ? '' : disciplineError}
+        onRetryActivity={refreshRecovery}
       />
 
       {confirmRedemption && dpBalance !== null && <RedemptionDialog points={dpBalance} onCancel={() => setConfirmRedemption(false)} onConfirm={confirmConversion} busy={redeeming} />}

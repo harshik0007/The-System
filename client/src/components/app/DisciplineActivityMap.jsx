@@ -3,6 +3,8 @@ import { createPortal } from 'react-dom';
 import { getActivityQualificationLabel, getRollingActivityDates, getVisibleActivityRecord, shouldShowHistoricalResetWarning } from '../../utils/disciplineActivity.js';
 import { getIstDateKey } from '../../utils/taskScheduleBuilder.js';
 import AppIcon from './AppIcon.jsx';
+import PageLoadingSkeleton from './PageLoadingSkeleton.jsx';
+import { Link } from 'react-router-dom';
 
 function monthLabel(dateKey) {
   return new Intl.DateTimeFormat('en', { month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' }).format(new Date(`${dateKey}T12:00:00Z`));
@@ -105,7 +107,7 @@ function ActivityTooltip({ dateKey, record, todayKey, position, tooltipRef, qual
   );
 }
 
-export default function DisciplineActivityMap({ disciplineState, schedule, emergencyPauseState, compact = false, serverRecords = null, serverToday = null, memberSince: memberSinceProp, theme = null }) {
+export default function DisciplineActivityMap({ disciplineState, schedule, emergencyPauseState, compact = false, serverRecords = null, serverToday = null, memberSince: memberSinceProp, theme = null, activityLoading = false, activityError = '', onRetryActivity }) {
   const todayKey = getIstDateKey();
   const dateKeys = useMemo(() => getRollingActivityDates(todayKey, 365), [todayKey]);
   const groupedMonths = useMemo(() => {
@@ -177,6 +179,9 @@ export default function DisciplineActivityMap({ disciplineState, schedule, emerg
   const activityDays = serverMode
     ? (serverRecords || []).filter((record) => (record.completedTaskCount ?? record.completedOriginalTaskCount ?? 0) > 0).length
     : Object.values(disciplineState.dailyRecords).filter((record) => record.completedTaskCount > 0).length;
+  const hasActivityData = serverMode
+    ? Boolean(serverRecords?.length || serverToday)
+    : Object.keys(disciplineState.dailyRecords || {}).length > 0;
 
   const updateTooltipPosition = () => {
     const next = placeTooltip(tooltipAnchorRef.current, tooltipRef.current);
@@ -227,6 +232,10 @@ export default function DisciplineActivityMap({ disciplineState, schedule, emerg
         {!compact && <span className="discipline-activity__summary">{activityDays} recorded days with completed tasks</span>}
       </div>
       <p className="discipline-activity__intro">Each square represents one IST calendar day. Select a day to inspect scheduled work, completion and rewards.</p>
+      {activityLoading ? <PageLoadingSkeleton variant="rows" compact label="Loading your activity record" />
+        : activityError ? <div className="discipline-activity__state" role="alert"><AppIcon name="activity" /><div><strong>Your activity record could not be loaded.</strong><p>{activityError}</p></div>{onRetryActivity && <button className="button button--secondary" type="button" onClick={onRetryActivity}>Retry</button>}</div>
+          : !hasActivityData ? <div className="discipline-activity__state"><AppIcon name="activity" /><div><strong>No activity yet</strong><p>Complete a Task today to start your 365-day record.</p></div><Link className="button button--secondary" to="/app/tasks">Open today’s Tasks</Link></div>
+            : <>
       <div className="discipline-activity__map" role="group" aria-label="Last 365 calendar days of scheduled task activity">
         {groupedMonths.map((month) => (
           <div className="discipline-activity__month" key={`${month.label}-${month.dates[0]}`}>
@@ -285,6 +294,7 @@ export default function DisciplineActivityMap({ disciplineState, schedule, emerg
           </div>
         </> : <p className="discipline-activity__before-member">This day is before the permanent Member Since date.</p>}
       </aside>
+            </>}
     </section>
     {tooltipDate && tooltipRecord && <ActivityTooltip dateKey={tooltipDate} record={tooltipRecord} todayKey={todayKey} position={tooltipPosition} tooltipRef={tooltipRef} qualificationLabel={qualificationFor(tooltipRecord, tooltipDate)} theme={theme} />}
   </>;

@@ -15,7 +15,7 @@ import { taskApi } from '../../services/taskApi.js';
 import '../../styles/discipline.css';
 
 function formatMemberSince(dateKey) {
-  if (!dateKey) return 'Unavailable';
+  if (!dateKey) return 'Not on file';
   return new Intl.DateTimeFormat('en', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' })
     .format(new Date(`${dateKey}T12:00:00Z`));
 }
@@ -27,10 +27,12 @@ export default function ProfilePage() {
     disciplineError,
     progression,
     recoveryLoading,
+    refreshRecovery,
   } = useTaskBackend();
   const { preferences } = useUserPreferences();
   const { requestLogout } = useAccountActions();
   const [accountSettings, setAccountSettings] = useState(null);
+  const [accountLoading, setAccountLoading] = useState(true);
   const [accountError, setAccountError] = useState('');
   useEffect(() => {
     const controller = new AbortController();
@@ -39,6 +41,8 @@ export default function ProfilePage() {
       setAccountError('');
     }).catch((error) => {
       if (error?.name !== 'AbortError') setAccountError(error?.message || 'Account information could not be loaded.');
+    }).finally(() => {
+      if (!controller.signal.aborted) setAccountLoading(false);
     });
     return () => controller.abort();
   }, []);
@@ -67,22 +71,22 @@ export default function ProfilePage() {
 
       <section className="profile-identity app-panel">
         <MemberAvatar name={username} mark={avatarMark} className="profile-identity__avatar" />
-        <div><p className="app-eyebrow">MEMBER PROFILE</p><h2>{username}</h2><p className="profile-identity__name">{personalName || 'Name details unavailable'}</p><p>Member since {formatMemberSince(memberSince)}</p></div>
-        <div className="profile-identity__since"><small>ACCOUNT STATUS</small><strong>{accountSettings?.account?.status || 'Loading'}</strong><button className="profile-identity__logout" type="button" onClick={requestLogout}>Log out</button></div>
+        <div><p className="app-eyebrow">MEMBER PROFILE</p><h2>{accountLoading ? <SkeletonLine width="short" label="Loading username" /> : username || 'Member profile'}</h2><p className="profile-identity__name">{accountLoading ? <SkeletonLine width="medium" label="Loading profile name" /> : personalName || 'Name not added'}</p><p>Member since {accountLoading && !memberSince ? <SkeletonLine width="medium" label="Loading member date" /> : formatMemberSince(memberSince)}</p></div>
+        <div className="profile-identity__since"><small>ACCOUNT STATUS</small><strong>{accountLoading ? <SkeletonLine width="short" label="Loading account status" /> : accountSettings?.account?.status || '—'}</strong><button className="profile-identity__logout" type="button" onClick={requestLogout}>Log out</button></div>
       </section>
 
       <section className="profile-account app-panel" aria-labelledby="profile-account-title">
         <div className="discipline-section-heading"><div><p className="app-eyebrow">PERMANENT ACCOUNT RECORD</p><h2 id="profile-account-title">Account information</h2></div></div>
         <dl className="profile-discipline__metrics">
-          <div><dt>Account created</dt><dd>{formatMemberSince(accountSettings?.account?.createdAt?.slice(0, 10))}</dd></div>
-          <div><dt>Member Since</dt><dd>{formatMemberSince(memberSince)}</dd></div>
+          <div><dt>Account created</dt><dd>{accountLoading && !accountSettings?.account?.createdAt ? <SkeletonLine width="medium" label="Loading account creation date" /> : formatMemberSince(accountSettings?.account?.createdAt?.slice(0, 10))}</dd></div>
+          <div><dt>Member Since</dt><dd>{accountLoading && !memberSince ? <SkeletonLine width="medium" label="Loading member date" /> : formatMemberSince(memberSince)}</dd></div>
           <div><dt>Reset Count</dt><dd>{accountSettings?.account?.resetCount ?? progression?.resetCount ?? '—'}</dd><small>Manual restart does not change this count.</small></div>
           <div><dt>Lifetime Longest Streak</dt><dd>{lifetimeStreak == null ? '—' : `${lifetimeStreak} days`}</dd><small>Permanent account record</small></div>
         </dl>
       </section>
 
       <section className="profile-discipline app-panel" aria-labelledby="profile-discipline-title">
-        <div className="discipline-section-heading"><div><p className="app-eyebrow">ACTIVE PROGRESSION RUN</p><h2 id="profile-discipline-title">Discipline overview</h2></div><span>Current Rank · {currentRankData ? `${currentRank.number} ${currentRank.name}` : 'Loading'}</span></div>
+        <div className="discipline-section-heading"><div><p className="app-eyebrow">ACTIVE PROGRESSION RUN</p><h2 id="profile-discipline-title">Discipline overview</h2></div><span>Current Rank · {currentRankData ? `${currentRank.number} ${currentRank.name}` : recoveryLoading ? <SkeletonLine width="medium" label="Loading current Rank" /> : '—'}</span></div>
         <dl className="profile-discipline__metrics">
           <div><dt>Current Level</dt><dd>{accountSettings?.progression?.level == null ? '—' : String(accountSettings.progression.level).padStart(2, '0')}</dd></div>
           <div><dt>Current-run XP</dt><dd>{accountSettings?.progression?.totalXp == null ? '—' : Number(accountSettings.progression.totalXp).toLocaleString('en-IN', { maximumFractionDigits: 2 })}</dd></div>
@@ -121,6 +125,9 @@ export default function ProfilePage() {
         schedule={null}
         serverRecords={disciplineCalendar?.records || []}
         memberSince={disciplineCalendar?.memberSince || memberSince}
+        activityLoading={!disciplineCalendar && !disciplineError}
+        activityError={disciplineCalendar ? '' : disciplineError}
+        onRetryActivity={refreshRecovery}
       />
       {recoveryLoading && !summary && <SkeletonLine width="long" label="Loading Member progression records" className="profile-progression-skeleton" />}
     </div>

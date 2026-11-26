@@ -92,6 +92,12 @@
 .discipline-activity__summary { color: #7d93a7; font-size: .52rem; text-align: right; }
 .discipline-activity__intro { margin: -5px 0 0; color: #8195a8; font-size: .58rem; line-height: 1.45; }
 .discipline-activity__map { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px 15px; }
+.discipline-activity__state { display: flex; min-height: 150px; align-items: center; justify-content: center; gap: 16px; padding: 24px; border: 1px dashed var(--color-line); border-radius: 12px; background: var(--surface-card-nested); }
+.discipline-activity__state > .app-icon { color: var(--color-accent); }
+.discipline-activity__state strong { color: var(--color-text); font-size: .95rem; }
+.discipline-activity__state p { margin: 5px 0 0; color: var(--color-muted); font-size: .875rem; line-height: 1.55; }
+.discipline-activity__state > div { min-width: 0; }
+.discipline-activity__state .button { flex: 0 0 auto; }
 .discipline-activity__month { min-width: 0; padding: 9px 9px 10px; border: 1px solid rgb(115 154 191 / 10%); border-radius: 6px; background: linear-gradient(145deg, rgb(18 31 47 / 58%), rgb(9 17 27 / 36%)); }
 .discipline-activity__month h3 { margin: 0 0 7px; color: #869db2; font: 500 .49rem var(--font-mono); letter-spacing: .04em; }
 .discipline-activity__cells { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }

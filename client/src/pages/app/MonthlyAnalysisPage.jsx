@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import AppIcon from '../../components/app/AppIcon.jsx';
 import PageLoadingSkeleton, { SkeletonLine } from '../../components/app/PageLoadingSkeleton.jsx';
 import { taskApi } from '../../services/taskApi.js';
@@ -23,27 +24,34 @@ function StatPair({ label, first, second }) {
   return <div className="m25-stat-pair"><span>{label}</span><strong>{first} <i aria-hidden="true">→</i> {second}</strong></div>;
 }
 
+function ChartEmpty({ message }) {
+  return <div className="monthly-chart-empty"><AppIcon name="analysis" /><div><strong>No data yet</strong><p>{message}</p><Link className="button button--secondary" to="/app/tasks">Open today’s Tasks</Link></div></div>;
+}
+
 function DailyPerformance({ daily }) {
-  if (!daily.length) return <p className="monthly-empty">No daily source records are available for this period.</p>;
+  const taskDays = daily.filter((day) => (Number(day.tasks?.scheduled) || 0) > 0).length;
+  const xpDays = daily.filter((day) => (Number(day.xp?.earned) || 0) > 0 || (Number(day.xp?.drained) || 0) > 0).length;
+  if (!daily.length) return <ChartEmpty message="Complete a Task today to start your monthly trend." />;
   const maxTasks = Math.max(1, ...daily.map((day) => Number(day.tasks?.scheduled) || 0));
   const maxXp = Math.max(1, ...daily.map((day) => Math.max(Number(day.xp?.earned) || 0, Number(day.xp?.drained) || 0)));
   return <div className="m25-daily-stack">
     <div className="m25-daily-panel"><div className="monthly-chart-block__heading"><h3>Daily Task performance</h3><p>Completed and missed original scheduled Tasks.</p></div>
+      {taskDays < 3 ? <ChartEmpty message="Complete a few more scheduled Tasks to make this trend useful." /> : <>
       <div className="m25-day-grid" role="list" aria-label="Daily Task performance">
         {daily.map((day) => <div className="m25-day-item" key={`task-${day.date}`} role="listitem" title={`${dateLabel(day.date)} · ${day.tasks ? `${day.tasks.completed} completed, ${day.tasks.missed} missed of ${day.tasks.scheduled} scheduled` : 'Task detail unavailable'}`}>
           <span className="m25-day-item__bars"><i className="m25-bar m25-bar--completed" style={{ height: `${day.tasks ? Math.max(2, (Number(day.tasks.completed) || 0) / maxTasks * 100) : 0}%` }} /><i className="m25-bar m25-bar--missed" style={{ height: `${day.tasks ? Math.max(2, (Number(day.tasks.missed) || 0) / maxTasks * 100) : 0}%` }} /></span>
           <small>{day.date.slice(-2)}</small><span className="m25-day-item__date">{dateLabel(day.date)}</span>
         </div>)}
       </div>
-      <div className="monthly-chart-legend"><span><i className="is-positive" />Completed</span><span><i className="is-negative" />Missed</span></div>
+      <div className="monthly-chart-legend"><span><i className="is-positive" />Completed</span><span><i className="is-negative" />Missed</span></div></>}
     </div>
     <div className="m25-daily-panel"><div className="monthly-chart-block__heading"><h3>Daily XP performance</h3><p>XP earned and Recovery Quest drain, shown separately.</p></div>
-      {daily.some((day) => day.xp) ? <><div className="m25-day-grid" role="list" aria-label="Daily XP performance">
+      {xpDays < 3 ? <ChartEmpty message="Earn or lose XP on a few more days to see this trend." /> : <><div className="m25-day-grid" role="list" aria-label="Daily XP performance">
         {daily.filter((day) => day.xp).map((day) => <div className="m25-day-item" key={`xp-${day.date}`} role="listitem" title={`${dateLabel(day.date)} · ${number(day.xp.earned)} XP gained · ${number(day.xp.drained)} XP drained · Net ${signed(day.xp.net)}`}>
           <span className="m25-day-item__bars"><i className="m25-bar m25-bar--gained" style={{ height: `${Math.max(day.xp.earned ? 2 : 0, (Number(day.xp.earned) || 0) / maxXp * 100)}%` }} /><i className="m25-bar m25-bar--drained" style={{ height: `${Math.max(day.xp.drained ? 2 : 0, (Number(day.xp.drained) || 0) / maxXp * 100)}%` }} /></span>
           <small>{day.date.slice(-2)}</small><span className="m25-day-item__date">{dateLabel(day.date)}</span>
         </div>)}
-      </div><div className="monthly-chart-legend"><span><i className="is-positive" />XP gained</span><span><i className="is-negative" />XP drained</span></div></> : <p className="monthly-empty">No XP transactions are recorded for this period.</p>}
+      </div><div className="monthly-chart-legend"><span><i className="is-positive" />XP gained</span><span><i className="is-negative" />XP drained</span></div></>}
     </div>
   </div>;
 }

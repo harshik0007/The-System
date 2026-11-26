@@ -95,8 +95,9 @@ function MemberListRow({ member, category, compact = false }) {
   );
 }
 
-function CurrentMemberSummary({ member, position, category }) {
-  if (!member || !position) return <section className="leaderboard-current leaderboard-current--unavailable" aria-labelledby="leaderboard-current-title"><div><p className="app-eyebrow">YOUR POSITION</p><h2 id="leaderboard-current-title">Current member position unavailable</h2><p>A valid current ProgressionRun is not available for this member.</p></div></section>;
+function CurrentMemberSummary({ member, position, category, loading }) {
+  if (loading) return <section className="leaderboard-current" aria-label="Loading your leaderboard position" aria-busy="true"><SkeletonLine width="long" label="Loading your position" /></section>;
+  if (!member || !position) return null;
   const categoryLabel = LEADERBOARD_CATEGORIES.find((item) => item.id === category)?.label || 'Leaderboard';
   return (
     <section className="leaderboard-current" aria-labelledby="leaderboard-current-title">
@@ -147,7 +148,7 @@ export default function LeaderboardPage() {
         <span className="leaderboard-header__count"><AppIcon name="leaderboard" />{snapshot ? `${snapshot.memberCount} visible profiles` : loading ? <SkeletonLine width="short" label="Loading profiles" /> : 'Profiles unavailable'}</span>
       </header>
 
-      <CurrentMemberSummary member={snapshot?.currentMember} position={currentPosition} category={category} />
+      <CurrentMemberSummary member={snapshot?.currentMember} position={currentPosition} category={category} loading={loading} />
 
       <section className="leaderboard-controls" aria-label="Leaderboard controls">
         <div className="leaderboard-tabs" role="tablist" aria-label="Leaderboard category">{LEADERBOARD_CATEGORIES.map((item, index) => <button key={item.id} type="button" role="tab" id={`leaderboard-tab-${item.id}`} aria-selected={category === item.id} aria-controls="leaderboard-results" tabIndex={category === item.id ? 0 : -1} onClick={() => setCategory(item.id)} onKeyDown={(event) => handleCategoryKeyDown(event, index)}>{item.label}</button>)}</div>
@@ -165,7 +166,7 @@ export default function LeaderboardPage() {
           <Podium members={topMembers} category={category} />
           <section className="leaderboard-section leaderboard-list-section" aria-labelledby="leaderboard-list-heading">
             <div className="leaderboard-section__heading"><div><p className="app-eyebrow">FULL STANDINGS</p><h2 id="leaderboard-list-heading">Ranked members</h2></div><p>{visibleMembers.length} {visibleMembers.length === 1 ? 'member' : 'members'} shown · Competition ranks retain the full category standings</p></div>
-            {!members.length ? <div className="leaderboard-empty"><span aria-hidden="true">⌕</span><h3>No eligible members yet</h3><p>Registered members with an active progression will appear here.</p></div> : visibleMembers.length ? <>
+            {!members.length ? <div className="leaderboard-empty"><span aria-hidden="true">⌕</span><h3>No standings yet</h3><p>Community standings will appear here as members make progress.</p><button type="button" onClick={() => setRefreshKey((value) => value + 1)}>Refresh standings</button></div> : visibleMembers.length ? <>
               <div className="leaderboard-list leaderboard-list--desktop" role="list" aria-label="Ranked members"><div className="leaderboard-list__head" aria-hidden="true"><span>MEMBER</span><span>RANK · HIGHEST</span><span>LEVEL</span><span>TOTAL XP</span><span>STREAK</span><span>SELECTED CATEGORY</span><span /></div>{visibleMembers.map((member) => <div role="listitem" key={member.publicHandle}><MemberListRow member={member} category={category} /></div>)}</div>
               <div className="leaderboard-list leaderboard-list--mobile" role="list" aria-label="Ranked members">{visibleMembers.map((member) => <div role="listitem" key={member.publicHandle}><MemberListRow member={member} category={category} compact /></div>)}</div>
             </> : <div className="leaderboard-empty"><span aria-hidden="true">⌕</span><h3>No members found</h3><p>Try another username or reset the Rank filter.</p><button type="button" onClick={() => { setRankId('all'); setQuery(''); }}>Reset filters</button></div>}
