@@ -221,7 +221,7 @@
 .quick-start-add-button { display: inline-flex; min-height: 44px; align-items: center; justify-self: start; gap: 7px; padding: 0 13px; border: 1px dashed var(--border-interactive); border-radius: var(--silver-radius-control); background: var(--surface-card); color: var(--silver-indigo-hover); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; transition: background var(--motion-fast), border-color var(--motion-fast), color var(--motion-fast); }
 .quick-start-add-button:hover { background: var(--surface-selected); border-color: var(--silver-indigo); color: var(--silver-indigo-hover); }
 .quick-start-add-button > span { font-size: 19px; line-height: 1; }
-.quick-start-actions { display: flex; justify-content: flex-end; gap: 10px; padding-top: 2px; border-top: 1px solid var(--silver-border); }
+.quick-start-actions { display: flex; justify-content: flex-end; gap: 10px; padding-top: 14px; border-top: 1px solid var(--silver-border); }
 .quick-start-actions--split { justify-content: space-between; }
 .quick-start-toggle { position: relative; display: grid; grid-template-columns: 42px minmax(0, 1fr); align-items: start; gap: 12px; padding: 15px; border: 1px solid var(--silver-border); border-radius: var(--silver-radius-control); background: var(--surface-card-nested); cursor: pointer; }
 .quick-start-toggle > input { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; clip-path: inset(50%); }
