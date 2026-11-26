@@ -7,6 +7,7 @@ import ShadowBackground from '../ShadowBackground.jsx';
 import { useReducedMotion } from '../../hooks/useReducedMotion.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import '../../styles/public-pages.css';
+import '../../styles/modal-close-fixes.css';
 
 gsap.registerPlugin(ScrollTrigger);
 

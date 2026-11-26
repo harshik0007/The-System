@@ -14,6 +14,7 @@ import { taskApi } from '../../services/taskApi.js';
 import '../../styles/app-shell.css';
 import '../../styles/discipline.css';
 import '../../styles/profile-task-layout-fixes.css';
+import '../../styles/modal-close-fixes.css';
 
 const pauseResumeFormatter = new Intl.DateTimeFormat('en-IN', {
   timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short',

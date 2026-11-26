@@ -1,0 +1,114 @@
+:root :is(
+  .settings-dialog__close,
+  .rank-badge-dialog__close,
+  .task-change-dialog__close,
+  .task-submission__close,
+  .account-action-dialog__close,
+  .emergency-pause-modal__close,
+  .recovery-confirm-modal__close,
+  .discipline-modal__close
+) {
+  box-sizing: border-box;
+  display: grid;
+  width: 40px;
+  min-width: 40px;
+  height: 40px;
+  min-height: 40px;
+  flex: 0 0 40px;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--silver-border);
+  border-radius: 10px;
+  background: var(--silver-surface);
+  color: var(--silver-muted);
+  box-shadow: 0 2px 7px rgb(25 34 53 / 6%);
+  font-size: 1.125rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: border-color var(--motion-fast), background var(--motion-fast), color var(--motion-fast), box-shadow var(--motion-fast), transform var(--motion-fast);
+}
+
+:root :is(
+  .settings-dialog__close,
+  .rank-badge-dialog__close,
+  .task-change-dialog__close,
+  .task-submission__close,
+  .account-action-dialog__close,
+  .emergency-pause-modal__close,
+  .recovery-confirm-modal__close,
+  .discipline-modal__close
+):hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--silver-indigo) 38%, var(--silver-border));
+  background: var(--silver-indigo-soft);
+  color: var(--silver-indigo-hover);
+  box-shadow: 0 4px 11px rgb(89 101 216 / 10%);
+}
+
+:root :is(
+  .settings-dialog__close,
+  .rank-badge-dialog__close,
+  .task-change-dialog__close,
+  .task-submission__close,
+  .account-action-dialog__close,
+  .emergency-pause-modal__close,
+  .recovery-confirm-modal__close,
+  .discipline-modal__close
+):focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--silver-indigo) 34%, transparent);
+  outline-offset: 2px;
+}
+
+:root :is(
+  .settings-dialog__close,
+  .rank-badge-dialog__close,
+  .task-change-dialog__close,
+  .task-submission__close,
+  .account-action-dialog__close,
+  .emergency-pause-modal__close,
+  .recovery-confirm-modal__close,
+  .discipline-modal__close
+):active:not(:disabled) { transform: scale(.96); }
+
+:root :is(
+  .settings-dialog__close,
+  .rank-badge-dialog__close,
+  .task-change-dialog__close,
+  .task-submission__close,
+  .account-action-dialog__close,
+  .emergency-pause-modal__close,
+  .recovery-confirm-modal__close,
+  .discipline-modal__close
+):disabled { opacity: .55; cursor: not-allowed; }
+
+:root :is(
+  .settings-dialog__close,
+  .task-change-dialog__close,
+  .task-submission__close,
+  .account-action-dialog__close,
+  .emergency-pause-modal__close,
+  .recovery-confirm-modal__close,
+  .discipline-modal__close
+) .app-icon { width: 17px; height: 17px; stroke-width: 1.9; }
+
+/* Keep the close control in reach when longer settings dialogs scroll. */
+:root .settings-dialog__close {
+  position: sticky;
+  z-index: 5;
+  top: 8px;
+  right: auto;
+  justify-self: end;
+  margin-bottom: -40px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root :is(
+    .settings-dialog__close,
+    .rank-badge-dialog__close,
+    .task-change-dialog__close,
+    .task-submission__close,
+    .account-action-dialog__close,
+    .emergency-pause-modal__close,
+    .recovery-confirm-modal__close,
+    .discipline-modal__close
+  ) { transition-duration: .01ms; }
+}
