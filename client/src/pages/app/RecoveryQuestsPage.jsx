@@ -78,7 +78,7 @@ function QuestCard({ quest, onComplete, paused = false }) {
 }
 
 export default function RecoveryQuestsPage() {
-  const { recoveryQuests, gracePoints, gracePointTransactions, progression, recoveryLoading, recoveryError, refreshRecovery, completeRecoveryQuest } = useTaskBackend();
+  const { recoveryQuests, gracePoints, gracePointTransactions, progression, recoveryLoading, recoveryLoaded, recoveryError, refreshRecovery, completeRecoveryQuest } = useTaskBackend();
   const reduceMotion = useReducedMotion();
   const [filter, setFilter] = useState('active');
   const [confirmQuest, setConfirmQuest] = useState(null);
@@ -165,7 +165,7 @@ export default function RecoveryQuestsPage() {
         <div className="recovery-tabs" role="group" aria-label="Filter Recovery Quests">
           {filters.map((item) => <button key={item.id} type="button" aria-pressed={filter === item.id} className={filter === item.id ? 'is-selected' : ''} onClick={() => setFilter(item.id)}>{item.label}<span>{item.id === 'all' ? quests.length : counts[item.id] ?? 0}</span></button>)}
         </div>
-        {recoveryLoading && quests.length === 0 ? <PageLoadingSkeleton variant="rows" compact label="Loading Recovery Quest records" /> : filteredQuests.length ? <div className="recovery-quest-list">
+        {recoveryLoading && !recoveryLoaded && quests.length === 0 ? <PageLoadingSkeleton variant="rows" compact label="Loading Recovery Quest records" /> : filteredQuests.length ? <div className="recovery-quest-list">
           {filteredQuests.map((quest) => <QuestCard key={quest.id} quest={quest} onComplete={setConfirmQuest} paused={isEmergencyPauseActive} />)}
         </div> : <div className="recovery-empty-state"><span><AppIcon name="recovery" /></span><h3>{filter === 'active' ? 'No active Recovery Quests' : 'No records in this view'}</h3><p>{filter === 'active' ? 'When an original scheduled Task is finalized as missed, its saved Accountability Action appears here.' : 'Completed, expired and threshold-cleared records remain available in All.'}</p></div>}
       </section>

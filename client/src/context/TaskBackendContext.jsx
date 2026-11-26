@@ -51,6 +51,7 @@ export function TaskBackendProvider({ children }) {
   const [disciplineError, setDisciplineError] = useState('');
   const [progressionResetNotice, setProgressionResetNotice] = useState(null);
   const [recoveryLoading, setRecoveryLoading] = useState(true);
+  const [recoveryLoaded, setRecoveryLoaded] = useState(false);
   const [recoveryError, setRecoveryError] = useState('');
   const [emergencyPause, setEmergencyPause] = useState(null);
   const [emergencyPauseLoading, setEmergencyPauseLoading] = useState(false);
@@ -244,7 +245,10 @@ export function TaskBackendProvider({ children }) {
     } catch (requestError) {
       if (requestError?.name !== 'AbortError' && requestId === recoveryRequestIdRef.current) setRecoveryError(requestError?.message || 'Recovery Quest data could not be loaded.');
     } finally {
-      if (requestId === recoveryRequestIdRef.current) setRecoveryLoading(false);
+      if (requestId === recoveryRequestIdRef.current) {
+        setRecoveryLoading(false);
+        setRecoveryLoaded(true);
+      }
     }
   }, [location.pathname, navigate, refresh]);
 
@@ -351,6 +355,7 @@ export function TaskBackendProvider({ children }) {
     disciplineError,
     progressionResetNotice,
     recoveryLoading,
+    recoveryLoaded,
     recoveryError,
     emergencyPause,
     emergencyPauseLoading,
@@ -362,7 +367,7 @@ export function TaskBackendProvider({ children }) {
     redeemDisciplinePoint,
     refresh,
     clearError: () => { setError(''); setErrorInfo(null); },
-  }), [schedule, tasks, occurrences, allowance, allowanceLoaded, todayDate, todayCycleDay, loading, error, errorInfo, recoveryQuests, gracePoints, gracePointTransactions, progression, disciplineSummary, disciplineCalendar, disciplineTransactions, disciplineError, progressionResetNotice, recoveryLoading, recoveryError, emergencyPause, emergencyPauseLoading, emergencyPauseError, activateEmergencyPause, resumeEmergencyPause, refreshRecovery, completeRecoveryQuest, redeemDisciplinePoint, refresh]);
+  }), [schedule, tasks, occurrences, allowance, allowanceLoaded, todayDate, todayCycleDay, loading, error, errorInfo, recoveryQuests, gracePoints, gracePointTransactions, progression, disciplineSummary, disciplineCalendar, disciplineTransactions, disciplineError, progressionResetNotice, recoveryLoading, recoveryLoaded, recoveryError, emergencyPause, emergencyPauseLoading, emergencyPauseError, activateEmergencyPause, resumeEmergencyPause, refreshRecovery, completeRecoveryQuest, redeemDisciplinePoint, refresh]);
 
   return <TaskBackendContext.Provider value={value}>{children}</TaskBackendContext.Provider>;
 }

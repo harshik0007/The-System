@@ -117,6 +117,9 @@ export default function DashboardPage() {
 
   return (
     <div className="dashboard-page" ref={pageRef}>
+      <section className="dashboard-quick-pause dashboard-reveal" aria-label="Emergency Pause controls">
+        <EmergencyPauseControls />
+      </section>
       <header className="dashboard-welcome dashboard-reveal">
         <div><p className="app-eyebrow">PLAYER OVERVIEW</p><h1>Welcome back, {member?.username || 'member'}.</h1><p>Your progress is built through consistent action.</p></div>
         <span className="app-demo-label"><i aria-hidden="true" />LIVE PROGRESSION</span>
@@ -138,7 +141,6 @@ export default function DashboardPage() {
               {backendLoaded && !nextThemeReward && <span className="dashboard-theme-unlocked-state">ALL THEMES UNLOCKED</span>}
             </div>
             <Link className="app-action-link" to={`/ranks/${rank.slug}`}>Explore Rank <AppIcon name="arrow" /></Link>
-            <EmergencyPauseControls />
           </div>
         </section>
 
