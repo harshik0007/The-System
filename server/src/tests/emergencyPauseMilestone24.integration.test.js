@@ -227,7 +227,7 @@ test('M24 Emergency Pause is transactional across API activation, Quest freeze, 
     assert.equal(clientAuthority.status, 400);
     const statusResponse = await fetch(`${base}/emergency-pause`);
     assert.equal(statusResponse.status, 200);
-    assert.equal((await statusResponse.json()).allowance, 10);
+    assert.equal((await statusResponse.json()).allowance, 2);
 
     await assert.rejects(completeCurrentRecoveryQuest({ userId: fixture.userId, questId: quest._id, now: start }), (error) => error.code === 'EMERGENCY_PAUSE_ACTIVE');
     await assert.rejects(completeCurrentTaskOccurrence({ userId: fixture.userId, occurrenceId: occurrence._id, submission: { note: '', fileName: '' }, idempotencyKey: 'm24-task-complete-0001', now: start }), (error) => error.code === 'EMERGENCY_PAUSE_ACTIVE');
@@ -274,25 +274,11 @@ test('M24 Emergency Pause is transactional across API activation, Quest freeze, 
     await ProgressionRun.updateOne({ _id: fixture.run._id }, { $set: { 'emergencyPause.allowanceMonthKey': '2026-11', 'emergencyPause.activationsUsed': 0 } });
     assert.equal((await getEmergencyPauseStatus(fixture.userId, { now: new Date(earlyResumeAt.getTime() + 180_000) })).activationsUsed, 2);
     assert.equal((await ProgressionRun.findById(fixture.run._id)).emergencyPause.activationsUsed, 2, 'The member-scoped month ledger repairs a stale run allowance mirror.');
-    for (let activationNumber = 3; activationNumber <= 10; activationNumber += 1) {
-      const activationAt = new Date(earlyResumeAt.getTime() + activationNumber * 60_000);
-      await activateEmergencyPause({
-        userId: fixture.userId,
-        durationDays: 1,
-        idempotencyKey: `m24-activate-${activationNumber}-0001`,
-        now: activationAt,
-      });
-      await resumeEmergencyPause({
-        userId: fixture.userId,
-        idempotencyKey: `m24-resume-${activationNumber}-0001`,
-        now: new Date(activationAt.getTime() + 1_000),
-      });
-    }
-    const allowanceLimitAt = new Date(earlyResumeAt.getTime() + 11 * 60_000);
+    const allowanceLimitAt = new Date(earlyResumeAt.getTime() + 3 * 60_000);
     const exhaustedStatus = await getEmergencyPauseStatus(fixture.userId, { now: allowanceLimitAt });
-    assert.equal(exhaustedStatus.activationsUsed, 10);
+    assert.equal(exhaustedStatus.activationsUsed, 2);
     assert.equal(exhaustedStatus.activationsRemaining, 0);
-    await assert.rejects(activateEmergencyPause({ userId: fixture.userId, durationDays: 1, idempotencyKey: 'm24-activate-eleventh-0001', now: allowanceLimitAt }), (error) => error.code === 'EMERGENCY_PAUSE_MONTHLY_LIMIT');
+    await assert.rejects(activateEmergencyPause({ userId: fixture.userId, durationDays: 1, idempotencyKey: 'm24-activate-third-0001', now: allowanceLimitAt }), (error) => error.code === 'EMERGENCY_PAUSE_MONTHLY_LIMIT');
 
     const workerFixture = await createFixture('2026-11-18');
     const workerCycleBaseline = (await getDisciplineSummary(workerFixture.userId, { now: getIstMidnightInstant('2026-11-18') })).activeRewardCycle.baselineTargetAt;

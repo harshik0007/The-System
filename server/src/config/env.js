@@ -15,14 +15,6 @@ function parsePort(value, name = 'PORT') {
   return port;
 }
 
-function parseAppReviewMode(value) {
-  if (value == null || String(value).trim() === '') return false;
-  const normalized = String(value).trim().toLowerCase();
-  if (normalized === 'true') return true;
-  if (normalized === 'false') return false;
-  throw new Error('APP_REVIEW_MODE must be true or false when configured.');
-}
-
 function parseMongoUri(value, nodeEnv) {
   const uri = value || (nodeEnv === 'development' ? 'mongodb://127.0.0.1:27017/the-system?replicaSet=rs0' : undefined);
   if (!uri) {
@@ -138,7 +130,6 @@ export function loadConfig(env = process.env) {
     nodeEnv,
     port: parsePort(env.PORT ?? '5001'),
     host: nodeEnv === 'development' ? '127.0.0.1' : '0.0.0.0',
-    appReviewMode: parseAppReviewMode(env.APP_REVIEW_MODE),
     mongoUri,
     developmentIdentitySelector,
     corsOrigins: Object.freeze(corsOrigins),

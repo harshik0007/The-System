@@ -17,14 +17,6 @@ test('development config provides loopback origins and accepts optional MongoDB 
   assert.equal(result.googleCallbackUrl, 'http://localhost:5175/api/v1/auth/google/callback');
 });
 
-test('Review Mode reads only explicit true or false values and defaults off when omitted', () => {
-  assert.equal(loadConfig({ NODE_ENV: 'development' }).appReviewMode, false);
-  assert.equal(loadConfig({ NODE_ENV: 'development', APP_REVIEW_MODE: 'true' }).appReviewMode, true);
-  assert.equal(loadConfig({ NODE_ENV: 'development', APP_REVIEW_MODE: ' TRUE ' }).appReviewMode, true);
-  assert.equal(loadConfig({ NODE_ENV: 'development', APP_REVIEW_MODE: 'false' }).appReviewMode, false);
-  assert.throws(() => loadConfig({ NODE_ENV: 'development', APP_REVIEW_MODE: 'enabled' }), /APP_REVIEW_MODE must be true or false/);
-});
-
 test('backend port configuration rejects port zero in every environment', () => {
   assert.throws(() => loadConfig({ NODE_ENV: 'development', PORT: '0' }), /PORT/);
   assert.throws(() => loadConfig({

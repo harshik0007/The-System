@@ -8,12 +8,12 @@ const rankEntryEventSchema = new Schema({
   progressionRunId: { type: Schema.Types.ObjectId, ref: 'ProgressionRun', required: true, immutable: true },
   rankSlug: { type: String, enum: RANK_SLUGS, required: true, immutable: true },
   sourceEventKey: { type: String, required: true, maxlength: 200, immutable: true },
-  // Null only for direct Review Mode initialization at Rank 01; normal promotions link their triggering XP ledger row.
+  // Every earned Rank entry links to the XP ledger transaction that crossed its gate.
   sourceXpTransactionId: {
     type: Schema.Types.ObjectId,
     ref: 'XpTransaction',
     default: null,
-    required() { return !this.sourceEventKey?.startsWith('review-mode:rank-entry:'); },
+    required: true,
     immutable: true,
   },
   configuredXpRewardCents: { type: Number, default: 0, min: 0, validate: Number.isInteger, immutable: true },

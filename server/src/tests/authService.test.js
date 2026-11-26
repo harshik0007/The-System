@@ -22,7 +22,6 @@ function query(value) {
 function fixture({ user = null, users = [], duplicate = null, settings = { recoveryCodeHmacSecret: 'r'.repeat(48), googleOAuthEnabled: true } } = {}) {
   const created = [];
   const progressionInitializations = [];
-  const reviewRewardGrants = [];
   let progressionCreated = 0;
   const UserModel = {
     exists: async (filter) => {
@@ -67,9 +66,8 @@ function fixture({ user = null, users = [], duplicate = null, settings = { recov
     settings,
     passwordTools: testPasswordTools,
     initializeProgression: async (options) => { progressionCreated += 1; progressionInitializations.push(options); return { _id: `run-${progressionCreated}`, startedOn: '2026-11-21' }; },
-    grantReviewModeRankEntryReward: async (options) => { reviewRewardGrants.push(options); },
   });
-  return { service, UserModel, created, progressionInitializations, reviewRewardGrants, get progressionCreated() { return progressionCreated; } };
+  return { service, UserModel, created, progressionInitializations, get progressionCreated() { return progressionCreated; } };
 }
 
 const validSignup = {
@@ -102,46 +100,6 @@ test('local signup remains available in development when no stable .env secrets 
   const result = await state.service.signup(validSignup);
   assert.equal(result.recoveryCodes.length, 10);
   assert.equal(state.created.length, 1);
-});
-
-test('Review Mode applies only to new local signups and initializes Rank 01 reward once', async () => {
-  const state = fixture({ settings: { recoveryCodeHmacSecret: 'r'.repeat(48), googleOAuthEnabled: true, appReviewMode: true } });
-  await state.service.signup(validSignup);
-  assert.equal(state.created[0].highestRankAchieved, 'continuum');
-  assert.equal(state.progressionInitializations[0].reviewMode, true);
-  assert.equal(state.reviewRewardGrants.length, 1);
-  assert.equal(state.reviewRewardGrants[0].rankSlug, 'continuum');
-});
-
-test('turning Review Mode on does not upgrade an existing local account at login', async () => {
-  const existing = {
-    _id: 'existing-local', emailNormalized: 'person@example.com', username: 'harshik_007',
-    passwordHash: 'test-hash:abc123!x', authVersion: 0, authMethod: 'local', accountStatus: 'active',
-    authProviders: { localPassword: true, google: false }, highestRankAchieved: 'origin',
-  };
-  const state = fixture({ user: existing, settings: { recoveryCodeHmacSecret: 'r'.repeat(48), googleOAuthEnabled: true, appReviewMode: true } });
-  await state.service.login({ identifier: 'person@example.com', password: 'abc123!x' });
-  assert.equal(existing.highestRankAchieved, 'origin');
-  assert.equal(state.progressionCreated, 0);
-  assert.equal(state.reviewRewardGrants.length, 0);
-});
-
-test('Review Mode also initializes a newly completed Google signup without affecting existing Google login', async () => {
-  const settings = { recoveryCodeHmacSecret: 'r'.repeat(48), googleOAuthEnabled: true, appReviewMode: true };
-  const state = fixture({ settings });
-  await state.service.completeGoogleSignup({
-    pendingRegistration: { sub: 'google-review-sub', email: 'google-review@example.com', expiresAt: Date.now() + 60_000 },
-    firstName: 'Review', middleName: '', lastName: 'Member', username: 'ReviewGoogle', termsAccepted: true,
-  });
-  assert.equal(state.created[0].highestRankAchieved, 'continuum');
-  assert.equal(state.progressionInitializations[0].reviewMode, true);
-  assert.equal(state.reviewRewardGrants.length, 1);
-
-  const existing = { _id: 'existing-google', googleSub: 'existing-google-sub', emailNormalized: 'existing@example.com', username: 'Existing', authMethod: 'google', accountStatus: 'active', authProviders: { localPassword: false, google: true } };
-  const loginState = fixture({ user: existing, settings });
-  await loginState.service.googleOAuthSignIn({ profile: { id: 'existing-google-sub', emails: [{ value: 'existing@example.com', verified: true }], _json: { email_verified: true } } });
-  assert.equal(loginState.progressionCreated, 0);
-  assert.equal(loginState.reviewRewardGrants.length, 0);
 });
 
 test('signup rejects terms, malformed username and duplicate username/email without creating another User', async () => {

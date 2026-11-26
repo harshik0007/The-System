@@ -37,15 +37,11 @@ test('approved Rank gates promote and demote automatically with no Level cap', (
   ]);
 });
 
-test('Review Mode starts only a new progression at the exact Level 100 Rank 01 XP threshold', () => {
-  const normal = getInitialProgressionState(false);
-  const review = getInitialProgressionState(true);
-  assert.deepEqual(normal, { currentRankSlug: 'origin', level: 0, totalXp: 0 });
-  assert.equal(review.level, 100);
-  assert.equal(review.currentRankSlug, 'continuum');
-  assert.equal(review.totalXp, getCumulativeXpThreshold(100));
-  assert.equal(getLevelFromTotalXp(review.totalXp), review.level);
-  assert.equal(getRankSlugForLevel(review.level), review.currentRankSlug);
+test('a new Progression Run always starts at Rank 07 Origin with zero Level and XP', () => {
+  const initial = getInitialProgressionState();
+  assert.deepEqual(initial, { currentRankSlug: 'origin', level: 0, totalXp: 0 });
+  assert.equal(getLevelFromTotalXp(initial.totalXp), initial.level);
+  assert.equal(getRankSlugForLevel(initial.level), initial.currentRankSlug);
 });
 
 test('authoritative Rank multipliers, caps and entry rewards match the approved configuration', () => {

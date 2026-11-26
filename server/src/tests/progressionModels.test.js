@@ -41,21 +41,6 @@ test('M22 progression ledgers validate their immutable date/run/Rank snapshots',
     businessDate: '2026-11-19',
     configurationVersion: 'm22-v1',
   });
-  const reviewRankEntry = new RankEntryEvent({
-    userId,
-    progressionRunId: runId,
-    rankSlug: 'continuum',
-    sourceEventKey: `review-mode:rank-entry:${runId}:continuum`,
-    sourceXpTransactionId: null,
-    xpRewardConfigured: false,
-    configuredXpRewardCents: 0,
-    creditedXpRewardCents: 0,
-    configuredDpRewardCents: 75,
-    creditedDpRewardCents: 75,
-    occurredAt: new Date(),
-    businessDate: '2026-11-19',
-    configurationVersion: 'm22-v1',
-  });
   const xpTransaction = new XpTransaction({
     userId,
     progressionRunId: runId,
@@ -87,7 +72,7 @@ test('M22 progression ledgers validate their immutable date/run/Rank snapshots',
     balanceAfterCents: 10,
     occurredAt: new Date(),
   });
-  for (const model of [daily, allocation, rankEntry, reviewRankEntry, xpTransaction, dpTransaction]) assert.equal(model.validateSync(), undefined, model.constructor.modelName);
+  for (const model of [daily, allocation, rankEntry, xpTransaction, dpTransaction]) assert.equal(model.validateSync(), undefined, model.constructor.modelName);
   assert.ok(new RankEntryEvent({ ...rankEntry.toObject(), sourceXpTransactionId: null }).validateSync(), 'ordinary Rank entries must retain their source XP transaction');
   assert.ok(new DailyXpRecord({ userId, date: 'not-an-IST-date', rankAtDayStart: 'origin', capAmountCents: 30_000, configurationVersion: 'm22-v1', createdAt: new Date(), updatedAt: new Date() }).validateSync());
   assert.ok(new XpTransaction({ ...xpTransaction.toObject(), type: 'unapproved-bonus' }).validateSync());

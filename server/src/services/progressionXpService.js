@@ -286,9 +286,7 @@ async function awardRankEntryWithinSession({ userId, run, rank, sourceXpTransact
     userId,
     progressionRunId: run._id,
     rankSlug: rank.slug,
-    sourceEventKey: sourceXpTransaction
-      ? `rank-entry:${run._id}:${rank.slug}`
-      : `review-mode:rank-entry:${run._id}:${rank.slug}`,
+    sourceEventKey: `rank-entry:${run._id}:${rank.slug}`,
     sourceXpTransactionId: sourceXpTransaction?._id || null,
     configuredXpRewardCents,
     xpRewardConfigured,
@@ -378,25 +376,6 @@ async function awardRankEntryWithinSession({ userId, run, rank, sourceXpTransact
     creditedDpReward: decimalFromCents(creditedDpRewardCents),
     occurredAt: occurredAt.toISOString(),
   };
-}
-
-/** Record the configured Rank 01 entry reward for an account initialized directly at Continuum. */
-export async function grantInitialRankEntryRewardWithinSession({ userId, run, rankSlug, occurredAt, businessDate = run?.startedOn, session }) {
-  if (!session) throw new TypeError('Initial Rank-entry rewards require the account-creation transaction session.');
-  const rank = PROGRESSION_RANK_BY_SLUG[rankSlug];
-  if (rankSlug !== 'continuum' || !rank || run?.currentRankSlug !== rankSlug || getRankSlugForLevel(run?.level) !== rankSlug) {
-    throw new TypeError('Direct initial Rank-entry rewards are supported only for a consistent Rank 01 Continuum run.');
-  }
-  if (rank.entryXpCents !== null) throw new TypeError('The direct Rank-entry reward path requires an unconfigured Rank-entry XP reward.');
-  return awardRankEntryWithinSession({
-    userId,
-    run,
-    rank,
-    sourceXpTransaction: null,
-    occurredAt: new Date(occurredAt),
-    businessDate,
-    session,
-  });
 }
 
 export async function processRankTransitionsWithinSession({ userId, run, fromLevel, sourceXpTransaction, occurredAt, businessDate = getIstDateKey(occurredAt), session }) {

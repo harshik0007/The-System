@@ -4,7 +4,6 @@ import { config } from '../config/env.js';
 import { authRateLimitService } from './authRateLimitService.js';
 import { withMongoTransaction } from './mongoTransaction.js';
 import { createFreshProgressionRunWithinSession } from './progressionRunFactory.js';
-import { grantInitialRankEntryRewardWithinSession } from './progressionXpService.js';
 import { getPasswordValidationError, hashPassword, passwordHashNeedsUpgrade, performDummyPasswordVerification, verifyPassword } from './passwordService.js';
 import { accountRateKey } from '../utils/authPrimitives.js';
 import {
@@ -105,7 +104,6 @@ export function createAuthService({
   now = () => new Date(),
   passwordTools = { hashPassword, verifyPassword, passwordHashNeedsUpgrade, performDummyPasswordVerification, getPasswordValidationError },
   initializeProgression = createFreshProgressionRunWithinSession,
-  grantReviewModeRankEntryReward = grantInitialRankEntryRewardWithinSession,
 } = {}) {
   async function rateLimit(action, ip, key) {
     await rateLimits.check({ action, ip, accountKey: key ? accountRateKey(key) : undefined });
@@ -124,9 +122,7 @@ export function createAuthService({
 
   async function createMemberAndProgression(fields) {
     return transaction(async (mongoSession) => {
-      const reviewMode = settings.appReviewMode === true;
-      const initialUserFields = reviewMode ? { ...fields, highestRankAchieved: 'continuum' } : fields;
-      const [user] = await UserModel.create([initialUserFields], { session: mongoSession });
+      const [user] = await UserModel.create([fields], { session: mongoSession });
       const activeRun = await ProgressionRunModel.findOne({ userId: user._id, status: 'active' }).session(mongoSession);
       if (activeRun) throw new ConflictError('ACTIVE_PROGRESSION_EXISTS', 'This account already has an active progression.');
       const latestRun = await ProgressionRunModel.findOne({ userId: user._id }).sort({ runNumber: -1 }).session(mongoSession);
@@ -135,19 +131,8 @@ export function createAuthService({
         userId: user._id,
         runNumber: (latestRun?.runNumber || 0) + 1,
         startedAt,
-        reviewMode,
         session: mongoSession,
       });
-      if (reviewMode) {
-        await grantReviewModeRankEntryReward({
-          userId: user._id,
-          run,
-          rankSlug: 'continuum',
-          occurredAt: startedAt,
-          businessDate: run.startedOn,
-          session: mongoSession,
-        });
-      }
       user.currentProgressionRunId = run._id;
       await user.save({ session: mongoSession });
       return user;

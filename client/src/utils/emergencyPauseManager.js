@@ -1,8 +1,6 @@
 import { getIstDateKey } from './taskScheduleBuilder.js';
 
-// Temporary development allowance requested for Emergency Pause testing.
-// Restore this to 2 during the final product optimization pass.
-export const EMERGENCY_PAUSES_PER_MONTH = 10;
+export const EMERGENCY_PAUSES_PER_MONTH = 2;
 export const EMERGENCY_PAUSE_MIN_DAYS = 1;
 export const EMERGENCY_PAUSE_MAX_DAYS = 7;
 export const EMERGENCY_PAUSE_DAY_MS = 24 * 60 * 60 * 1000;

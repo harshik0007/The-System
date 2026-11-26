@@ -85,7 +85,7 @@ function PauseDialog({ mode, durationDays, setDurationDays, now, availableCount,
         {dialogMode === 'rules' && <div className="emergency-pause-modal__rules">
           <p>Emergency Pause temporarily suspends normal activity so members can take a break without losing their Discipline progress.</p>
           <ol>
-            <li>You can activate Emergency Pause up to {allowance} times per IST calendar month during the current testing period.</li>
+            <li>You can activate Emergency Pause up to {allowance} times per IST calendar month.</li>
             <li>Each pause can last from 1 to 7 consecutive 24-hour days.</li>
             <li>You can resume early whenever you are ready; that activation remains used.</li>
             <li>Otherwise, the System resumes after your selected duration.</li>

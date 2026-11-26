@@ -1,16 +1,9 @@
 import ProgressionRun from '../models/ProgressionRun.js';
-import { PROGRESSION_RANK_BY_SLUG } from '../config/progressionConfiguration.js';
 import { getIstDateKey, getIstMonthKey } from '../utils/ist.js';
 import { startDisciplineForNewRunWithinSession } from './disciplineService.js';
 
-export function getInitialProgressionState(reviewMode = false) {
-  if (!reviewMode) return { currentRankSlug: 'origin', level: 0, totalXp: 0 };
-  const continuum = PROGRESSION_RANK_BY_SLUG.continuum;
-  return {
-    currentRankSlug: continuum.slug,
-    level: continuum.minimumLevel,
-    totalXp: continuum.cumulativeXpThreshold,
-  };
+export function getInitialProgressionState() {
+  return { currentRankSlug: 'origin', level: 0, totalXp: 0 };
 }
 
 /** Create the approved clean-run baseline inside the caller's transaction. */
@@ -19,7 +12,6 @@ export async function createFreshProgressionRunWithinSession({
   runNumber,
   startedAt = new Date(),
   emergencyPauseActivationsUsed = 0,
-  reviewMode = false,
   session,
 }) {
   if (!session) throw new TypeError('Fresh Progression Run creation requires the caller transaction session.');
@@ -27,7 +19,7 @@ export async function createFreshProgressionRunWithinSession({
 
   const instant = new Date(startedAt);
   const startedOn = getIstDateKey(instant);
-  const initialProgression = getInitialProgressionState(reviewMode === true);
+  const initialProgression = getInitialProgressionState();
   const [run] = await ProgressionRun.create([{
     userId,
     runNumber,
