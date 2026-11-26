@@ -180,14 +180,13 @@ export default function DisciplinePage() {
   };
 
   if (!summary && disciplineError) {
-    return <div className="discipline-page"><header className="discipline-page__header"><div><p className="app-eyebrow">MY PROGRESS · DAILY CONSISTENCY</p><h1>Discipline</h1><p>Consistency is the foundation of progression.</p></div><span className="app-demo-label"><i aria-hidden="true" />SERVER DATA</span></header><p className="discipline-feedback" role="alert"><AppIcon name="activity" />{disciplineError}</p></div>;
+    return <div className="discipline-page"><header className="discipline-page__header"><div><p className="app-eyebrow">MY PROGRESS · DAILY CONSISTENCY</p><h1>Discipline</h1><p>Consistency is the foundation of progression.</p></div></header><p className="discipline-feedback" role="alert"><AppIcon name="activity" />{disciplineError}</p></div>;
   }
 
   return (
     <div className="discipline-page">
       <header className="discipline-page__header">
         <div><p className="app-eyebrow">MY PROGRESS · DAILY CONSISTENCY</p><h1>Discipline</h1><p>Consistency is the foundation of progression.</p></div>
-        <span className="app-demo-label"><i aria-hidden="true" />SERVER DATA</span>
       </header>
 
       {disciplineError && <p className="discipline-feedback" role="alert"><AppIcon name="activity" />{disciplineError}</p>}
@@ -228,8 +227,8 @@ export default function DisciplinePage() {
         <div className="discipline-section-heading"><div><p className="app-eyebrow">CURRENT RANK · REWARD CATEGORIES</p><h2 id="discipline-rewards-title">Rank benefits</h2></div><span>{rankData ? `Current Rank: ${rank.number} · ${rank.name}` : <SkeletonLine width="medium" label="Loading current Rank" />}</span></div>
         <div className="discipline-rewards-grid">
           <RewardCategory tone="cyan" eyebrow="RECURRING · DISCIPLINE POINTS" title="Consistency cycle" amount={cycle ? `+${Number(cycle.rewardAmount).toFixed(2)} DP` : 'No active cycle'} description={cycle ? `${cycleRequirement} qualifying days per cycle. This active cycle preserves its Rank ${cycle.rank.number} ${cycle.rank.name} snapshot.` : 'Cycle reward details appear here when a Progression Run is active.'} icon="activity" />
-          <RewardCategory tone="rank" color={rank.color} eyebrow="ONE-TIME · RANK ENTRY" title="Rank-entry reward" amount={rankData ? `+${Number(rank.entryDp).toFixed(2)} DP` : 'Unavailable'} description="Recorded once when each Rank is first reached in a Progression Run. The server ledger shows any awarded entry reward." icon="shield" />
-          <RewardCategory tone="xp" eyebrow="CURRENT · RANK XP BENEFIT" title="Task XP multiplier" amount={rankData?.multiplierLabel || 'Unavailable'} description={rankData ? 'Applied to eligible Task base XP after allocation. The day’s XP cap is captured from the Rank held at IST day start.' : 'Current Rank XP benefits appear when the active server Progression Run is loaded.'} icon="spark" />
+          <RewardCategory tone="rank" color={rank.color} eyebrow="ONE-TIME · RANK ENTRY" title="Rank-entry reward" amount={rankData ? `+${Number(rank.entryDp).toFixed(2)} DP` : 'Unavailable'} description="Recorded once when each Rank is first reached in a Progression Run. Your history shows any awarded entry reward." icon="shield" />
+          <RewardCategory tone="xp" eyebrow="CURRENT · RANK XP BENEFIT" title="Task XP multiplier" amount={rankData?.multiplierLabel || 'Unavailable'} description={rankData ? 'Applied to eligible Task base XP after allocation. The day’s XP cap is captured from the Rank held at IST day start.' : 'Current Rank XP benefits appear when your active Progression Run is ready.'} icon="spark" />
         </div>
       </section>
 
@@ -242,7 +241,7 @@ export default function DisciplinePage() {
       </section>
 
       <section className="discipline-rewards-section" aria-labelledby="discipline-ledger-title">
-        <div className="discipline-section-heading"><div><p className="app-eyebrow">SERVER LEDGER · ACTIVE PROGRESSION RUN</p><h2 id="discipline-ledger-title">Discipline Point history</h2></div><span>{transactions.length} recent transactions</span></div>
+        <div className="discipline-section-heading"><div><p className="app-eyebrow">YOUR PROGRESS · THIS RUN</p><h2 id="discipline-ledger-title">Discipline Point history</h2></div><span>{transactions.length} recent transactions</span></div>
         {transactions.length ? <ul className="discipline-drain__events discipline-ledger" aria-label="Discipline Point transactions">{transactions.map((event) => <li key={event.id}><time>{event.businessDate || formatInstant(event.occurredAt)}</time><span>{transactionLabel(event.type)}</span><strong className={Number(event.delta) < 0 ? 'is-negative' : ''}>{Number(event.delta) > 0 ? '+' : ''}{Number(event.delta).toFixed(2)} DP</strong></li>)}</ul> : recoveryLoading ? <PageLoadingSkeleton variant="rows" compact label="Loading Discipline Point transaction history" /> : <p className="discipline-empty-state">No Discipline Point transactions have been recorded for this Progression Run.</p>}
       </section>
 
@@ -253,7 +252,6 @@ export default function DisciplinePage() {
         serverToday={summary?.today || null}
         memberSince={summary?.memberSince || progression?.memberSince}
       />
-      <p className="discipline-disclosure"><AppIcon name="activity" />Daily qualification, streaks, reward-cycle progress, balances and Discipline history are loaded from the active server Progression Run. The current IST date remains In Progress until its daily reset.</p>
 
       {confirmRedemption && dpBalance !== null && <RedemptionDialog points={dpBalance} onCancel={() => setConfirmRedemption(false)} onConfirm={confirmConversion} busy={redeeming} />}
     </div>

@@ -4,7 +4,7 @@ export default function DailyTaskSummary({ metrics }) {
   return (
     <section className="app-panel daily-task-summary" aria-labelledby="daily-task-summary-title">
       <div className="daily-task-summary__heading">
-        <div><p className="app-eyebrow">DAILY TASKS · SERVER DATA</p><h2 id="daily-task-summary-title">Today’s schedule</h2></div>
+        <div><p className="app-eyebrow">DAILY TASKS · YOUR PLAN</p><h2 id="daily-task-summary-title">Today’s schedule</h2></div>
         <strong className="daily-task-summary__percentage">{metrics.percentage}<span>%</span></strong>
       </div>
 

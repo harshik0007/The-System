@@ -67,7 +67,7 @@ export default function ResetAndRestartDialog({ open, onClose, onConfirm, previe
         <p className="app-eyebrow settings-dialog__danger-eyebrow">PERMANENT PROGRESSION RESET</p>
         <h2 id="reset-system-title">Reset &amp; Restart THE SYSTEM?</h2>
         <p id="reset-system-description" className="settings-dialog__intro">Your current Progression Run will be archived and a completely fresh Origin run will begin. This does not delete your account or permanently retained Monthly Analysis summaries.</p>
-        <div className="settings-reset-warning"><strong>This operation cannot be undone.</strong><span>It creates a new server-side Progression Run. Reset Count stays unchanged, and you will create a new Task Schedule before continuing.</span></div>
+        <div className="settings-reset-warning"><strong>This operation cannot be undone.</strong><span>It starts a fresh Progression Run. Reset Count stays unchanged, and you will create a new Task Schedule before continuing.</span></div>
         {loading && <p className="settings-inline-note"><SkeletonLine width="long" label="Loading reset details from your account" /></p>}
         {preview && <div className="settings-reset-summary">
           <div className="settings-reset-list" ref={warningRef} tabIndex="0" aria-label="Information that will be reset" onScroll={(event) => { const element = event.currentTarget; if (element.scrollTop + element.clientHeight >= element.scrollHeight - 3) setHasReadWarning(true); }}>

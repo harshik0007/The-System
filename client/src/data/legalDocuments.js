@@ -38,13 +38,13 @@ export const legalDocuments = {
   'proof-verification': { title: 'Proof Verification Policy', updated: 'Draft for review', sections: [
     ['status', 'Document status', `${draft}. Evidence methods and operational handling remain subject to implementation.`],
     ['evidence', 'Evidence types', 'Task evidence may include photos, videos, documents, trusted external-platform activity, or system-based activity for in-app Tasks.'],
-    ['review', 'Review and final decision', 'AI-assisted image and document review may support assessment; external APIs may verify trusted platform activity. AI does not award XP. Backend validation determines the final verification decision.'],
+    ['review', 'Review and final decision', 'AI-assisted image and document review may support assessment; external APIs may verify trusted platform activity. AI does not award XP. The final verification decision remains with THE SYSTEM.'],
     ['deletion', 'Original proof deletion', 'After final verification and successful deletion confirmation, original proof is intended to be deleted from THE SYSTEM storage. A verification receipt without the original is retained.'],
     ['limits', 'Provider limitations', 'Evidence sent to third parties can be processed or retained under provider-side policies. THE SYSTEM’s storage deletion cannot guarantee deletion from third-party systems. Provider, retention, security, dispute and exception details must be approved and disclosed.'],
   ] },
   'ai-disclosure': { title: 'AI & Proof Verification Policy', updated: 'Draft for review', sections: [
     ['status', 'Document status', `${draft}. No provider retention or compliance guarantee is made in this draft.`],
-    ['role', 'AI’s proposed role', 'OpenAI API may provide AI-assisted image and document verification. AI supports review and does not award XP or make the final decision. Backend validation determines the final result.'],
+    ['role', 'AI’s proposed role', 'OpenAI API may provide AI-assisted image and document verification. AI may support review but would not award XP or make the final decision. The final result remains with THE SYSTEM.'],
     ['processing', 'Third-party processing', 'Evidence submitted for AI review may be transmitted to a third-party provider and processed on provider infrastructure. Provider-side retention or use may differ from THE SYSTEM’s storage handling. Exact provider terms and retention must be checked and disclosed before launch.'],
     ['deletion', 'Deletion boundary', 'THE SYSTEM intends to delete original proof from its own storage after final verification and successful deletion confirmation, while retaining a receipt without the original. This does not imply provider-side deletion.'],
     ['review', 'Review and correction', 'The final review, correction, dispute and exception flows are not yet defined. AI assistance is not an assurance of accuracy.'],

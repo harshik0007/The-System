@@ -106,10 +106,10 @@ export default function DashboardPage() {
   if (!backendLoaded) {
     if (taskDataLoading || recoveryLoading) return <PageLoadingSkeleton variant="dashboard" label="Loading dashboard data" />;
     return <div className="dashboard-page" ref={pageRef}>
-      <header className="dashboard-welcome"><div><p className="app-eyebrow">PLAYER OVERVIEW</p><h1>Welcome back, {member?.username || 'member'}.</h1><p>Your server-backed progression and activity will appear here.</p></div></header>
+      <header className="dashboard-welcome"><div><p className="app-eyebrow">PLAYER OVERVIEW</p><h1>Welcome back, {member?.username || 'member'}.</h1><p>Your progress and activity will appear here.</p></div></header>
       <section className="app-panel dashboard-unavailable" role={taskDataLoading || recoveryLoading ? 'status' : 'alert'}>
         <h2>Dashboard data is unavailable</h2>
-        <p>{taskDataError || 'The server did not return an active progression for this account.'}</p>
+        <p>{taskDataError || 'There is no active Progression Run for this account yet.'}</p>
         <button type="button" className="app-button app-button--secondary" onClick={() => window.location.reload()}>Retry</button>
       </section>
     </div>;
@@ -119,7 +119,7 @@ export default function DashboardPage() {
     <div className="dashboard-page" ref={pageRef}>
       <header className="dashboard-welcome dashboard-reveal">
         <div><p className="app-eyebrow">PLAYER OVERVIEW</p><h1>Welcome back, {member?.username || 'member'}.</h1><p>Your progress is built through consistent action.</p></div>
-        <span className="app-demo-label"><i aria-hidden="true" />SERVER DATA</span>
+        <span className="app-demo-label"><i aria-hidden="true" />LIVE PROGRESSION</span>
       </header>
 
       <div className="dashboard-feature-grid">
@@ -143,24 +143,23 @@ export default function DashboardPage() {
         </section>
 
         <section className="app-panel dashboard-level-panel dashboard-reveal" aria-labelledby="dashboard-level-heading">
-          <div className="app-panel__heading"><div><p className="app-eyebrow">LEVEL & XP · SERVER DATA</p><h2 id="dashboard-level-heading">Progress snapshot</h2></div><span className="dashboard-level-panel__icon"><AppIcon name="spark" /></span></div>
+          <div className="app-panel__heading"><div><p className="app-eyebrow">LEVEL & XP · YOUR PROGRESS</p><h2 id="dashboard-level-heading">Progress snapshot</h2></div><span className="dashboard-level-panel__icon"><AppIcon name="spark" /></span></div>
           <div className="dashboard-level-panel__values"><div><span>Current Level</span><strong>{String(serverRun?.level ?? currentLevel).padStart(2, '0')}</strong></div><div><span>Total XP</span><strong>{displayedXp.toLocaleString('en-US')}</strong></div></div>
           <AppProgressBar value={levelProgress.percent} label="Progress to next Level" description={`${levelProgress.earnedInLevel} of ${levelProgress.requirement} XP toward the next Level.`} />
           {progressionXp && <p className="dashboard-level-panel__remaining">{Number(progressionXp.xpRemaining).toLocaleString('en-US')} XP remaining to Level {progressionXp.currentLevel + 1}</p>}
-          <p className="app-panel__note">XP, Level and current Rank are read from the active server progression run.</p>
         </section>
       </div>
 
       {backendLoaded && progressionXp && <div className="dashboard-progression-benefits">
         <section className="app-panel dashboard-progression-benefit" aria-labelledby="dashboard-active-xp-heading">
-          <div className="app-panel__heading"><div><p className="app-eyebrow">ACTIVE XP BOOSTS · SERVER DATA</p><h2 id="dashboard-active-xp-heading">Current Rank benefit</h2></div><span className="dashboard-progression-benefit__multiplier">{progressionXp.currentRank.multiplierLabel}</span></div>
+          <div className="app-panel__heading"><div><p className="app-eyebrow">YOUR XP BOOST</p><h2 id="dashboard-active-xp-heading">Current Rank benefit</h2></div><span className="dashboard-progression-benefit__multiplier">{progressionXp.currentRank.multiplierLabel}</span></div>
           <p className="dashboard-progression-benefit__source">{progressionXp.currentRank.name} applies its multiplier to eligible Task base XP.</p>
           <div className="dashboard-progression-benefit__cap"><div><span>Daily XP cap · {progressionXp.dailyXp.rankAtDayStart} at IST day start</span><strong>{Number(progressionXp.dailyXp.credited).toLocaleString('en-US')} / {Number(progressionXp.dailyXp.capAmount).toLocaleString('en-US')} XP</strong></div><AppProgressBar value={progressionXp.dailyXp.capAmountCents ? (progressionXp.dailyXp.creditedCents / progressionXp.dailyXp.capAmountCents) * 100 : 0} label="Daily XP cap used" description={`${progressionXp.dailyXp.remaining} XP remains in today's ordinary XP capacity.`} /></div>
           <p className="app-panel__note">Daily XP earned: {Number(progressionXp.dailyXp.credited).toLocaleString('en-US')} · Remaining today: {Number(progressionXp.dailyXp.remaining).toLocaleString('en-US')} XP.</p>
         </section>
 
         <section className="app-panel dashboard-progression-benefit dashboard-progression-benefit--next" aria-labelledby="dashboard-next-rank-heading">
-          <div className="app-panel__heading"><div><p className="app-eyebrow">PROGRESSION PREVIEW · SERVER CONFIGURATION</p><h2 id="dashboard-next-rank-heading">Next Rank benefits</h2></div><span className="dashboard-progression-benefit__icon"><AppIcon name="arrow" /></span></div>
+          <div className="app-panel__heading"><div><p className="app-eyebrow">NEXT RANK PREVIEW</p><h2 id="dashboard-next-rank-heading">Next Rank benefits</h2></div><span className="dashboard-progression-benefit__icon"><AppIcon name="arrow" /></span></div>
           {progressionXp.nextRank ? <>
             <div className="dashboard-progression-benefit__next-title"><span>Rank {progressionXp.nextRank.number}</span><strong>{progressionXp.nextRank.name}</strong></div>
             <p className="dashboard-progression-benefit__source">Unlock at Level {progressionXp.nextRank.minimumLevel}.</p>
@@ -201,7 +200,7 @@ export default function DashboardPage() {
 
       <div className="dashboard-content-grid dashboard-content-grid--primary">
         <section className="app-panel dashboard-tasks-panel dashboard-reveal" aria-labelledby="dashboard-tasks-heading">
-          <div className="app-panel__heading"><div><p className="app-eyebrow">TODAY · SERVER SCHEDULE</p><h2 id="dashboard-tasks-heading">Today's Tasks</h2></div><span className="dashboard-panel-count">{completedTasks}<i>/</i>{scheduledTaskCount}</span></div>
+          <div className="app-panel__heading"><div><p className="app-eyebrow">TODAY · YOUR SCHEDULE</p><h2 id="dashboard-tasks-heading">Today's Tasks</h2></div><span className="dashboard-panel-count">{completedTasks}<i>/</i>{scheduledTaskCount}</span></div>
           {serverSchedule && <div className="dashboard-task-summary"><strong>{taskCompletion}%</strong><span>complete <i>· equal Task weighting</i></span><AppProgressBar value={taskCompletion} label="Today's Task completion" description={`${completedTasks} of ${scheduledTaskCount} scheduled Tasks completed; Tasks are equally weighted.`} /></div>}
           {startsNextDateCount > 0 && <p className="dashboard-task-future-note">{startsNextDateCount} new {startsNextDateCount === 1 ? 'Task starts' : 'Tasks start'} on the next IST date and will join this count then.</p>}
           <ul className="dashboard-task-list">
@@ -222,7 +221,7 @@ export default function DashboardPage() {
 
         <div className="dashboard-side-stack">
           <section className="app-panel dashboard-recovery-panel dashboard-reveal" aria-labelledby="dashboard-recovery-heading">
-            <div className="app-panel__heading"><div><p className="app-eyebrow">RECOVERY · SERVER DATA</p><h2 id="dashboard-recovery-heading">Recovery Quests</h2></div><span className="dashboard-panel-count">{activeRecoveryCount} active</span></div>
+            <div className="app-panel__heading"><div><p className="app-eyebrow">RECOVERY · YOUR QUESTS</p><h2 id="dashboard-recovery-heading">Recovery Quests</h2></div><span className="dashboard-panel-count">{activeRecoveryCount} active</span></div>
             {activeRecoveryCount >= 4 && <p className="dashboard-recovery-limit">{activeRecoveryCount}/5 active · {activeRecoveryCount === 5 ? 'next quest triggers the limit' : 'approaching the active limit'}</p>}
             {nearestRecoveryMs !== null && <p className="dashboard-recovery-nearest">Nearest Recovery Window: <strong>{remainingLabel(nearestRecoveryMs)}</strong></p>}
             <ul className="dashboard-quest-list">
@@ -240,7 +239,7 @@ export default function DashboardPage() {
 
           {Number.isFinite(effectiveRecoveryState?.gracePoints)
             ? <GracePointSummary compact recoveryState={effectiveRecoveryState} serverBacked={backendLoaded} />
-            : <section className="app-panel grace-charge-summary dashboard-grace-panel-unavailable" role="status"><p className="app-eyebrow">GRACE POINTS</p><p>Grace Point balance is unavailable from the server.</p></section>}
+            : <section className="app-panel grace-charge-summary dashboard-grace-panel-unavailable" role="status"><p className="app-eyebrow">GRACE POINTS</p><p>Grace Point balance could not be loaded.</p></section>}
         </div>
       </div>
 
@@ -269,7 +268,6 @@ export default function DashboardPage() {
         </ol>
       </section>
 
-      <p className="dashboard-disclosure"><AppIcon name="activity" /><span>Task Schedule, occurrences, XP, Level, Rank, Discipline qualification, streaks, DP cycles, Recovery Quests and Grace Points are read from the server.</span></p>
     </div>
   );
 }

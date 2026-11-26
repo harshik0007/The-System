@@ -9,7 +9,7 @@ export default function GoogleSignInButton({ disabled = false }) {
 
   if (!capabilities?.googleSignIn) {
     return <div className="auth-google-unavailable" role="status">
-      Google sign-in is not configured on this server. You can still use your username or email and password.
+      Google sign-in is not available right now. You can still use your username or email and password.
     </div>;
   }
 

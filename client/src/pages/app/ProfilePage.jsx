@@ -123,7 +123,6 @@ export default function ProfilePage() {
         memberSince={disciplineCalendar?.memberSince || memberSince}
       />
       {recoveryLoading && !summary && <SkeletonLine width="long" label="Loading Member progression records" className="profile-progression-skeleton" />}
-      <p className="discipline-disclosure"><AppIcon name="activity" />Discipline history and lifetime streak records come from the server. The activity map reflects finalized days in the active Progression Run; unavailable historical XP details are not estimated.</p>
     </div>
   );
 }

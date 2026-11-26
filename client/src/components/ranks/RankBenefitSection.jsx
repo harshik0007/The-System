@@ -12,7 +12,7 @@ export default function RankBenefitSection({ rank }) {
         <li><span>Daily Rank XP benefit</span><strong>{benefit.dailyXpPercent.toFixed(2)}% of the next-Level XP requirement at reset</strong></li>
         <li><span>One-time Rank-entry XP</span><strong>Pending configuration · no XP awarded</strong></li>
       </ul>
-      <p className="rank-benefit__note">Discipline Point rewards share a 4.00 DP cap. Next-Level XP calculations use the current frontend demonstration threshold curve.</p>
+      <p className="rank-benefit__note">Discipline Point rewards share a 4.00 DP cap. Next-Level XP follows the current progression curve.</p>
     </section>
   );
 }

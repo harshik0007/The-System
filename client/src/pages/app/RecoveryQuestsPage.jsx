@@ -62,7 +62,7 @@ function QuestCard({ quest, onComplete, paused = false }) {
       {active ? <div className="recovery-window">
         <div className="recovery-window__meta"><span>72-hour Recovery Window</span><strong>{paused ? formatRemaining(quest.remainingMs) : formatRemaining(quest.remainingMs)}</strong></div>
         <div className="recovery-window__track" role="progressbar" aria-label={`${formatRemaining(quest.remainingMs)} in the 72-hour Recovery Window`} aria-valuemin="0" aria-valuemax="72" aria-valuenow={Math.max(0, Math.min(72, Math.round(quest.remainingMs / 3_600_000)))}><span style={{ width: `${progress}%` }} /></div>
-        <p>Expires {formatDate(quest.expiresAt)} IST · Remaining time is calculated by the server.</p>
+        <p>Expires {formatDate(quest.expiresAt)} IST · Emergency Pause preserves the remaining time.</p>
       </div> : <div className="recovery-quest-card__history">
         {completed && <span>Completed {formatDate(quest.completedAt)}</span>}
         {expired && <span>Expired {formatDate(quest.expiredAt)} · one Grace Point deducted{quest.gracePointTransactionId ? '' : ' (transaction pending)'}</span>}
@@ -171,10 +171,9 @@ export default function RecoveryQuestsPage() {
       </section>
 
       <div className="recovery-rules-grid">
-        <article className="app-panel recovery-rule-card"><span className="recovery-rule-card__icon"><AppIcon name="clock" /></span><div><p className="app-eyebrow">RECOVERY WINDOW</p><h3>Exactly 72 hours to complete</h3><p>Each active Quest remains eligible for exactly 72 rolling hours from its server-recorded activation time. Emergency Pause preserves its remaining time.</p></div></article>
+        <article className="app-panel recovery-rule-card"><span className="recovery-rule-card__icon"><AppIcon name="clock" /></span><div><p className="app-eyebrow">RECOVERY WINDOW</p><h3>Exactly 72 hours to complete</h3><p>Each active Quest remains eligible for exactly 72 rolling hours from activation. Emergency Pause preserves its remaining time.</p></div></article>
         <article className="app-panel recovery-rule-card"><span className="recovery-rule-card__icon recovery-rule-card__icon--warning"><AppIcon name="activity" /></span><div><p className="app-eyebrow">ACTIVE QUEST LIMIT</p><h3>Five active quests maximum</h3><p>At the 6th active quest, one Grace Point is deducted and the active group is cleared. Cleared records remain in All and do not expire individually.</p></div></article>
       </div>
-      <p className="recovery-disclosure"><AppIcon name="activity" />Recovery Quest status, Grace Point balance and completion are loaded from the active server progression run.</p>
 
       {confirmQuest && <div className="recovery-modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setConfirmQuest(null); }}>
         <section className="recovery-confirm-modal" role="dialog" aria-modal="true" aria-labelledby="recovery-confirm-title" aria-describedby="recovery-confirm-description">

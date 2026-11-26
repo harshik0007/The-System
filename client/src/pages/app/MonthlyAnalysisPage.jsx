@@ -187,10 +187,10 @@ export default function MonthlyAnalysisPage() {
 
   if (loading) return <PageLoadingSkeleton variant="monthly" label="Loading monthly analysis" />;
   if (pageError && !selected) return <div className="monthly-analysis-page"><header className="monthly-analysis-header"><div><p className="app-eyebrow">MY PROGRESS · PERFORMANCE HISTORY</p><h1>Monthly Analysis</h1><p>Review monthly reports saved for your current Progression Run.</p></div></header><section className="monthly-panel monthly-empty-state" role="alert"><AppIcon name="analysis" /><h2>Monthly Analysis is unavailable</h2><p>{pageError}</p><button className="button button--secondary" type="button" onClick={() => void loadPage()}>Retry</button></section></div>;
-  if (!selected) return <div className="monthly-analysis-page"><header className="monthly-analysis-header"><div><p className="app-eyebrow">MY PROGRESS · PERFORMANCE HISTORY</p><h1>Monthly Analysis</h1><p>Review monthly reports saved for your current Progression Run.</p></div><span className="monthly-period-status">SERVER DATA</span></header><section className="monthly-panel monthly-empty-state"><AppIcon name="analysis" /><h2>No monthly report is available yet</h2><p>A report appears after your current Progression Run and its persisted history become available. No demonstration figures are included.</p></section></div>;
+  if (!selected) return <div className="monthly-analysis-page"><header className="monthly-analysis-header"><div><p className="app-eyebrow">MY PROGRESS · PERFORMANCE HISTORY</p><h1>Monthly Analysis</h1><p>Review monthly reports saved for your current Progression Run.</p></div></header><section className="monthly-panel monthly-empty-state"><AppIcon name="analysis" /><h2>No monthly report is available yet</h2><p>Your report will appear when enough activity has been recorded for this Progression Run.</p></section></div>;
 
   return <div className="monthly-analysis-page">
-    <header className="monthly-analysis-header"><div><p className="app-eyebrow">MY PROGRESS · PERFORMANCE HISTORY</p><h1>Monthly Analysis</h1><p>Measure your consistency. Understand your progress. Identify where you can improve.</p></div><span className="monthly-period-status">SERVER DATA</span></header>
+    <header className="monthly-analysis-header"><div><p className="app-eyebrow">MY PROGRESS · PERFORMANCE HISTORY</p><h1>Monthly Analysis</h1><p>Measure your consistency. Understand your progress. Identify where you can improve.</p></div></header>
     {pageError && <div className="m25-inline-error" role="alert">{pageError} <button type="button" onClick={() => void loadPage()}>Retry</button></div>}
 
     <section className="monthly-controls" aria-label="Monthly analysis controls">
@@ -200,7 +200,7 @@ export default function MonthlyAnalysisPage() {
       <button className="button button--secondary monthly-export-button" type="button" onClick={() => void downloadPdf()} disabled={pdfLoading}>{pdfLoading ? <SkeletonLine width="short" label="Preparing PDF" /> : 'Download PDF'}</button>
     </section>
     {pdfError && <p className="m25-inline-error" role="alert">{pdfError}</p>}
-    <p className="monthly-run-note">Current Progression Run · {selected.coverage.aggregationVersion ? `Report version ${selected.coverage.aggregationVersion}` : 'Saved server report'} · Comparisons are isolated to this run.</p>
+    <p className="monthly-run-note">Current Progression Run · {selected.coverage.aggregationVersion ? `Report version ${selected.coverage.aggregationVersion}` : 'Saved report'} · Comparisons are isolated to this run.</p>
 
     <nav className="monthly-section-nav" aria-label="Monthly analysis sections">{[['monthly-overview', 'Overview'], ['monthly-performance', 'Performance Trends'], ['monthly-progression', 'Recovery & Progression'], ['monthly-history', 'Detailed History'], ['monthly-comparison', 'Compare']].map(([id, label]) => <a href={`#${id}`} key={id} onClick={(event) => {
       const target = document.getElementById(id);

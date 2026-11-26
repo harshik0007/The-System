@@ -45,7 +45,7 @@ export default function PersonalBestRecords({ records, isCurrentMember = false }
         <div><p className="app-eyebrow">LIFETIME ACHIEVEMENTS</p><h2 id="personal-best-records-title">Personal Best Records</h2></div>
         <p>Leaderboard positions and THE SYSTEM Rank are tracked separately.</p>
       </header>
-      {isCurrentMember && <p className="personal-best-records__notice">Saved with the member account. A Personal Best updates only after a valid server ranking improves the previous best.</p>}
+      {isCurrentMember && <p className="personal-best-records__notice">Saved with your account. A Personal Best updates when your ranking improves on the previous best.</p>}
       <div className="personal-best-records__grid">
         <PositionRecord recordKey="overall" title="BEST OVERALL POSITION" record={records?.overall} />
         <PositionRecord recordKey="discipline" title="BEST DISCIPLINE POSITION" record={records?.discipline} />

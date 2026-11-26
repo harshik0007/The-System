@@ -155,7 +155,7 @@ export default function DailyTasksPage() {
           <p>Consistency is built through the actions you complete every day.</p>
         </div>
         <div className="daily-tasks-header__meta">
-          <span className="app-demo-label"><i aria-hidden="true" />SERVER DATA</span>
+          <span className="app-demo-label"><i aria-hidden="true" />YOUR SCHEDULE</span>
           <Link className="button button--primary daily-tasks-create-link" to="/app/tasks/create">{schedule ? 'Manage Tasks' : 'Create Schedule'} <span aria-hidden="true">↗</span></Link>
           <div className="daily-tasks-date"><AppIcon name="clock" /><span><strong>{todayLabel || <SkeletonLine width="medium" label="Loading IST date" />}</strong><small>Daily deadline · 12:00 AM IST (India Standard Time)</small></span></div>
         </div>
@@ -175,7 +175,7 @@ export default function DailyTasksPage() {
 
       {schedule && <section className="daily-task-list-section" aria-labelledby="daily-task-list-title">
         <div className="daily-task-list-heading daily-task-reveal">
-          <div><p className="app-eyebrow">CYCLE DAY {String(todayCycleDay || '—').padStart(2, '0')} · SERVER SCHEDULE</p><h2 id="daily-task-list-title">Your scheduled Tasks</h2><p>These original Task occurrences are read from the active server schedule.</p></div>
+          <div><p className="app-eyebrow">CYCLE DAY {String(todayCycleDay || '—').padStart(2, '0')} · TODAY</p><h2 id="daily-task-list-title">Your scheduled Tasks</h2><p>Here are the Tasks planned for this day of your cycle.</p></div>
           <span className="daily-task-list-heading__count">{metrics.completed}<i>/</i>{metrics.total}<small>completed</small></span>
         </div>
         {loading && <PageLoadingSkeleton variant="rows" compact label="Loading today’s scheduled Tasks" />}
@@ -190,10 +190,9 @@ export default function DailyTasksPage() {
           />)}
         </ol>}
         {!loading && currentDayTasks.length === 0 && <div className="task-builder-empty daily-task-reveal"><span aria-hidden="true">—</span><p>No Task occurrences are scheduled for this IST cycle day.</p><small>Tasks assigned to other cycle days remain in your active schedule.</small></div>}
-        <p className="task-completion-pending daily-task-reveal" role="note"><AppIcon name="clock" />Submitting a Task marks the occurrence completed and applies its saved XP share, current Rank multiplier and daily cap on the server. Optional proof details are not AI-verified.</p>
+        <p className="task-completion-pending daily-task-reveal" role="note"><AppIcon name="clock" />Completing a Task applies its saved XP share, current Rank multiplier and daily cap. Optional proof details are not AI-verified.</p>
       </section>}
 
-      <p className="daily-tasks-disclosure"><AppIcon name="activity" />Schedule, Task definitions, current-day occurrences and weekly change allowance are served by the backend. No demonstration Tasks are copied into your account.</p>
       {changeTarget && <TaskChangeDialog
         task={changeTarget.task}
         mode={changeTarget.mode}

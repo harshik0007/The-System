@@ -57,7 +57,7 @@ function SignOutDialog({ open, onClose, onConfirm, logout }) {
       await logout();
       onConfirm();
     } catch (error) {
-      const message = error?.message || 'The server could not end this session. It may still be active; please retry.';
+      const message = error?.message || 'We could not end this session. It may still be active; please try again.';
       setFeedback(message);
       notifyError(message);
     } finally {

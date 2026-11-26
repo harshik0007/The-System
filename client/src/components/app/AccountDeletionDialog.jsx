@@ -81,7 +81,7 @@ export default function AccountDeletionDialog({ open, authMethod, initialNotice 
             {reauth.loading ? <SkeletonLine width="long" label="Checking recent Google verification" /> : reauth.ready ? <span className="is-ready"><i />Google identity verified for this account.</span> : reauth.configured ? <>
               <span>A fresh Google sign-in is required immediately before deletion.</span>
               <a className="settings-dialog__submit" href={apiUrl('/auth/account/google-deletion/reauth')}>Verify with Google</a>
-            </> : <span>Google re-authentication is not configured on this server.</span>}
+            </> : <span>Google re-authentication is not available for this account.</span>}
           </div>
         ) : <p className="settings-reset-error" role="alert">The account sign-in method could not be verified.</p>}
 

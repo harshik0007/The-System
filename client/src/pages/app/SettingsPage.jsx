@@ -287,7 +287,7 @@ export default function SettingsPage() {
     try {
       const response = await taskApi.updateAccountPreferences({ appearance: { theme: theme.id } });
       const savedTheme = response.settings?.appearance?.theme;
-      if (savedTheme !== theme.id) throw new Error('The server did not confirm this theme selection. Your existing theme remains active.');
+      if (savedTheme !== theme.id) throw new Error('Your theme selection could not be saved. Your existing theme remains active.');
       // Keep the old appearance in place until the backend has confirmed the
       // selection. The shared foreground overlay owns the visual transition.
       mergePreferences({ appearance: response.settings.appearance });
@@ -478,7 +478,7 @@ export default function SettingsPage() {
               <AppIcon name={category.icon} /><span>{category.label}</span>
             </button>
           ))}
-          <div className="settings-nav__note"><AppIcon name="shield" /><p>Profile, privacy, appearance and accessibility choices are stored with the member account. Notification categories use the shared M27 preference service.</p></div>
+          <div className="settings-nav__note"><AppIcon name="shield" /><p>Profile, privacy, appearance and accessibility choices are saved with your account. Notification categories are saved with your preferences.</p></div>
         </nav>
 
         <section className="settings-content app-panel" aria-labelledby={`settings-category-${activeCategory}`}>
@@ -512,7 +512,7 @@ export default function SettingsPage() {
               <SectionHeader eyebrow="INTERFACE" title="Appearance" description="Choose a visual identity available at your current Rank." icon="spark" />
               <div className="settings-choice-group">
                 <p className="settings-choice-group__title">Rank-based themes</p>
-                <p className="settings-theme-intro">Obsidian unlocks at Rank 05 — Surge, Aurora at Rank 03 — Apex, Eclipse at Rank 02 — Zenith, and Galaxion exclusively at Rank 01 — Continuum. The server verifies and saves your current selection.</p>
+                <p className="settings-theme-intro">Obsidian unlocks at Rank 05 — Surge, Aurora at Rank 03 — Apex, Eclipse at Rank 02 — Zenith, and Galaxion exclusively at Rank 01 — Continuum. Your selection is saved with your account.</p>
                 <div className="settings-theme-grid" aria-label="Available interface themes">
                   {APPEARANCE_THEMES.map((theme) => {
                     const unlocked = isAppearanceThemeEligible(theme.id, accountSettings?.progression?.level ?? 0);
@@ -560,13 +560,13 @@ export default function SettingsPage() {
             </>}
 
             {activeCategory === 'notifications' && <>
-              <SectionHeader eyebrow="IN-APP UPDATES" title="Notification preferences" description="Choose which future server-recorded in-app updates you want to receive. Changes are saved to your account immediately." icon="bell" />
+              <SectionHeader eyebrow="IN-APP UPDATES" title="Notification preferences" description="Choose which in-app updates you want to receive. Changes are saved to your account immediately." icon="bell" />
               <NotificationCategorySettings />
             </>}
 
             {activeCategory === 'security' && <>
-              <SectionHeader eyebrow="ACCOUNT STATUS" title="Account information" description="Review permanent account dates and the current server-managed progression state." icon="shield" />
-              <div className="settings-readonly-grid settings-readonly-grid--security"><ReadOnly label="Account status" value={accountSettings?.account?.status || 'Loading'} note="Account identity is resolved by the server." /><ReadOnly label="Account created" value={accountSettings?.account?.createdAt ? formatMemberSince(accountSettings.account.createdAt.slice(0, 10)) : 'Loading'} /><ReadOnly label="Member Since" value={formatMemberSince(accountSettings?.account?.memberSince)} /><ReadOnly label="Current Run Started" value={formatMemberSince(accountSettings?.progression?.startedOn)} /><ReadOnly label="Reset Count" value={accountSettings?.account?.resetCount ?? progression?.resetCount ?? '—'} note="Manual Reset & Restart does not increase this count." /></div>
+              <SectionHeader eyebrow="ACCOUNT STATUS" title="Account information" description="Review your account dates and current progression." icon="shield" />
+              <div className="settings-readonly-grid settings-readonly-grid--security"><ReadOnly label="Account status" value={accountSettings?.account?.status || 'Loading'} note="Your account identity is linked to this profile." /><ReadOnly label="Account created" value={accountSettings?.account?.createdAt ? formatMemberSince(accountSettings.account.createdAt.slice(0, 10)) : 'Loading'} /><ReadOnly label="Member Since" value={formatMemberSince(accountSettings?.account?.memberSince)} /><ReadOnly label="Current Run Started" value={formatMemberSince(accountSettings?.progression?.startedOn)} /><ReadOnly label="Reset Count" value={accountSettings?.account?.resetCount ?? progression?.resetCount ?? '—'} note="Manual Reset & Restart does not increase this count." /></div>
               <div className="settings-security-actions">
                 {hasLocalPassword && <section className="settings-security-card settings-security-card--password"><div><p className="app-eyebrow">ACCOUNT SECURITY</p><h3>Credential management</h3><p>Change your password after confirming the current one. If you forget it, use one of your saved one-time recovery codes.</p><Link className="settings-security-card__text-link" to="/forgot-password">Recover access with a code <AppIcon name="arrow" /></Link></div><button type="button" className="settings-reset-action" onClick={() => setChangePasswordOpen(true)}>Change password</button></section>}
                 <AuthenticationMethodsSettings />

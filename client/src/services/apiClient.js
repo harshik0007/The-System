@@ -89,7 +89,7 @@ async function readJson(response) {
 
 function apiErrorFromResponse(response, payload, fallback = 'The request could not be completed.') {
   const isProxyFailure = !(response.headers.get('content-type') || '').toLowerCase().includes('json') && response.status >= 500;
-  if (isProxyFailure) return new ApiError(response.status, 'UPSTREAM_UNAVAILABLE', 'THE SYSTEM could not reach the service. Check that the server is running, then retry.');
+  if (isProxyFailure) return new ApiError(response.status, 'UPSTREAM_UNAVAILABLE', 'THE SYSTEM could not complete that request. Please try again in a moment.');
   if (payload?.__invalidJson) return new ApiError(response.status, 'INVALID_RESPONSE', 'The service returned an unreadable response.');
   const details = payload?.error?.details;
   const detailMessage = Array.isArray(details) && details.length
@@ -125,7 +125,7 @@ async function fetchWithCsrf(path, requestOptions, retryInvalidCsrf = true) {
     });
   } catch (error) {
     if (error?.name === 'AbortError') throw error;
-    throw new ApiError(0, 'NETWORK_ERROR', 'THE SYSTEM could not reach the service. Check that the server and database are running.');
+    throw new ApiError(0, 'NETWORK_ERROR', 'THE SYSTEM could not connect. Check your connection and try again.');
   }
   if (response.status === 403 && !isSafeMethod(method)) {
     const payload = await readJson(response.clone());
@@ -136,7 +136,7 @@ async function fetchWithCsrf(path, requestOptions, retryInvalidCsrf = true) {
         throw new ApiError(
           originalError.status,
           originalError.code,
-          `The server still could not validate this session after refreshing the security token. Refresh the page and try again.${requestReference}`,
+          `We could not verify this session. Refresh the page and try again.${requestReference}`,
           originalError.details,
           originalError.requestId,
         );

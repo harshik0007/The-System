@@ -108,7 +108,7 @@ function PauseDialog({ mode, durationDays, setDurationDays, now, availableCount,
             </select>
           </label>
           <div className="emergency-pause-modal__times"><p><span>Starts</span><strong>{formatDateTime(now)}</strong></p><p><span>Estimated resume</span><strong>{formatDateTime(expectedResume)}</strong></p></div>
-          <div className="emergency-pause-modal__notice"><AppIcon name="activity" /><p>Scheduled Tasks and Recovery Quest actions pause. Active Recovery Windows are preserved, XP drain stops at paused resets, and protected dates keep your Discipline Streak. The server confirms the exact resume time when activated.</p></div>
+          <div className="emergency-pause-modal__notice"><AppIcon name="activity" /><p>Scheduled Tasks and Recovery Quest actions pause. Active Recovery Windows are preserved, XP drain stops at paused resets, and protected dates keep your Discipline Streak. Your exact resume time appears after activation.</p></div>
           <div className="emergency-pause-modal__actions"><button type="button" className="emergency-pause-modal__secondary" onClick={onClose} disabled={pending}>Cancel</button><button type="submit" className="emergency-pause-modal__primary" disabled={pending || availableCount < 1}>{pending ? 'Activating…' : 'Confirm Emergency Pause'}</button></div>
         </form>}
 
@@ -188,7 +188,7 @@ export default function EmergencyPauseControls() {
     </> : <>
       <div className="emergency-pause-control__status"><span className="emergency-pause-control__status-dot" /><strong>Emergency Pause</strong></div>
       <div className="emergency-pause-control__actions"><button type="button" className="emergency-pause-control__activate" onClick={() => { setDurationDays(1); setMode('activate'); }} disabled={emergencyPauseLoading || !emergencyPause || availableCount === 0}>Emergency Pause</button><button type="button" className="emergency-pause-control__rules" onClick={() => setMode('rules')}>Pause Rules</button></div>
-      <p className="emergency-pause-control__allowance">{emergencyPauseLoading && !emergencyPause ? <SkeletonLine width="medium" label="Loading Emergency Pause status" /> : emergencyPause ? `${usage} / ${pauseAllowance} used this month` : 'Emergency Pause status is unavailable.'}</p>
+      <p className="emergency-pause-control__allowance">{emergencyPauseLoading && !emergencyPause ? <SkeletonLine width="medium" label="Loading Emergency Pause status" /> : emergencyPause ? `${usage} / ${pauseAllowance} used this month` : 'Emergency Pause status could not be loaded.'}</p>
       {emergencyPause && availableCount === 0 && <p className="emergency-pause-control__limit">Allowance resets at the start of next IST calendar month.</p>}
     </>}
     <PauseDialog
