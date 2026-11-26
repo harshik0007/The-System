@@ -98,7 +98,7 @@ export default function PageTransition({ children }) {
     if (location.key === activeLocation.key) return;
 
     initialEntranceRef.current = false;
-    if (window.scrollY !== 0) window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    if (window.scrollY !== 0) window.scrollTo({ top: 0, left: 0, behavior: reducedMotion ? 'instant' : 'smooth' });
     pendingFocusKeyRef.current = location.key;
     if (member && isAuthenticatedExperiencePath(location.pathname)) {
       // Keep the authenticated shell mounted across app and information routes.
@@ -109,7 +109,7 @@ export default function PageTransition({ children }) {
     }
     setOutgoingLocation(activeLocation);
     setActiveLocation(location);
-  }, [location, activeLocation, member]);
+  }, [location, activeLocation, member, reducedMotion]);
 
   useLayoutEffect(() => {
     if (pendingFocusKeyRef.current !== activeLocation.key) return;

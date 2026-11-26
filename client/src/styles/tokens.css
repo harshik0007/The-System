@@ -88,6 +88,6 @@
   --space-5: 3rem;
   --space-6: 5rem;
   --page-width: 1240px;
-  --motion-fast: 180ms ease;
+  --motion-fast: 180ms cubic-bezier(.2, .75, .25, 1);
   --motion-standard: 320ms cubic-bezier(.2, .75, .25, 1);
 }

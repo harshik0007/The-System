@@ -8,12 +8,35 @@ import { useUserPreferences } from '../../context/UserPreferencesContext.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { AccountActionsProvider } from '../../context/AccountActionsContext.jsx';
 import { NotificationCenterProvider } from '../../context/NotificationCenterContext.jsx';
+import { useTaskBackend } from '../../context/TaskBackendContext.jsx';
+import AppIcon from './AppIcon.jsx';
 import { taskApi } from '../../services/taskApi.js';
 import '../../styles/app-shell.css';
 import '../../styles/discipline.css';
 
+const pauseResumeFormatter = new Intl.DateTimeFormat('en-IN', {
+  timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short',
+});
+
+function EmergencyPauseBanner({ pause }) {
+  const resumeAt = pause?.effectiveEndAt ? new Date(pause.effectiveEndAt) : null;
+  const formattedResume = resumeAt && Number.isFinite(resumeAt.getTime())
+    ? pauseResumeFormatter.format(resumeAt)
+    : null;
+
+  return <aside className="app-emergency-pause-banner" role="status" aria-live="polite">
+    <span className="app-emergency-pause-banner__icon" aria-hidden="true"><AppIcon name="shield" /></span>
+    <div className="app-emergency-pause-banner__copy">
+      <strong>Emergency Pause is active</strong>
+      <p>Scheduled Tasks and Recovery Quest actions are paused. Your Discipline Streak remains protected.</p>
+    </div>
+    {formattedResume && <span className="app-emergency-pause-banner__resume">Scheduled resume <time dateTime={resumeAt.toISOString()}>{formattedResume} IST</time></span>}
+  </aside>;
+}
+
 export default function AppLayout() {
   const { mergePreferences } = useUserPreferences();
+  const { emergencyPause } = useTaskBackend();
   const { member } = useAuth();
   const [isMobile, setIsMobile] = useState(() => window.matchMedia('(max-width: 760px)').matches);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => window.matchMedia('(max-width: 1100px)').matches);
@@ -78,6 +101,7 @@ export default function AppLayout() {
       />
       <div className="app-layout__main">
         <AppTopbar isMobile={isMobile} sidebarExpanded={sidebarExpanded} onNavigationToggle={toggleNavigation} />
+        {emergencyPause?.isActive && <EmergencyPauseBanner pause={emergencyPause.pause} />}
         {profileSettingsError && <div className="app-profile-settings-error" role="alert">
           <span>{profileSettingsError}</span>
           <button type="button" onClick={() => setProfileSettingsRetry((attempt) => attempt + 1)}>Retry</button>

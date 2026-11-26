@@ -82,14 +82,6 @@ export default function DashboardPage() {
   useLayoutEffect(() => {
     if (reduceMotion || !pageRef.current) return undefined;
     const context = gsap.context(() => {
-      gsap.from('.dashboard-reveal', {
-        y: 14,
-        autoAlpha: 0,
-        duration: 0.42,
-        stagger: 0.055,
-        ease: 'power2.out',
-        clearProps: 'opacity,visibility,transform',
-      });
       gsap.from('.app-progress__fill', {
         scaleX: 0,
         transformOrigin: 'left center',
@@ -117,9 +109,6 @@ export default function DashboardPage() {
 
   return (
     <div className="dashboard-page" ref={pageRef}>
-      <section className="dashboard-quick-pause dashboard-reveal" aria-label="Emergency Pause controls">
-        <EmergencyPauseControls />
-      </section>
       <header className="dashboard-welcome dashboard-reveal">
         <div><p className="app-eyebrow">PLAYER OVERVIEW</p><h1>Welcome back, {member?.username || 'member'}.</h1><p>Your progress is built through consistent action.</p></div>
         <span className="app-demo-label"><i aria-hidden="true" />LIVE PROGRESSION</span>
@@ -199,6 +188,10 @@ export default function DashboardPage() {
         </div>
         <Link className="dashboard-theme-reward__link" to="/app/settings?category=appearance">View theme <AppIcon name="arrow" /></Link>
       </section>}
+
+      <section className="dashboard-quick-pause dashboard-reveal" id="emergency-pause-controls" aria-label="Emergency Pause controls">
+        <EmergencyPauseControls />
+      </section>
 
       <div className="dashboard-content-grid dashboard-content-grid--primary">
         <section className="app-panel dashboard-tasks-panel dashboard-reveal" aria-labelledby="dashboard-tasks-heading">
