@@ -38,7 +38,7 @@ export function TaskBackendProvider({ children }) {
   const [allowanceLoaded, setAllowanceLoaded] = useState(false);
   const [todayDate, setTodayDate] = useState(null);
   const [todayCycleDay, setTodayCycleDay] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [errorInfo, setErrorInfo] = useState(null);
   const [recoveryQuests, setRecoveryQuests] = useState([]);
@@ -50,7 +50,7 @@ export function TaskBackendProvider({ children }) {
   const [disciplineTransactions, setDisciplineTransactions] = useState([]);
   const [disciplineError, setDisciplineError] = useState('');
   const [progressionResetNotice, setProgressionResetNotice] = useState(null);
-  const [recoveryLoading, setRecoveryLoading] = useState(false);
+  const [recoveryLoading, setRecoveryLoading] = useState(true);
   const [recoveryError, setRecoveryError] = useState('');
   const [emergencyPause, setEmergencyPause] = useState(null);
   const [emergencyPauseLoading, setEmergencyPauseLoading] = useState(false);

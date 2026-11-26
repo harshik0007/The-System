@@ -14,6 +14,32 @@
   padding: clamp(20px, 3vw, 42px);
 }
 
+.app-session-loading {
+  display: flex;
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--silver-muted);
+  font-size: 14px;
+}
+
+.app-session-loading__indicator {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--silver-border);
+  border-top-color: var(--silver-indigo);
+  border-radius: 50%;
+  animation: app-session-loading-spin 800ms linear infinite;
+}
+
+@keyframes app-session-loading-spin { to { transform: rotate(360deg); } }
+
+:root.reduce-nonessential-motion .app-session-loading__indicator { animation: none; }
+@media (prefers-reduced-motion: reduce) {
+  .app-session-loading__indicator { animation: none; }
+}
+
 .page-loading-skeleton__layout {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

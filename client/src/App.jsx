@@ -12,7 +12,7 @@ import { UserPreferencesProvider, useUserPreferences } from './context/UserPrefe
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import { SignUpDraftProvider } from './context/SignUpDraftContext.jsx';
 import { FlashMessageProvider } from './context/FlashMessageContext.jsx';
-import { isAuthenticatedExperiencePath } from './utils/routePaths.js';
+import { isApplicationPath, isAuthenticatedExperiencePath } from './utils/routePaths.js';
 
 const routeLoaders = {
   signup: () => import('./pages/auth/SignUpPage.jsx'),
@@ -143,7 +143,7 @@ function RouteView({ children }) {
   const { pathname } = useLocation();
   return (
     <RouteErrorBoundary key={pathname} resetKey={pathname}>
-      <Suspense fallback={<PageLoadingSkeleton variant={getLoadingVariant(pathname)} label="Loading page content" />}>
+      <Suspense fallback={isApplicationPath(pathname) ? null : <PageLoadingSkeleton variant={getLoadingVariant(pathname)} label="Loading page content" />}>
         {children}
       </Suspense>
     </RouteErrorBoundary>
@@ -198,7 +198,10 @@ function AuthenticatedExperienceLayout() {
   const { pathname } = useLocation();
   const { member, loading } = useAuth();
   const { ready: preferencesReady } = useUserPreferences();
-  if (loading || (member && !preferencesReady)) return <PageLoadingSkeleton variant={getLoadingVariant(pathname)} label="Preparing your experience" />;
+  if (loading || (member && !preferencesReady)) {
+    if (isApplicationPath(pathname)) return <div className="app-session-loading" role="status" aria-live="polite"><span className="app-session-loading__indicator" aria-hidden="true" />Preparing your workspace…</div>;
+    return <PageLoadingSkeleton variant={getLoadingVariant(pathname)} label="Preparing your experience" />;
+  }
   return member ? <AppLayout /> : <Outlet />;
 }
 
@@ -271,10 +274,8 @@ function HomeRoute() {
 }
 
 function AuthenticatedApplication() {
-  const { member, loading } = useAuth();
-  const { ready: preferencesReady } = useUserPreferences();
+  const { member } = useAuth();
   const location = useLocation();
-  if (loading || (member && !preferencesReady)) return <PageLoadingSkeleton variant={getLoadingVariant(location.pathname)} label="Preparing your experience" />;
   if (!member) {
     const from = `${location.pathname}${location.search}${location.hash}`;
     return <Navigate to="/login" replace state={{ from }} />;
