@@ -4,6 +4,7 @@ import AppIcon from '../../components/app/AppIcon.jsx';
 import PageLoadingSkeleton from '../../components/app/PageLoadingSkeleton.jsx';
 import TaskActionMenu from '../../components/tasks/TaskActionMenu.jsx';
 import TaskChangeDialog from '../../components/tasks/TaskChangeDialog.jsx';
+import QuickStartScheduleBuilder from '../../components/tasks/QuickStartScheduleBuilder.jsx';
 import { useTaskBackend } from '../../context/TaskBackendContext.jsx';
 import { createIdempotencyKey, taskApi } from '../../services/taskApi.js';
 import { createCycleDays, formatTaskDateKey, getScheduleValidation, getScheduledTasksForDay } from '../../utils/taskScheduleBuilder.js';
@@ -336,6 +337,8 @@ export default function CreateTaskSchedulePage() {
     return <div className="task-creation-page"><section className="task-builder-success" role="alert"><p className="app-eyebrow">{eyebrow}</p><h1>{heading}</h1><p>{backendError}</p><button className="task-builder-button task-builder-button--primary" type="button" onClick={refresh}>Try again <span aria-hidden="true">↻</span></button></section></div>;
   }
   if (currentSchedule) return <ActiveScheduleManager schedule={currentSchedule} tasks={serverTasks} allowance={allowance} todayDate={todayDate} loading={loading} onRefresh={refresh} />;
+  const customizeEverything = new URLSearchParams(location.search).get('customize') === '1';
+  if (!customizeEverything) return <QuickStartScheduleBuilder onCancel={() => navigate('/app/tasks')} />;
 
   const selectCycleLength = (length) => {
     setCycleLength(length);
