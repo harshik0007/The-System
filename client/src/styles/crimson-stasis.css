@@ -138,12 +138,20 @@
 .crimson-stasis[data-ambient-disabled='true'] :is(.crimson-stasis__beams, .crimson-stasis__bokeh, .crimson-stasis__aurora, .crimson-stasis__floor) { display: none; }
 
 body.crimson-stasis-running #root { position: relative; z-index: 1; }
-body.crimson-stasis-running .app-layout,
-body.crimson-stasis-running .app-layout__main,
-body.crimson-stasis-running .app-layout__content { background: transparent; }
 
-:root:has(.app-layout[data-app-design='silver']) body.crimson-stasis-running .app-sidebar,
-:root:has(.app-layout[data-app-design='silver']) body.crimson-stasis-running .app-layout :is(.app-panel, .app-topbar) { background: var(--silver-surface); }
+/* Theme page backgrounds used to cover the shared atmosphere. Keep the shell
+   transparent while the app's cards and navigation remain readable surfaces. */
+:root[data-system-theme] body.crimson-stasis-running .app-layout,
+:root[data-system-theme] body.crimson-stasis-running .app-layout__main,
+:root[data-system-theme] body.crimson-stasis-running .app-layout__content {
+  background: transparent;
+}
+
+:root:has(.app-layout[data-app-design='silver']) body.crimson-stasis-running .app-layout,
+:root:has(.app-layout[data-app-design='silver']) body.crimson-stasis-running .app-layout__main,
+:root:has(.app-layout[data-app-design='silver']) body.crimson-stasis-running .app-layout__content {
+  background: transparent;
+}
 
 @keyframes stasis-breathe { from { opacity: 0.9; } to { opacity: 1; } }
 @keyframes stasis-edge-breathe { from { opacity: var(--stasis-edge-low); } to { opacity: var(--stasis-edge-high); } }
