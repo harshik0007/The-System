@@ -223,9 +223,14 @@
 .quick-start-add-button > span { font-size: 19px; line-height: 1; }
 .quick-start-actions { display: flex; justify-content: flex-end; gap: 10px; padding-top: 2px; border-top: 1px solid var(--silver-border); }
 .quick-start-actions--split { justify-content: space-between; }
-.quick-start-toggle { display: grid; grid-template-columns: 20px minmax(0, 1fr); align-items: start; gap: 10px; padding: 13px; border: 1px solid var(--silver-border); border-radius: var(--silver-radius-control); background: var(--surface-card-nested); cursor: pointer; }
-.quick-start-toggle > input { width: 18px; height: 18px; margin: 2px 0 0; accent-color: var(--silver-indigo); }
-.quick-start-toggle > span:last-child { display: grid; gap: 3px; }
+.quick-start-toggle { position: relative; display: grid; grid-template-columns: 42px minmax(0, 1fr); align-items: start; gap: 12px; padding: 15px; border: 1px solid var(--silver-border); border-radius: var(--silver-radius-control); background: var(--surface-card-nested); cursor: pointer; }
+.quick-start-toggle > input { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; clip-path: inset(50%); }
+.quick-start-toggle__switch { position: relative; display: block; width: 40px; height: 24px; grid-column: 1; grid-row: 1; border: 1px solid var(--border-interactive); border-radius: 999px; background: var(--surface-card); transition: background var(--motion-fast), border-color var(--motion-fast), box-shadow var(--motion-fast); }
+.quick-start-toggle__switch::after { position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: var(--color-muted); content: ''; transition: transform var(--motion-fast), background var(--motion-fast); }
+.quick-start-toggle > input:checked + .quick-start-toggle__switch { border-color: var(--silver-indigo); background: var(--silver-indigo); }
+.quick-start-toggle > input:checked + .quick-start-toggle__switch::after { background: var(--surface-card); transform: translateX(16px); }
+.quick-start-toggle > input:focus-visible + .quick-start-toggle__switch { outline: 3px solid var(--focus-ring); outline-offset: 3px; }
+.quick-start-toggle__copy { display: grid; min-width: 0; grid-column: 2; grid-row: 1; gap: 3px; }
 .quick-start-toggle strong { color: var(--color-text); font-size: 14px; }
 .quick-start-toggle small { color: var(--color-muted); font-size: 13px; line-height: 1.45; }
 .quick-start-shared-forfeit { display: grid; gap: 15px; }
@@ -259,8 +264,9 @@
 .quick-start-review__tasks strong { overflow-wrap: anywhere; color: var(--color-text); font-size: 13px; }
 .quick-start-review__tasks small { overflow-wrap: anywhere; color: var(--color-muted); font-size: 12px; line-height: 1.4; }
 .quick-start-facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; }
-.quick-start-facts > p { display: flex; min-width: 0; align-items: flex-start; gap: 9px; margin: 0; padding: 12px; border: 1px solid var(--silver-border); border-radius: 9px; background: var(--surface-card-nested); color: var(--color-muted); font-size: 13px; line-height: 1.5; }
-.quick-start-facts > p > span { display: grid; width: 28px; height: 28px; flex: 0 0 auto; place-items: center; border: 1px solid var(--border-interactive); border-radius: 8px; background: var(--surface-card); color: var(--silver-indigo); }
+.quick-start-facts > p { display: grid; min-width: 0; grid-template-columns: 28px minmax(0, 1fr); align-items: start; gap: 9px; margin: 0; padding: 12px; border: 1px solid var(--silver-border); border-radius: 9px; background: var(--surface-card-nested); color: var(--color-muted); font-size: 13px; line-height: 1.5; }
+.quick-start-facts__icon { display: grid; width: 28px; height: 28px; place-items: center; border: 1px solid var(--border-interactive); border-radius: 8px; background: var(--surface-card); color: var(--silver-indigo); }
+.quick-start-facts__text { min-width: 0; overflow-wrap: break-word; }
 .quick-start-facts .app-icon { width: 15px; height: 15px; }
 .quick-start-acknowledgement { display: flex; min-width: 0; flex-wrap: wrap; align-items: center; gap: 9px; color: var(--color-text); font-size: 14px; line-height: 1.5; }
 .quick-start-acknowledgement input { width: 18px; height: 18px; flex: 0 0 auto; accent-color: var(--silver-indigo); }

@@ -325,7 +325,7 @@ export default function QuickStartScheduleBuilder({ onCancel }) {
 
     {step === 2 && <section className="quick-start-card" aria-labelledby="quick-start-screen-title">
       <ScreenHeading step="2" title="What happens if you miss one?" description="Pick a small Forfeit you'll do if you miss a Task. Keep it safe and realistic." />
-      <label className="quick-start-toggle"><input type="checkbox" checked={sameForAll} onChange={(event) => toggleSameForAll(event.target.checked)} /><span className="quick-start-toggle__switch" aria-hidden="true" /><span><strong>Same Forfeit for all Tasks</strong><small>Start with one choice and customize individual Tasks if you want.</small></span></label>
+      <label className="quick-start-toggle"><input type="checkbox" checked={sameForAll} onChange={(event) => toggleSameForAll(event.target.checked)} /><span className="quick-start-toggle__switch" aria-hidden="true" /><span className="quick-start-toggle__copy"><strong>Same Forfeit for all Tasks</strong><small>Start with one choice and customize individual Tasks if you want.</small></span></label>
 
       {sameForAll ? <div className="quick-start-shared-forfeit">
         <ForfeitChips value={sharedForfeit} onChange={chooseSharedForfeit} />
@@ -365,9 +365,9 @@ export default function QuickStartScheduleBuilder({ onCancel }) {
         </ul>
       </section>
       <div className="quick-start-facts">
-        <p><span aria-hidden="true"><AppIcon name="activity" /></span><TermText>Do at least 5 a day to build your Streak.</TermText></p>
-        <p><span aria-hidden="true"><AppIcon name="shield" /></span><TermText>You start with 3 lives (Grace Points).</TermText></p>
-        <p><span aria-hidden="true"><AppIcon name="clock" /></span><TermText>A missed Task gives you 72 hours to complete its Recovery Quest.</TermText></p>
+        <p><span className="quick-start-facts__icon" aria-hidden="true"><AppIcon name="activity" /></span><span className="quick-start-facts__text"><TermText>Do at least 5 a day to build your Streak.</TermText></span></p>
+        <p><span className="quick-start-facts__icon" aria-hidden="true"><AppIcon name="shield" /></span><span className="quick-start-facts__text"><TermText>You start with 3 lives (Grace Points).</TermText></span></p>
+        <p><span className="quick-start-facts__icon" aria-hidden="true"><AppIcon name="clock" /></span><span className="quick-start-facts__text"><TermText>A missed Task gives you 72 hours to complete its Recovery Quest.</TermText></span></p>
       </div>
       <label className="quick-start-acknowledgement"><input type="checkbox" checked={rulesAcknowledged} onChange={(event) => setRulesAcknowledged(event.target.checked)} /><span>I understand the rules.</span><Link to="/rules#the-60-second-version" target="_blank" rel="noreferrer">Read the full rules</Link></label>
       {saveError && <p className="quick-start-form-error" role="alert">{saveError}</p>}
