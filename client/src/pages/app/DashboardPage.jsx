@@ -12,6 +12,7 @@ import GracePointSummary from '../../components/app/GracePointSummary.jsx';
 import DisciplinePointsSummary from '../../components/app/DisciplinePointsSummary.jsx';
 import EmergencyPauseControls from '../../components/app/EmergencyPauseControls.jsx';
 import FirstRunChecklist from '../../components/app/FirstRunChecklist.jsx';
+import ShareProgressActions from '../../components/app/ShareProgressActions.jsx';
 import { APPEARANCE_THEMES } from '../../data/appearanceThemes.js';
 import { useTaskBackend } from '../../context/TaskBackendContext.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
@@ -122,6 +123,8 @@ export default function DashboardPage() {
         <div><p className="app-eyebrow">PLAYER OVERVIEW</p><h1>Welcome back, {member?.username || 'member'}.</h1><p>Your progress is built through consistent action.</p></div>
         <span className="app-demo-label"><i aria-hidden="true" />LIVE PROGRESSION</span>
       </header>
+
+      <ShareProgressActions rank={rank} streak={displayedDisciplineState.currentStreak} />
 
       <FirstRunChecklist progress={firstRunProgress} />
 

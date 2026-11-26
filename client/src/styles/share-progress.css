@@ -1,0 +1,49 @@
+.share-progress {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.75rem 1.5rem;
+  margin-block: 1rem 1.5rem;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--silver-border);
+  border-radius: var(--silver-radius-card);
+  background: var(--silver-surface);
+  box-shadow: var(--silver-shadow-card);
+}
+
+.share-progress__copy .app-eyebrow { margin: 0 0 0.35rem; }
+.share-progress__copy h2 { margin: 0; color: var(--silver-text); font-size: 1.125rem; }
+.share-progress__copy > p:last-child { margin: 0.35rem 0 0; color: var(--silver-muted); font-size: 0.875rem; }
+.share-progress__actions { display: flex; flex-wrap: wrap; gap: 0.625rem; }
+.share-progress__button {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.65rem 0.9rem;
+  border: 1px solid var(--silver-border);
+  border-radius: var(--silver-radius-control);
+  background: var(--silver-surface);
+  color: var(--silver-text);
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+  transition: background var(--motion-fast), border-color var(--motion-fast), color var(--motion-fast), transform var(--motion-fast);
+}
+.share-progress__button:hover { border-color: var(--silver-indigo); background: var(--silver-indigo-soft); color: var(--silver-text); transform: translateY(-1px); }
+.share-progress__button:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: 3px; }
+.share-progress__button--primary { border-color: var(--silver-indigo); background: var(--silver-indigo); color: #fff; }
+.share-progress__button--primary:hover { border-color: var(--silver-indigo-hover); background: var(--silver-indigo-hover); color: #fff; }
+.share-progress__button svg { width: 18px; height: 18px; flex: 0 0 18px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
+.share-progress__status { grid-column: 1 / -1; min-height: 1.25rem; margin: 0; color: var(--silver-muted); font-size: 0.8125rem; }
+
+@media (max-width: 680px) {
+  .share-progress { grid-template-columns: minmax(0, 1fr); padding: 1rem; }
+  .share-progress__actions { display: grid; grid-template-columns: 1fr; }
+  .share-progress__button { width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .share-progress__button { transition: none; }
+}
