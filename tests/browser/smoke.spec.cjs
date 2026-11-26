@@ -4,7 +4,7 @@ const { auditRoute } = require('./routeAuditHelper.cjs');
 
 const smokeRoutes = [
   { path: '/', expectedHeading: 'Progress is built, not given' },
-  { path: '/app/dashboard', expectedHeading: 'Welcome back' },
+  { path: '/app/dashboard', expectedHeading: 'Today' },
   { path: '/app/discipline', expectedHeading: 'Discipline' },
 ];
 

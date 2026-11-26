@@ -21,7 +21,7 @@ test('User defaults preserve independent lifetime records and protect private fi
   assert.equal(user.resetCount, 0);
   assert.equal(user.lifetimeLongestStreak, 0);
   assert.equal(user.highestRankAchieved, null);
-  assert.equal(user.appearancePreferences.theme, 'dark-navy');
+  assert.equal(Object.hasOwn(user.appearancePreferences.toObject(), 'theme'), false);
   assert.equal(user.validateSync(), undefined);
   const serialized = user.toJSON();
   assert.equal(serialized.resetCount, 0);
@@ -31,20 +31,14 @@ test('User defaults preserve independent lifetime records and protect private fi
   assert.equal('emailNormalized' in serialized, false);
 });
 
-test('User appearance preference theme accepts only registered theme IDs and defaults existing preference shapes', () => {
+test('User appearance preferences retain supported controls and ignore retired fields', () => {
   const legacy = new User({ appearancePreferences: { clickRipple: false } });
-  const invalid = new User({ appearancePreferences: { theme: 'rank-01' } });
-  const valid = new User({ appearancePreferences: { theme: 'obsidian' } });
-  const galaxion = new User({ appearancePreferences: { theme: 'galaxion' } });
-  const legacyWaterFury = new User({ appearancePreferences: { theme: 'waterfury' } });
-  const replacedTheme = new User({ appearancePreferences: { theme: 'nexus-prime' } });
-  assert.equal(legacy.appearancePreferences.theme, 'dark-navy');
+  const retired = new User({ appearancePreferences: { theme: 'obsidian', clickRipple: false } });
+  assert.equal(Object.hasOwn(legacy.appearancePreferences.toObject(), 'theme'), false);
+  assert.equal(Object.hasOwn(retired.appearancePreferences.toObject(), 'theme'), false);
   assert.equal(legacy.appearancePreferences.clickRipple, false);
-  assert.ok(invalid.validateSync());
-  assert.equal(valid.validateSync(), undefined);
-  assert.equal(galaxion.validateSync(), undefined);
-  assert.ok(legacyWaterFury.validateSync());
-  assert.ok(replacedTheme.validateSync());
+  assert.equal(retired.appearancePreferences.clickRipple, false);
+  assert.equal(retired.validateSync(), undefined);
 });
 
 test('User rejects negative/fractional counters, invalid Rank and invalid Member Since dates', () => {

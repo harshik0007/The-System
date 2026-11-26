@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useFlashMessages } from '../../context/FlashMessageContext.jsx';
 import '../../styles/share-progress.css';
 
 function copyText(value) {
@@ -21,7 +21,7 @@ function copyTextFallback(value) {
 }
 
 export default function ShareProgressActions({ rank, streak = 0 }) {
-  const [message, setMessage] = useState('');
+  const { notifySuccess, notifyError } = useFlashMessages();
   const siteUrl = window.location.origin;
   const inviteText = `I'm building consistency on THE SYSTEM. Join me: ${siteUrl}`;
   const progressText = rank
@@ -30,7 +30,8 @@ export default function ShareProgressActions({ rank, streak = 0 }) {
 
   async function inviteFriend() {
     const copied = await copyText(inviteText);
-    setMessage(copied ? 'Invite message copied.' : 'Copy is unavailable in this browser.');
+    if (copied) notifySuccess('Invite message copied.');
+    else notifyError('Copy is unavailable in this browser.');
   }
 
   async function shareProgress() {
@@ -38,14 +39,15 @@ export default function ShareProgressActions({ rank, streak = 0 }) {
     if (navigator.share) {
       try {
         await navigator.share(shareData);
-        setMessage('Share sheet opened.');
+        notifySuccess('Share sheet opened.');
         return;
       } catch (error) {
         if (error?.name === 'AbortError') return;
       }
     }
     const copied = await copyText(`${progressText} ${siteUrl}`);
-    setMessage(copied ? 'Progress message copied.' : 'Copy is unavailable in this browser.');
+    if (copied) notifySuccess('Progress message copied.');
+    else notifyError('Copy is unavailable in this browser.');
   }
 
   return (
@@ -65,7 +67,6 @@ export default function ShareProgressActions({ rank, streak = 0 }) {
           Share my progress
         </button>
       </div>
-      <p className="share-progress__status" role="status" aria-live="polite">{message}</p>
     </section>
   );
 }

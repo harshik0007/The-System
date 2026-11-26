@@ -99,7 +99,6 @@ async function createFreshRunWithinSession({ userId, user, oldRun, sourceEventKe
   const currentRankSlug = getRankSlugForLevel(oldRun.level);
   if (rankOrder(currentRankSlug) > rankOrder(user.highestRankAchieved)) user.highestRankAchieved = currentRankSlug;
   user.currentProgressionRunId = newRun._id;
-  user.appearancePreferences.theme = 'dark-navy';
   await user.save({ session });
 
   const [resetEvent] = await ProgressionResetEvent.create([{

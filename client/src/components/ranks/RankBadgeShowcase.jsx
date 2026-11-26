@@ -11,8 +11,8 @@ export default function RankBadgeShowcase({ rank, isEarned = false, serialNumber
         <div className="rank-badge-showcase__heading"><span>EXCLUSIVE RANK BADGE</span><b>{isEarned ? 'UNLOCKED' : 'PREVIEW'}<i aria-hidden="true" /></b></div>
         <div className="rank-badge-showcase__art">
           <RankBadge rank={rank} serialNumber={serial} size="large" presentation={presentation} />
+          <p className="rank-badge-showcase__caption">{isEarned ? 'This Rank badge is unlocked on this account.' : 'Earn this Rank to unlock its exclusive badge.'}</p>
         </div>
-        <p>{isEarned ? 'This Rank badge is unlocked on this account.' : 'Earn this Rank to unlock its exclusive badge.'}</p>
       </aside>
       {isEarned && achievementRevealActive && <RankUnlockReveal rank={rank} serialNumber={serialNumber} active={achievementRevealActive} />}
     </>

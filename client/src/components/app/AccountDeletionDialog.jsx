@@ -4,8 +4,10 @@ import AppIcon from './AppIcon.jsx';
 import { SkeletonLine } from './PageLoadingSkeleton.jsx';
 import { authService } from '../../services/authService.js';
 import { apiUrl } from '../../services/apiClient.js';
+import { useFlashMessages } from '../../context/FlashMessageContext.jsx';
 
 export default function AccountDeletionDialog({ open, authMethod, initialNotice = '', onClose, onConfirm }) {
+  const { notifyError } = useFlashMessages();
   const dialogRef = useRef(null);
   const [phrase, setPhrase] = useState('');
   const [password, setPassword] = useState('');
@@ -61,7 +63,9 @@ export default function AccountDeletionDialog({ open, authMethod, initialNotice 
     try {
       await onConfirm({ confirmationPhrase: phrase, ...(authMethod === 'local' ? { currentPassword: password } : {}) });
     } catch (requestError) {
-      setError(requestError?.message || 'Account deletion could not be completed. Your account remains unchanged.');
+      const message = requestError?.message || 'Account deletion could not be completed. Your account remains unchanged.';
+      setError(message);
+      notifyError(message);
       setBusy(false);
     }
   };

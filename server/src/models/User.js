@@ -34,7 +34,6 @@ const authProvidersSchema = new Schema({
   google: { type: Boolean, default: false, required: true },
 }, { _id: false });
 const appearancePreferencesSchema = new Schema({
-  theme: { type: String, enum: ['dark-navy', 'obsidian', 'aurora', 'eclipse', 'galaxion'], default: 'dark-navy', required: true },
   voidShardCursor: { type: Boolean, default: true, required: true },
   clickRipple: { type: Boolean, default: true, required: true },
   nonessentialAnimations: { type: Boolean, default: true, required: true },

@@ -5,8 +5,8 @@ import BrandLogo from './BrandLogo.jsx';
 const navigation = [
   ['Overview', '#top'],
   ['How it works', '#how-it-works'],
-  ['Features', '#features'],
-  ['Progression', '#progression'],
+  ['Ranks', '#progression'],
+  ['Leaderboard', '#leaderboard'],
 ];
 
 export default function Navbar() {
@@ -18,7 +18,7 @@ export default function Navbar() {
     || location.pathname === '/badges'
     || /^\/ranks\/[^/]+\/?$/.test(location.pathname);
   const informationLinks = [
-    ['About', '/about'], ['How it works', '/how-it-works'], ['Features', '/features'], ['Seven ranks', '/ranks'], ['Badges', '/badges'], ['Rules', '/rules'],
+    ['About', '/about'], ['How it works', '/how-it-works'], ['Features', '/features'], ['Seven ranks', '/ranks'], ['FAQ', '/faq'],
   ];
   const links = onLanding ? navigation : informationLinks;
   const showPageNavigation = !isRankOrBadgePage;
@@ -54,7 +54,7 @@ export default function Navbar() {
       </>}
       <div className="nav-actions">
         <Link className="nav-login" to="/login">Log in</Link>
-        <Link className="nav-signup" to="/signup">Sign up</Link>
+        <Link className="nav-signup" to="/signup">Get started</Link>
       </div>
     </header>
   );

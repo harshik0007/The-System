@@ -23,7 +23,7 @@ const headings = {
   '/how-it-works': 'From intention to verified progress', '/features': 'Tools for a more intentional life',
   '/ranks': 'Seven Ranks', '/rules': 'Know the commitments', '/faq': 'Frequently asked questions',
   '/getting-started': 'Make your first commitment count', '/contact': 'How can we help',
-  '/app': 'Welcome back', '/app/dashboard': 'Welcome back', '/app/tasks': 'Daily Tasks',
+  '/app': 'Today', '/app/dashboard': 'Today', '/app/tasks': 'Daily Tasks',
   '/app/recovery-quests': 'Recovery Quests', '/app/discipline': 'Discipline',
   '/app/leaderboard': 'Community Leaderboard', '/app/settings': 'Settings',
   '/app/monthly-analysis': 'Monthly Analysis', '/app/notifications': 'Notifications',

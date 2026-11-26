@@ -160,7 +160,7 @@ test('read-only critical interactions: leaderboard, reports, profile, task dialo
       await expect(button).toHaveAttribute('aria-current', 'page');
       visitedCategories.push(category);
     }
-    await openRoute(page, '/app/dashboard', 'Welcome back');
+    await openRoute(page, '/app/dashboard', 'Today');
     await openRoute(page, '/app/settings', 'Settings');
     const settingsReady = await page.locator('.settings-content').isVisible().catch(() => false);
     const settingsEndpointCalls = events.apiTimings.filter((request) => request.url.endsWith('/leaderboard/profile-settings')).length;
@@ -227,7 +227,7 @@ test('read-only critical interactions: leaderboard, reports, profile, task dialo
     const tooltipVisible = await page.getByRole('tooltip').isVisible().catch(() => false);
     const tooltipText = tooltipVisible ? await page.getByRole('tooltip').innerText() : '';
     const currentStatusVisible = /In Progress|Qualified|Protected/i.test(selectedDayText);
-    await openRoute(page, '/app/dashboard', 'Welcome back');
+    await openRoute(page, '/app/dashboard', 'Today');
     const pauseControl = page.locator('.emergency-pause-control');
     const pauseAvailable = await pauseControl.isVisible().catch(() => false);
     const pauseStatus = pauseAvailable ? await pauseControl.innerText() : '';

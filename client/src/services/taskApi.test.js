@@ -23,7 +23,7 @@ test('a non-JSON proxy 500 is distinguished from an Express API error', async (t
     assert.equal(error.status, 500);
     assert.equal(error.code, 'UPSTREAM_UNAVAILABLE');
     assert.equal(error.requestId, null);
-    assert.match(error.message, /could not reach the service/);
+    assert.match(error.message, /could not complete that request/);
     return true;
   });
 });

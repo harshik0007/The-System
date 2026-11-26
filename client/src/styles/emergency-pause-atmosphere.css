@@ -1,0 +1,160 @@
+body.emergency-pause-atmosphere-running #root {
+  position: relative;
+  z-index: 2;
+}
+
+body.emergency-pause-atmosphere-running .app-layout {
+  background: transparent;
+}
+
+.emergency-pause-atmosphere {
+  position: fixed;
+  z-index: 1;
+  inset: 0;
+  overflow: hidden;
+  background: transparent;
+  opacity: 1;
+  pointer-events: none;
+  transition: opacity 1500ms ease;
+  contain: strict;
+}
+
+.emergency-pause-atmosphere--entering { opacity: 0; }
+.emergency-pause-atmosphere--ending { opacity: 0; }
+.emergency-pause-atmosphere[data-document-visible='false'] .emergency-pause-atmosphere__aura::before,
+.emergency-pause-atmosphere[data-document-visible='false'] .emergency-pause-atmosphere__aura::after,
+.emergency-pause-atmosphere[data-document-visible='false'] .emergency-pause-atmosphere__leaf,
+.emergency-pause-atmosphere[data-document-visible='false'] .emergency-pause-atmosphere__particle,
+.emergency-pause-atmosphere--ending .emergency-pause-atmosphere__aura::before,
+.emergency-pause-atmosphere--ending .emergency-pause-atmosphere__aura::after,
+.emergency-pause-atmosphere--ending .emergency-pause-atmosphere__leaf,
+.emergency-pause-atmosphere--ending .emergency-pause-atmosphere__particle {
+  animation-play-state: paused;
+}
+
+.emergency-pause-atmosphere__aura {
+  position: absolute;
+  inset: 0;
+}
+
+.emergency-pause-atmosphere__aura::before,
+.emergency-pause-atmosphere__aura::after {
+  position: absolute;
+  inset: 0;
+  content: '';
+}
+
+.emergency-pause-atmosphere__aura::before {
+  background:
+    radial-gradient(ellipse 38% 84% at 0% 48%, rgb(166 21 48 / 45%), transparent 76%),
+    radial-gradient(ellipse 38% 84% at 100% 53%, rgb(156 18 45 / 43%), transparent 76%),
+    radial-gradient(ellipse 76% 43% at 50% 100%, rgb(135 16 42 / 22%), transparent 75%);
+  opacity: .92;
+  animation: emergency-pause-aura-breathe 13s ease-in-out infinite alternate;
+}
+
+.emergency-pause-atmosphere__aura::after {
+  box-shadow:
+    inset 0 0 172px rgb(133 13 38 / 21%),
+    inset 0 0 56px rgb(194 28 53 / 10%),
+    inset 0 -12vh 42vh rgb(112 13 35 / 9%);
+  opacity: .88;
+  animation: emergency-pause-edge-light 17s ease-in-out infinite alternate;
+}
+
+.emergency-pause-atmosphere__leaves,
+.emergency-pause-atmosphere__particles {
+  position: absolute;
+  inset: 0;
+}
+
+.emergency-pause-atmosphere__leaf {
+  position: absolute;
+  top: -9vh;
+  left: var(--leaf-left);
+  display: block;
+  width: var(--leaf-width);
+  height: var(--leaf-height);
+  color: var(--leaf-color);
+  opacity: 0;
+  transform-origin: 50% 50%;
+  animation: emergency-pause-leaf-fall var(--leaf-duration) var(--leaf-delay) linear infinite;
+  will-change: transform, opacity;
+}
+
+.emergency-pause-atmosphere__leaf svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.emergency-pause-atmosphere__leaf-shape { fill: currentColor; stroke: rgb(255 190 196 / 62%); stroke-width: .85; }
+.emergency-pause-atmosphere__leaf-vein { fill: none; stroke: rgb(255 220 220 / 68%); stroke-linecap: round; stroke-width: .75; }
+.emergency-pause-atmosphere__leaf svg { filter: brightness(1.18) saturate(1.16); }
+.emergency-pause-atmosphere__leaf.is-luminous { filter: drop-shadow(0 0 8px rgb(211 39 62 / 48%)); }
+
+.emergency-pause-atmosphere__particle {
+  position: absolute;
+  top: var(--particle-top);
+  left: var(--particle-left);
+  width: var(--particle-size);
+  height: var(--particle-size);
+  border-radius: 50%;
+  background: var(--particle-color, #b82a40);
+  opacity: 0;
+  animation: emergency-pause-particle-float var(--particle-duration) var(--particle-delay) ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.emergency-pause-atmosphere__particle.is-luminous {
+  background: #f05262;
+  box-shadow: 0 0 9px rgb(222 48 70 / 58%), 0 0 17px rgb(178 25 48 / 27%);
+}
+
+@keyframes emergency-pause-aura-breathe {
+  from { opacity: .66; }
+  to { opacity: .96; }
+}
+
+@keyframes emergency-pause-edge-light {
+  from { opacity: .7; }
+  to { opacity: .98; }
+}
+
+@keyframes emergency-pause-leaf-fall {
+  0% { opacity: 0; transform: translate3d(0, -9vh, 0) rotate(-24deg); }
+  4% { opacity: calc(var(--leaf-opacity) + .12); }
+  22% { transform: translate3d(var(--leaf-drift-1), 20vh, 0) rotate(38deg); }
+  46% { transform: translate3d(var(--leaf-drift-2), 52vh, 0) rotate(112deg); }
+  72% { transform: translate3d(var(--leaf-drift-3), 84vh, 0) rotate(190deg); }
+  91% { opacity: calc(var(--leaf-opacity) + .12); transform: translate3d(var(--leaf-drift-end), 108vh, 0) rotate(278deg); }
+  100% { opacity: 0; transform: translate3d(var(--leaf-drift-end), 120vh, 0) rotate(310deg); }
+}
+
+@keyframes emergency-pause-particle-float {
+  0%, 100% { opacity: 0; transform: translate3d(0, 0, 0) scale(.72); }
+  18% { opacity: calc(var(--particle-opacity) + .14); }
+  53% { opacity: calc(var(--particle-opacity) + .14); transform: translate3d(var(--particle-drift), var(--particle-mid-y), 0) scale(1); }
+  78% { opacity: calc(var(--particle-opacity) + .14); }
+  92% { opacity: 0; transform: translate3d(var(--particle-drift-back), var(--particle-end-y), 0) scale(.78); }
+}
+
+@media (max-width: 640px) {
+  .emergency-pause-atmosphere__leaf:nth-child(n + 11),
+  .emergency-pause-atmosphere__particle:nth-child(n + 15) { display: none; }
+  .emergency-pause-atmosphere__leaf { width: min(var(--leaf-width), 22px); height: auto; }
+  .emergency-pause-atmosphere__aura::before {
+    background:
+      radial-gradient(ellipse 42% 75% at 0% 48%, rgb(150 19 43 / 30%), transparent 77%),
+      radial-gradient(ellipse 42% 75% at 100% 53%, rgb(140 16 39 / 31%), transparent 77%),
+      radial-gradient(ellipse 72% 38% at 50% 100%, rgb(119 14 36 / 15%), transparent 75%);
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  .emergency-pause-atmosphere__leaf:nth-child(n + 16),
+  .emergency-pause-atmosphere__particle:nth-child(n + 19) { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .emergency-pause-atmosphere { transition-duration: 1ms; }
+  .emergency-pause-atmosphere__leaf,
+  .emergency-pause-atmosphere__particle { display: none; animation: none !important; }
+  .emergency-pause-atmosphere__aura::before { opacity: .68; animation: none !important; }
+  .emergency-pause-atmosphere__aura::after { opacity: .7; animation: none !important; }
+}

@@ -13,6 +13,7 @@ import AppIcon from './AppIcon.jsx';
 import { taskApi } from '../../services/taskApi.js';
 import '../../styles/app-shell.css';
 import '../../styles/discipline.css';
+import '../../styles/interaction-fixes.css';
 import '../../styles/profile-task-layout-fixes.css';
 import '../../styles/modal-close-fixes.css';
 
@@ -93,7 +94,7 @@ export default function AppLayout() {
   return (
     <AccountActionsProvider>
     <NotificationCenterProvider>
-    <div className={`app-layout${sidebarCollapsed && !isMobile ? ' app-layout--collapsed' : ''}`}>
+    <div className={`app-layout${sidebarCollapsed && !isMobile ? ' app-layout--collapsed' : ''}`} data-app-design="silver">
       <AppSidebar
         collapsed={sidebarCollapsed}
         isMobile={isMobile}

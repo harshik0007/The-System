@@ -11,7 +11,7 @@ export default function RankBadge({ rank, serialNumber, size = 'medium', classNa
   const accessiblePresentation = presentation === 'earned' ? 'earned badge' : isReference ? 'reference artwork with no member serial assigned' : 'badge preview';
   return (
     <RankBadgeAura rank={rank} presentation={presentation} unlocking={unlocking} size={size} className={className}>
-      <svg className={`rank-badge rank-badge--collectible rank-badge--${rank.slug}`} viewBox="0 0 320 430" role="img"
+      <svg className={`rank-badge rank-badge--collectible${isReference ? ' rank-badge--reference' : ''} rank-badge--${rank.slug}`} viewBox="0 0 320 430" role="img"
         style={{ '--rank-metal-fill': `url(#${id}-emblem-metal)`, '--rank-inlay-fill': `url(#${id}-emblem-inlay)` }}
         aria-label={`${rank.name}, Rank ${rank.number} ${accessiblePresentation}${isReference ? '' : `, serial ${serial}`}`} focusable="false">
         <text x="160" y="72" className="rank-badge__brand" textAnchor="middle" fill="#F5FAFF">THE SYSTEM</text>

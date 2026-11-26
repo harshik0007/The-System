@@ -72,7 +72,7 @@ export default function ProfilePage() {
       <section className="profile-identity app-panel">
         <MemberAvatar name={username} mark={avatarMark} className="profile-identity__avatar" />
         <div><p className="app-eyebrow">MEMBER PROFILE</p><h2>{accountLoading ? <SkeletonLine width="short" label="Loading username" /> : username || 'Member profile'}</h2><p className="profile-identity__name">{accountLoading ? <SkeletonLine width="medium" label="Loading profile name" /> : personalName || 'Name not added'}</p><p>Member since {accountLoading && !memberSince ? <SkeletonLine width="medium" label="Loading member date" /> : formatMemberSince(memberSince)}</p></div>
-        <div className="profile-identity__since"><small>ACCOUNT STATUS</small><strong>{accountLoading ? <SkeletonLine width="short" label="Loading account status" /> : accountSettings?.account?.status || '—'}</strong><button className="profile-identity__logout" type="button" onClick={requestLogout}>Log out</button></div>
+        <div className="profile-identity__since"><small>ACCOUNT STATUS</small><strong>{accountLoading ? <SkeletonLine width="short" label="Loading account status" /> : accountSettings?.account?.status || '—'}</strong><button className="profile-identity__logout account-logout-action" type="button" onClick={requestLogout}>Log out</button></div>
       </section>
 
       <section className="profile-account app-panel" aria-labelledby="profile-account-title">

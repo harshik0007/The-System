@@ -11,7 +11,6 @@ import { PROGRESSION_RANKS } from '../config/progressionConfiguration.js';
 import { NotFoundError, ServiceUnavailableError, ValidationError } from '../utils/httpErrors.js';
 import { addIstCalendarDays, getIstDateKey } from '../utils/ist.js';
 import { getRankSlugForLevel } from '../utils/ranks.js';
-import { DEFAULT_THEME, getEligibleTheme } from '../utils/themeEntitlements.js';
 import { getLevelFromTotalXp } from './progressionXpService.js';
 import { calculateNextPersonalBest, rankLeaderboardRows, toSafeTieBreakDto } from '../utils/leaderboardRanking.js';
 import { withMongoTransaction } from './mongoTransaction.js';
@@ -419,7 +418,6 @@ export async function getPublicMemberProfile({ requesterId, publicHandle, now = 
       middleName: privacy.fullName ? user.middleName || '' : null,
       lastName: privacy.fullName ? user.lastName || '' : null,
       avatarMark: user.avatarMark || 'initials',
-      theme: getEligibleTheme(user.appearancePreferences?.theme || DEFAULT_THEME, run?.level ?? 0),
       memberSince: user.memberSince,
       currentRank: privacy.currentRank && rank ? { slug: rank.slug, number: rank.number, name: rank.name, color: rank.color } : null,
       level: privacy.level && run ? run.level : null,

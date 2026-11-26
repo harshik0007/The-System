@@ -13,14 +13,14 @@ import DisciplinePointsSummary from '../../components/app/DisciplinePointsSummar
 import EmergencyPauseControls from '../../components/app/EmergencyPauseControls.jsx';
 import FirstRunChecklist from '../../components/app/FirstRunChecklist.jsx';
 import ShareProgressActions from '../../components/app/ShareProgressActions.jsx';
-import { APPEARANCE_THEMES } from '../../data/appearanceThemes.js';
 import { useTaskBackend } from '../../context/TaskBackendContext.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { RECOVERY_STATUS } from '../../utils/recoveryQuestManager.js';
 import { getFirstRunProgress } from '../../utils/firstRunProgress.js';
 import { selectEligibleTaskOccurrences } from '../../utils/taskOccurrenceSelection.js';
-import { getNextAppearanceThemeReward } from '../../data/appearanceThemes.js';
 import '../../styles/public-pages.css';
+import '../../styles/dashboard-redesign.css';
+import '../../styles/first-run-help.css';
 
 function remainingLabel(milliseconds) {
   const minutes = Math.max(0, Math.floor((Number(milliseconds) || 0) / 60_000));
@@ -38,8 +38,6 @@ export default function DashboardPage() {
   const serverRun = serverProgression?.progression || null;
   const progressionXp = serverRun?.xpSummary || null;
   const rank = ranks.find((item) => item.slug === serverRun?.currentRankSlug) || null;
-  const themeRewardProgress = backendLoaded ? getNextAppearanceThemeReward(rank?.number) : null;
-  const nextThemeReward = themeRewardProgress?.theme || null;
   const effectiveRecoveryState = backendLoaded ? {
     gracePoints: serverRun?.gracePoints ?? serverGracePoints?.balance ?? null,
     gracePointEvents: (gracePointTransactions || []).map((event) => ({
@@ -68,6 +66,7 @@ export default function DashboardPage() {
     && task.createdEffectiveDate > todayDate
     && task.cycleDays.includes(todayCycleDay)).length;
   const taskCompletion = scheduledTaskCount ? Math.round((completedTasks / scheduledTaskCount) * 100) : 0;
+  const nextTask = todayTasks.find((task) => !task.completed);
   const currentLevel = serverRun?.level ?? 0;
   const levelProgress = serverRun ? {
     percent: serverRun.levelProgressPercent,
@@ -75,6 +74,9 @@ export default function DashboardPage() {
     requirement: serverRun.nextLevelRequirement,
   } : { percent: 0, earnedInLevel: 0, requirement: 0 };
   const displayedXp = serverRun?.totalXp ?? 0;
+  const nextRankDistance = progressionXp?.nextRank
+    ? Math.max(0, Number(progressionXp.nextRank.minimumLevel) - Number(currentLevel))
+    : null;
   const displayedDisciplineState = {
     dpBalance: Number(serverDiscipline?.dpBalance ?? serverRun?.disciplinePoints ?? 0),
     currentStreak: serverDiscipline?.currentStreak ?? serverRun?.currentStreak ?? 0,
@@ -108,7 +110,7 @@ export default function DashboardPage() {
   if (!backendLoaded) {
     if (taskDataLoading || recoveryLoading) return <PageLoadingSkeleton variant="dashboard" label="Loading dashboard data" />;
     return <div className="dashboard-page" ref={pageRef}>
-      <header className="dashboard-welcome"><div><p className="app-eyebrow">PLAYER OVERVIEW</p><h1>Welcome back, {member?.username || 'member'}.</h1><p>Your progress and activity will appear here.</p></div></header>
+      <header className="dashboard-welcome"><div><p className="app-eyebrow">TODAY</p><h1>Today</h1><p>Your progress and next Task will appear here.</p></div></header>
       <section className="app-panel dashboard-unavailable" role={taskDataLoading || recoveryLoading ? 'status' : 'alert'}>
         <h2>Dashboard data is unavailable</h2>
         <p>{taskDataError || 'There is no active Progression Run for this account yet.'}</p>
@@ -119,15 +121,27 @@ export default function DashboardPage() {
 
   return (
     <div className="dashboard-page" ref={pageRef}>
-      <header className="dashboard-welcome dashboard-reveal">
-        <div><p className="app-eyebrow">PLAYER OVERVIEW</p><h1>Welcome back, {member?.username || 'member'}.</h1><p>Your progress is built through consistent action.</p></div>
-        <span className="app-demo-label"><i aria-hidden="true" />LIVE PROGRESSION</span>
+      <header className="dashboard-welcome dashboard-hero dashboard-reveal">
+        <div className="dashboard-hero__intro">
+          <p className="app-eyebrow">YOUR DAILY PLAN</p>
+          <h1>Today</h1>
+          <p>Welcome back, {member?.username || 'member'}. One clear action is enough to keep your progress moving.</p>
+        </div>
+        <section className="dashboard-hero__focus" aria-labelledby="dashboard-focus-heading">
+          <div className="dashboard-hero__focus-label"><span><AppIcon name="activity" /> NEXT TASK</span><span className={nextTask ? 'is-ready' : scheduledTaskCount ? 'is-complete' : ''}><i />{nextTask ? 'READY' : scheduledTaskCount ? 'COMPLETE' : 'OPEN'}</span></div>
+          <h2 id="dashboard-focus-heading">{nextTask?.title || (scheduledTaskCount ? 'Today’s Tasks are complete' : 'No Task planned today')}</h2>
+          <p>{nextTask ? 'Pick up where you left off and complete this Task when you are ready.' : scheduledTaskCount ? 'You have completed every Task scheduled for this cycle day.' : 'Open today’s Tasks to review your schedule or plan your next step.'}</p>
+          <div className="dashboard-hero__focus-progress">
+            <div><span>Today's follow-through</span><strong>{completedTasks}<i> / </i>{scheduledTaskCount}</strong></div>
+            <AppProgressBar className="app-progress--discipline" value={taskCompletion} label="Today's Task completion" description={`${completedTasks} of ${scheduledTaskCount} scheduled Tasks completed.`} />
+          </div>
+          <Link className="dashboard-hero__button dashboard-hero__focus-link" to="/app/tasks">Open today’s Tasks <AppIcon name="arrow" /></Link>
+        </section>
       </header>
 
       <ShareProgressActions rank={rank} streak={displayedDisciplineState.currentStreak} />
 
       <FirstRunChecklist progress={firstRunProgress} />
-
 
       <div className="dashboard-feature-grid">
         <section className="app-panel dashboard-rank-panel dashboard-reveal" aria-labelledby="dashboard-rank-heading" style={{ '--rank-accent': rank.color }}>
@@ -141,8 +155,7 @@ export default function DashboardPage() {
             <p>{rank.shortDescription}</p>
             <div className="dashboard-rank-panel__meta">
               <span className="dashboard-badge-state"><AppIcon name="shield" />Current Rank badge</span>
-              <span className="dashboard-rank-panel__position">Progression <b>·</b> {rank.progressionOrder} of 7</span>
-              {backendLoaded && !nextThemeReward && <span className="dashboard-theme-unlocked-state">ALL THEMES UNLOCKED</span>}
+              <span className="dashboard-rank-panel__position">{progressionXp?.nextRank ? `${nextRankDistance} ${nextRankDistance === 1 ? 'level' : 'levels'} to Rank ${progressionXp.nextRank.number} · ${progressionXp.nextRank.name}` : 'Highest Rank reached'}</span>
             </div>
             <Link className="app-action-link" to={`/ranks/${rank.slug}`}>Explore Rank <AppIcon name="arrow" /></Link>
           </div>
@@ -151,67 +164,19 @@ export default function DashboardPage() {
         <section className="app-panel dashboard-level-panel dashboard-reveal" aria-labelledby="dashboard-level-heading">
           <div className="app-panel__heading"><div><p className="app-eyebrow"><TermText>LEVEL & XP · YOUR PROGRESS</TermText></p><h2 id="dashboard-level-heading">Progress snapshot</h2></div><span className="dashboard-level-panel__icon"><AppIcon name="spark" /></span></div>
           <div className="dashboard-level-panel__values"><div><span>Current Level</span><strong>{String(serverRun?.level ?? currentLevel).padStart(2, '0')}</strong></div><div><span>Total XP</span><strong>{displayedXp.toLocaleString('en-US')}</strong></div></div>
-          <AppProgressBar value={levelProgress.percent} label="Progress to next Level" description={`${levelProgress.earnedInLevel} of ${levelProgress.requirement} XP toward the next Level.`} />
+          <AppProgressBar className="app-progress--xp" value={levelProgress.percent} label="Progress to next Level" description={`${levelProgress.earnedInLevel} of ${levelProgress.requirement} XP toward the next Level.`} />
           {progressionXp && <p className="dashboard-level-panel__remaining">{Number(progressionXp.xpRemaining).toLocaleString('en-US')} XP remaining to Level {progressionXp.currentLevel + 1}</p>}
         </section>
       </div>
-
-      {backendLoaded && progressionXp && <div className="dashboard-progression-benefits">
-        <section className="app-panel dashboard-progression-benefit" aria-labelledby="dashboard-active-xp-heading">
-          <div className="app-panel__heading"><div><p className="app-eyebrow">YOUR XP BOOST</p><h2 id="dashboard-active-xp-heading">Current Rank benefit</h2></div><span className="dashboard-progression-benefit__multiplier">{progressionXp.currentRank.multiplierLabel}</span></div>
-          <p className="dashboard-progression-benefit__source">{progressionXp.currentRank.name} applies its multiplier to eligible Task base XP.</p>
-          <div className="dashboard-progression-benefit__cap"><div><span>Daily XP cap · {progressionXp.dailyXp.rankAtDayStart} at IST day start</span><strong>{Number(progressionXp.dailyXp.credited).toLocaleString('en-US')} / {Number(progressionXp.dailyXp.capAmount).toLocaleString('en-US')} XP</strong></div><AppProgressBar value={progressionXp.dailyXp.capAmountCents ? (progressionXp.dailyXp.creditedCents / progressionXp.dailyXp.capAmountCents) * 100 : 0} label="Daily XP cap used" description={`${progressionXp.dailyXp.remaining} XP remains in today's ordinary XP capacity.`} /></div>
-          <p className="app-panel__note">Daily XP earned: {Number(progressionXp.dailyXp.credited).toLocaleString('en-US')} · Remaining today: {Number(progressionXp.dailyXp.remaining).toLocaleString('en-US')} XP.</p>
-        </section>
-
-        <section className="app-panel dashboard-progression-benefit dashboard-progression-benefit--next" aria-labelledby="dashboard-next-rank-heading">
-          <div className="app-panel__heading"><div><p className="app-eyebrow">NEXT RANK PREVIEW</p><h2 id="dashboard-next-rank-heading">Next Rank benefits</h2></div><span className="dashboard-progression-benefit__icon"><AppIcon name="arrow" /></span></div>
-          {progressionXp.nextRank ? <>
-            <div className="dashboard-progression-benefit__next-title"><span>Rank {progressionXp.nextRank.number}</span><strong>{progressionXp.nextRank.name}</strong></div>
-            <p className="dashboard-progression-benefit__source">Unlock at Level {progressionXp.nextRank.minimumLevel}.</p>
-            <ul className="dashboard-progression-benefit__list">
-              <li><span>XP multiplier</span><strong>{progressionXp.nextRank.multiplierLabel}</strong></li>
-              <li><span>Daily XP cap</span><strong>{Number(progressionXp.nextRank.dailyXpCap).toLocaleString('en-US')} XP</strong></li>
-              <li><span>One-time Rank-entry XP</span><strong>{progressionXp.nextRank.entryXpConfigured ? `+${Number(progressionXp.nextRank.entryXp).toLocaleString('en-US')} XP` : 'Not configured'}</strong></li>
-              <li><span>One-time Rank-entry DP</span><strong>+{Number(progressionXp.nextRank.entryDp).toFixed(2)} DP</strong></li>
-              <li><span>Recurring DP preview</span><strong>{progressionXp.nextRank.recurringDpPreview.qualifyingDays} days · +{Number(progressionXp.nextRank.recurringDpPreview.rewardDp).toFixed(2)} DP</strong></li>
-            </ul>
-            <p className="app-panel__note">Preview only. These benefits apply after reaching {progressionXp.nextRank.name}.</p>
-          </> : <div className="dashboard-progression-benefit__top-rank"><strong>Highest defined Rank reached</strong><p>Level progression continues beyond 100. No later Rank or Continuum entry XP is configured.</p></div>}
-        </section>
-      </div>}
-
-      {nextThemeReward && <section
-        className="app-panel dashboard-theme-reward dashboard-reveal"
-        aria-labelledby="dashboard-theme-reward-heading"
-        style={{ '--dashboard-theme-accent': nextThemeReward.colors[2] }}
-      >
-        <div className="dashboard-theme-reward__identity">
-          <span className="dashboard-theme-reward__icon" aria-hidden="true"><AppIcon name="spark" /></span>
-          <div>
-            <p className="app-eyebrow">NEXT THEME REWARD</p>
-            <h2 id="dashboard-theme-reward-heading">{nextThemeReward.name}</h2>
-            <p>{nextThemeReward.description}</p>
-          </div>
-        </div>
-        <div className="dashboard-theme-reward__progress">
-          <div className="dashboard-theme-reward__rank"><span>Unlocks at Rank {String(nextThemeReward.requiredRankNumber).padStart(2, '0')}</span><strong>{themeRewardProgress.remainingRankSteps} {themeRewardProgress.remainingRankSteps === 1 ? 'Rank' : 'Ranks'} to go</strong></div>
-          <div className="dashboard-theme-reward__track" role="progressbar" aria-label={`Rank progress toward ${nextThemeReward.name}`} aria-valuemin="0" aria-valuemax={themeRewardProgress.totalRankSteps} aria-valuenow={themeRewardProgress.completedRankSteps} aria-valuetext={`${themeRewardProgress.completedRankSteps} of ${themeRewardProgress.totalRankSteps} Rank promotions complete`}>
-            <span style={{ width: `${themeRewardProgress.progressPercent}%` }} />
-          </div>
-          <small>Current Rank {rank.number} · {rank.name}</small>
-        </div>
-        <Link className="dashboard-theme-reward__link" to="/app/settings?category=appearance">View theme <AppIcon name="arrow" /></Link>
-      </section>}
 
       <section className="dashboard-quick-pause dashboard-reveal" id="emergency-pause-controls" aria-label="Emergency Pause controls">
         <EmergencyPauseControls />
       </section>
 
-      <div className="dashboard-content-grid dashboard-content-grid--primary">
+      <div className="dashboard-content-grid dashboard-content-grid--primary dashboard-content-grid--tasks">
         <section className="app-panel dashboard-tasks-panel dashboard-reveal" aria-labelledby="dashboard-tasks-heading">
           <div className="app-panel__heading"><div><p className="app-eyebrow">TODAY · YOUR SCHEDULE</p><h2 id="dashboard-tasks-heading">Today's Tasks</h2></div><span className="dashboard-panel-count">{completedTasks}<i>/</i>{scheduledTaskCount}</span></div>
-          {serverSchedule && <div className="dashboard-task-summary"><strong>{taskCompletion}%</strong><span>complete <i>· equal Task weighting</i></span><AppProgressBar value={taskCompletion} label="Today's Task completion" description={`${completedTasks} of ${scheduledTaskCount} scheduled Tasks completed; Tasks are equally weighted.`} /></div>}
+          {serverSchedule && <div className="dashboard-task-summary"><strong>{taskCompletion}%</strong><span>complete <i>· equal Task weighting</i></span><AppProgressBar className="app-progress--discipline" value={taskCompletion} label="Today's Task completion" description={`${completedTasks} of ${scheduledTaskCount} scheduled Tasks completed; Tasks are equally weighted.`} /></div>}
           {startsNextDateCount > 0 && <p className="dashboard-task-future-note">{startsNextDateCount} new {startsNextDateCount === 1 ? 'Task starts' : 'Tasks start'} on the next IST date and will join this count then.</p>}
           <ul className="dashboard-task-list">
             {todayTasks.map((task, index) => (
@@ -226,11 +191,15 @@ export default function DashboardPage() {
             {taskDataLoading && <li className="dashboard-task-list__loading" role="status" aria-label="Loading scheduled Tasks"><i /><i /><i /></li>}
             {taskDataError && <li className="dashboard-task-list__empty">Task data is unavailable. Open Daily Tasks to retry.</li>}
           </ul>
-          <Link className="app-action-link" to="/rules#the-60-second-version">Rules in 60 seconds <AppIcon name="arrow" /></Link>
           <Link className="app-panel__footer-link" to="/app/tasks">View All Tasks <AppIcon name="arrow" /></Link>
+          <Link className="app-action-link" to="/rules#the-60-second-version">Rules in 60 seconds <AppIcon name="arrow" /></Link>
         </section>
+      </div>
 
-        <div className="dashboard-side-stack">
+      <section className="dashboard-supporting-section" aria-labelledby="dashboard-supporting-heading">
+        <div className="dashboard-supporting-section__heading"><p className="app-eyebrow">YOUR SYSTEM · SUPPORTING TOOLS</p><h2 id="dashboard-supporting-heading">Progress and recovery</h2></div>
+        <div className="dashboard-supporting-section__grid">
+          <div className="dashboard-side-stack dashboard-side-stack--support">
           <section className="app-panel dashboard-recovery-panel dashboard-reveal" aria-labelledby="dashboard-recovery-heading">
             <div className="app-panel__heading"><div><p className="app-eyebrow">RECOVERY · YOUR QUESTS</p><h2 id="dashboard-recovery-heading">Recovery Quests</h2></div><span className="dashboard-panel-count">{activeRecoveryCount} active</span></div>
             {activeRecoveryCount >= 4 && <p className="dashboard-recovery-limit">{activeRecoveryCount}/5 active · {activeRecoveryCount === 5 ? 'next quest triggers the limit' : 'approaching the active limit'}</p>}
@@ -251,8 +220,34 @@ export default function DashboardPage() {
           {Number.isFinite(effectiveRecoveryState?.gracePoints)
             ? <GracePointSummary compact recoveryState={effectiveRecoveryState} serverBacked={backendLoaded} />
             : <section className="app-panel grace-charge-summary dashboard-grace-panel-unavailable" role="status"><p className="app-eyebrow">GRACE POINTS</p><p>Grace Point balance could not be loaded.</p></section>}
+          </div>
+
+          {backendLoaded && progressionXp && <div className="dashboard-progression-benefits">
+            <section className="app-panel dashboard-progression-benefit" aria-labelledby="dashboard-active-xp-heading">
+              <div className="app-panel__heading"><div><p className="app-eyebrow">YOUR XP BOOST</p><h2 id="dashboard-active-xp-heading">Current Rank benefit</h2></div><span className="dashboard-progression-benefit__multiplier">{progressionXp.currentRank.multiplierLabel}</span></div>
+              <p className="dashboard-progression-benefit__source">{progressionXp.currentRank.name} applies its multiplier to eligible Task base XP.</p>
+              <div className="dashboard-progression-benefit__cap"><div><span>Daily XP cap · {progressionXp.dailyXp.rankAtDayStart} at IST day start</span><strong>{Number(progressionXp.dailyXp.credited).toLocaleString('en-US')} / {Number(progressionXp.dailyXp.capAmount).toLocaleString('en-US')} XP</strong></div><AppProgressBar className="app-progress--xp" value={progressionXp.dailyXp.capAmountCents ? (progressionXp.dailyXp.creditedCents / progressionXp.dailyXp.capAmountCents) * 100 : 0} label="Daily XP cap used" description={`${progressionXp.dailyXp.remaining} XP remains in today's ordinary XP capacity.`} /></div>
+              <p className="app-panel__note">Daily XP earned: {Number(progressionXp.dailyXp.credited).toLocaleString('en-US')} · Remaining today: {Number(progressionXp.dailyXp.remaining).toLocaleString('en-US')} XP.</p>
+            </section>
+
+            <section className="app-panel dashboard-progression-benefit dashboard-progression-benefit--next" aria-labelledby="dashboard-next-rank-heading">
+              <div className="app-panel__heading"><div><p className="app-eyebrow">NEXT RANK PREVIEW</p><h2 id="dashboard-next-rank-heading">Next Rank benefits</h2></div><span className="dashboard-progression-benefit__icon"><AppIcon name="arrow" /></span></div>
+              {progressionXp.nextRank ? <>
+                <div className="dashboard-progression-benefit__next-title"><span>Rank {progressionXp.nextRank.number}</span><strong>{progressionXp.nextRank.name}</strong></div>
+                <p className="dashboard-progression-benefit__source">Unlock at Level {progressionXp.nextRank.minimumLevel}.</p>
+                <ul className="dashboard-progression-benefit__list">
+                  <li><span>XP multiplier</span><strong>{progressionXp.nextRank.multiplierLabel}</strong></li>
+                  <li><span>Daily XP cap</span><strong>{Number(progressionXp.nextRank.dailyXpCap).toLocaleString('en-US')} XP</strong></li>
+                  <li><span>One-time Rank-entry XP</span><strong>{progressionXp.nextRank.entryXpConfigured ? `+${Number(progressionXp.nextRank.entryXp).toLocaleString('en-US')} XP` : 'Not configured'}</strong></li>
+                  <li><span>One-time Rank-entry DP</span><strong>+{Number(progressionXp.nextRank.entryDp).toFixed(2)} DP</strong></li>
+                  <li><span>Recurring DP preview</span><strong>{progressionXp.nextRank.recurringDpPreview.qualifyingDays} days · +{Number(progressionXp.nextRank.recurringDpPreview.rewardDp).toFixed(2)} DP</strong></li>
+                </ul>
+                <p className="app-panel__note">Preview only. These benefits apply after reaching {progressionXp.nextRank.name}.</p>
+              </> : <div className="dashboard-progression-benefit__top-rank"><strong>Highest defined Rank reached</strong><p>Level progression continues beyond 100. No later Rank or Continuum entry XP is configured.</p></div>}
+            </section>
+          </div>}
         </div>
-      </div>
+      </section>
 
       <div className="dashboard-content-grid dashboard-content-grid--secondary">
         <DisciplinePointsSummary compact disciplineState={displayedDisciplineState} serverSummary={serverDiscipline} />

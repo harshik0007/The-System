@@ -11,7 +11,6 @@ import { createNotificationWithinSession } from './notificationService.js';
 import { PROGRESSION_CONFIGURATION, PROGRESSION_RANKS, PROGRESSION_RANK_BY_SLUG, toRankBenefitDto } from '../config/progressionConfiguration.js';
 import { getIstDateKey } from '../utils/ist.js';
 import { getRankProgressionOrder, getRankSlugForLevel } from '../utils/ranks.js';
-import { DEFAULT_THEME, getEligibleTheme } from '../utils/themeEntitlements.js';
 
 export const XP_DRAIN_RATE_PER_QUEST = PROGRESSION_CONFIGURATION.xp.recoveryQuestDrainBasisPoints / 10_000;
 const centsToXp = (cents) => Math.max(0, Math.round(cents)) / 100;
@@ -262,12 +261,6 @@ async function applyXpLedgerChangeWithinSession({
     let userChanged = false;
     if (rankOrder(currentRankAfter) > rankOrder(user.highestRankAchieved)) {
       user.highestRankAchieved = currentRankAfter;
-      userChanged = true;
-    }
-    const selectedTheme = user.appearancePreferences?.theme || DEFAULT_THEME;
-    const eligibleTheme = getEligibleTheme(selectedTheme, resultingLevel);
-    if (selectedTheme !== eligibleTheme) {
-      user.appearancePreferences.theme = eligibleTheme;
       userChanged = true;
     }
     if (userChanged) await user.save({ session, validateModifiedOnly: true });

@@ -2,7 +2,6 @@ import { createContext, useCallback, useContext, useEffect, useRef, useState } f
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import AppIcon from '../components/app/AppIcon.jsx';
-import GalaxionMark from '../components/GalaxionMark.jsx';
 import { useAuth } from './AuthContext.jsx';
 import { useFlashMessages } from './FlashMessageContext.jsx';
 
@@ -47,7 +46,6 @@ function SignOutDialog({ open, onClose, onConfirm, logout }) {
   }, [open]);
 
   if (!open) return null;
-  const isGalaxionTheme = document.documentElement.dataset.systemTheme === 'galaxion';
   const submit = async () => {
     if (requestRef.current) return;
     requestRef.current = true;
@@ -70,15 +68,14 @@ function SignOutDialog({ open, onClose, onConfirm, logout }) {
     <div className="account-action-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget && !busy) onClose(); }}>
       <section className="account-action-dialog" ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="logout-dialog-title" aria-describedby="logout-dialog-description" tabIndex="-1">
         <button type="button" className="account-action-dialog__close" onClick={onClose} disabled={busy} aria-label="Close sign out confirmation"><AppIcon name="close" /></button>
-        <span className="account-action-dialog__icon"><AppIcon name="profile" /></span>
+        <span className="account-action-dialog__icon account-action-dialog__icon--danger"><AppIcon name="profile" /></span>
         <p className="app-eyebrow">ACCOUNT SESSION</p>
         <h2 id="logout-dialog-title">Log out of THE SYSTEM?</h2>
         <p id="logout-dialog-description">You will be signed out of THE SYSTEM. Your progress and history will not be deleted.</p>
         {feedback && <p className="account-action-dialog__feedback" role="status">{feedback}</p>}
         <div className="account-action-dialog__actions">
           <button type="button" className="account-action-dialog__cancel" onClick={onClose} disabled={busy}>Cancel</button>
-          <button type="button" className="account-action-dialog__confirm" onClick={submit} disabled={busy} aria-busy={busy}>
-            {isGalaxionTheme && <span className="account-action-dialog__loading-mark" aria-hidden="true">{busy && <GalaxionMark className="galaxion-signout-mark" />}</span>}
+          <button type="button" className="account-action-dialog__confirm account-action-dialog__confirm--danger" onClick={submit} disabled={busy} aria-busy={busy}>
             {busy ? 'Signing out…' : 'Confirm log out'}
           </button>
         </div>

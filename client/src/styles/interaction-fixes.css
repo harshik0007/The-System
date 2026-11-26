@@ -1,0 +1,61 @@
+/* Final interaction and contrast corrections for the current app surfaces. */
+:root:has(.app-layout[data-app-design='silver']) .app-layout .dashboard-hero__focus-link:hover {
+  color: #fff;
+}
+
+:root:has(.app-layout[data-app-design='silver']) .app-layout .account-logout-action {
+  min-height: 40px;
+  padding-inline: 14px;
+  border: 1px solid color-mix(in srgb, var(--silver-danger) 38%, var(--silver-border));
+  border-radius: 9px;
+  background: var(--silver-danger-soft);
+  color: var(--silver-danger);
+  font: 650 max(12px, .72rem)/1.2 var(--font-body);
+  box-shadow: 0 3px 9px rgb(32 46 69 / 5%);
+  transition: border-color var(--motion-fast), background var(--motion-fast), color var(--motion-fast), box-shadow var(--motion-fast), transform var(--motion-fast);
+}
+:root:has(.app-layout[data-app-design='silver']) .app-layout .account-logout-action:hover:not(:disabled) {
+  border-color: var(--silver-danger);
+  background: var(--silver-danger);
+  color: #fff;
+  box-shadow: 0 7px 16px color-mix(in srgb, var(--silver-danger) 20%, transparent);
+}
+:root:has(.app-layout[data-app-design='silver']) .app-layout .account-logout-action:focus-visible { outline: 3px solid color-mix(in srgb, var(--silver-danger) 32%, transparent); outline-offset: 3px; }
+:root:has(.app-layout[data-app-design='silver']) .app-layout .account-logout-action:active:not(:disabled) { transform: translateY(1px); }
+:root:has(.app-layout[data-app-design='silver']) .app-layout .account-logout-action:disabled { opacity: .58; cursor: not-allowed; }
+
+:root:has(.app-layout[data-app-design='silver']) body .account-action-dialog__icon--danger { border-color: #F2C9D0; background: var(--silver-danger-soft); color: var(--silver-danger); }
+:root:has(.app-layout[data-app-design='silver']) body .account-action-dialog__confirm--danger {
+  border-color: var(--silver-danger);
+  background: var(--silver-danger);
+  color: #fff;
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--silver-danger) 18%, transparent);
+}
+:root:has(.app-layout[data-app-design='silver']) body .account-action-dialog__confirm--danger:hover:not(:disabled) { border-color: #873340; background: #873340; color: #fff; }
+:root:has(.app-layout[data-app-design='silver']) body .account-action-dialog__confirm--danger:focus-visible { outline: 3px solid color-mix(in srgb, var(--silver-danger) 32%, transparent); outline-offset: 3px; }
+
+:root:has(.app-layout[data-app-design='silver']) .app-layout .daily-tasks-date { color: var(--silver-indigo); }
+:root:has(.app-layout[data-app-design='silver']) .app-layout .daily-tasks-date strong { color: var(--silver-text); }
+:root:has(.app-layout[data-app-design='silver']) .app-layout .daily-tasks-date small { color: var(--silver-muted); }
+:root:has(.app-layout[data-app-design='silver']) .app-layout .app-demo-label { border-color: var(--silver-border); background: var(--silver-surface); color: var(--silver-muted); }
+:root:has(.app-layout[data-app-design='silver']) .app-layout .app-demo-label i { background: var(--silver-discipline); box-shadow: none; }
+:root:has(.app-layout[data-app-design='silver']) .app-layout .task-completion-pending { border-color: var(--silver-border); background: var(--silver-surface-soft); color: var(--silver-muted); }
+
+.app-layout .app-notifications .notification-item__actions { display: flex; align-items: flex-start; }
+.app-layout .app-notifications .notification-item__delete {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--silver-border);
+  border-radius: 8px;
+  background: var(--silver-surface);
+  color: var(--silver-danger);
+  cursor: pointer;
+  transition: border-color var(--motion-fast), background var(--motion-fast), color var(--motion-fast), box-shadow var(--motion-fast);
+}
+.app-layout .app-notifications .notification-item__delete .app-icon { width: 15px; height: 15px; }
+.app-layout .app-notifications .notification-item__delete:hover:not(:disabled) { border-color: var(--silver-danger); background: var(--silver-danger-soft); color: var(--silver-danger); box-shadow: 0 3px 8px rgb(163 61 75 / 10%); }
+.app-layout .app-notifications .notification-item__delete:focus-visible { outline: 3px solid color-mix(in srgb, var(--silver-danger) 30%, transparent); outline-offset: 2px; }

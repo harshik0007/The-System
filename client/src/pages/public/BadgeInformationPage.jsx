@@ -22,7 +22,7 @@ export default function BadgeInformationPage() {
               <p className="public-eyebrow">RANK {rank.number}</p>
               <h2>{rank.name}</h2>
               <p>{rank.shortDescription}</p>
-              <Link to={`/ranks/${rank.slug}`}>Rank details <span aria-hidden="true">↗</span></Link>
+              <Link to={`/ranks/${rank.slug}`}>Rank details</Link>
             </div>
           </article>
         ))}

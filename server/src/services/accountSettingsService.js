@@ -12,12 +12,11 @@ import { EMERGENCY_PAUSE_ALLOWANCE } from '../config/emergencyPauseConfiguration
 import { ConflictError, NotFoundError, ValidationError } from '../utils/httpErrors.js';
 import { getIstDateKey, getIstMonthKey } from '../utils/ist.js';
 import { getCurrentRankFromLevel } from '../utils/ranks.js';
-import { DEFAULT_THEME, getEligibleTheme, isThemeId, isThemeEligible, THEME_ENTITLEMENTS } from '../utils/themeEntitlements.js';
 import { withMongoTransaction } from './mongoTransaction.js';
 import { terminateEmergencyPauseForManualResetWithinSession } from './emergencyPauseService.js';
 import { createFreshProgressionRunWithinSession } from './progressionRunFactory.js';
 
-const APPEARANCE_KEYS = ['theme', 'voidShardCursor', 'clickRipple', 'nonessentialAnimations', 'reduceDecorativeEffects', 'effectQuality'];
+const APPEARANCE_KEYS = ['voidShardCursor', 'clickRipple', 'nonessentialAnimations', 'reduceDecorativeEffects', 'effectQuality'];
 const ACCESSIBILITY_KEYS = ['reduceMotion'];
 const ACCOUNT_PROJECTION = [
   '_id', 'identityKind', 'createdAt', 'memberSince', 'accountStatus', 'currentProgressionRunId', 'resetCount', 'lifetimeLongestStreak',
@@ -36,11 +35,6 @@ function normalizePreferenceGroup(value, allowlist, groupName, { nullable = [] }
   for (const [key, preference] of Object.entries(value)) {
     if (nullable.includes(key) && preference === null) {
       normalized[key] = null;
-    } else if (key === 'theme' && groupName === 'appearance' && typeof preference === 'string') {
-      if (!isThemeId(preference)) {
-        throw new ValidationError('This theme is not available yet.', [{ field: `${groupName}.${key}`, code: 'THEME_UNAVAILABLE' }]);
-      }
-      normalized[key] = preference;
     } else if (key === 'effectQuality' && groupName === 'appearance' && ['high', 'balanced', 'low'].includes(preference)) {
       normalized[key] = preference;
     } else if (typeof preference === 'boolean') {
@@ -63,11 +57,9 @@ function normalizedBestRecords(records = {}) {
   return result;
 }
 
-function accountPreferences(user, currentLevel = 0) {
-  const selectedTheme = user.appearancePreferences?.theme || DEFAULT_THEME;
+function accountPreferences(user) {
   return {
     appearance: {
-      theme: getEligibleTheme(selectedTheme, currentLevel),
       voidShardCursor: user.appearancePreferences?.voidShardCursor !== false,
       clickRipple: user.appearancePreferences?.clickRipple !== false,
       nonessentialAnimations: user.appearancePreferences?.nonessentialAnimations !== false,
@@ -119,7 +111,7 @@ function safeAccountProfile(user, run, rankBadges) {
       avatarMark: user.avatarMark || 'initials',
     },
     privacy: safePrivacy(user),
-    ...accountPreferences(user, run?.level ?? 0),
+    ...accountPreferences(user),
     notificationPreferences: {
       categories: Object.fromEntries([
         'tasks', 'recovery-quests', 'discipline', 'rank-xp', 'emergency-pause', 'monthly-retention',
@@ -176,19 +168,9 @@ async function loadSettingsRun(user, session) {
   return { run, rankBadges };
 }
 
-async function reconcileThemeWithinSession(user, level, session) {
-  const selectedTheme = user.appearancePreferences?.theme || DEFAULT_THEME;
-  const eligibleTheme = getEligibleTheme(selectedTheme, level);
-  if (selectedTheme === eligibleTheme) return false;
-  user.appearancePreferences.theme = eligibleTheme;
-  await user.save({ session, validateModifiedOnly: true });
-  return true;
-}
-
 async function getAccountSettingsWithinSession(userId, session) {
   const user = await loadCurrentUser(userId, session);
   const { run, rankBadges } = await loadSettingsRun(user, session);
-  await reconcileThemeWithinSession(user, run?.level ?? 0, session);
   return safeAccountProfile(user, run, rankBadges);
 }
 
@@ -206,22 +188,12 @@ export async function updateAccountPreferences(userId, body = {}) {
   const accessibility = body.accessibility === undefined ? null : normalizePreferenceGroup(body.accessibility, ACCESSIBILITY_KEYS, 'accessibility', { nullable: ['reduceMotion'] });
   return withMongoTransaction(async (session) => {
     const user = await loadCurrentUser(userId, session);
-    let run = null;
-    if (user.currentProgressionRunId) {
-      run = await ProgressionRun.findOne({ _id: user.currentProgressionRunId, userId: user._id, status: 'active' }).select('_id level').session(session).lean();
-    }
-    if (appearance && Object.hasOwn(appearance, 'theme') && !isThemeEligible(appearance.theme, run?.level ?? 0)) {
-      const entitlement = THEME_ENTITLEMENTS[appearance.theme]?.requiredRankLabel || 'the required Rank';
-      throw new ValidationError(`This theme is locked. Reach ${entitlement} to apply it.`, [{ field: 'appearance.theme', code: 'THEME_LOCKED' }]);
-    }
-
     const fields = { accountPreferencesInitialized: true };
     for (const [key, value] of Object.entries(appearance || {})) fields[`appearancePreferences.${key}`] = value;
     for (const [key, value] of Object.entries(accessibility || {})) fields[`accessibilityPreferences.${key}`] = value;
     const filter = { _id: user._id, identityKind: 'account', accountStatus: 'active' };
-    if (appearance && Object.hasOwn(appearance, 'theme')) filter.currentProgressionRunId = user.currentProgressionRunId;
     const updated = await User.findOneAndUpdate(filter, { $set: fields }, { new: true, runValidators: true, session }).select(ACCOUNT_PROJECTION);
-    if (!updated) throw new ConflictError('PROGRESSION_CHANGED', 'Your progression changed while the theme was being applied. Refresh your Rank and try again.');
+    if (!updated) throw new ConflictError('ACCOUNT_SETTINGS_CHANGED', 'Your settings could not be saved. Refresh and try again.');
     return getAccountSettingsWithinSession(userId, session);
   });
 }
@@ -349,7 +321,6 @@ export async function manualResetAndRestart({ userId, confirmationPhrase, expect
         currentProgressionRunId: newRun._id,
         highestRankAchieved: null,
         personalBestRecords: { overall: {}, discipline: {}, xp: {} },
-        'appearancePreferences.theme': DEFAULT_THEME,
       },
     }, { session, runValidators: true });
     if (updatedUser.modifiedCount !== 1) throw new ConflictError('PROGRESSION_CHANGED', 'The active progression changed while reset was being processed. Refresh and try again.');

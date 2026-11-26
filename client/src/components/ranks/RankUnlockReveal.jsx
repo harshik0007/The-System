@@ -1,19 +1,12 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
+import { useReducedMotion } from '../../hooks/useReducedMotion.js';
 import RankBadge from './RankBadge.jsx';
 
 /** Reusable one-time presentation. `active` must come from a future earned-state flow. */
 export default function RankUnlockReveal({ rank, serialNumber, active = false, onComplete = () => {} }) {
   const dialogRef = useRef(null);
   const continueRef = useRef(null);
-  const [reducedMotion, setReducedMotion] = useState(false);
-
-  useEffect(() => {
-    const query = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const update = () => setReducedMotion(query.matches);
-    update();
-    query.addEventListener?.('change', update);
-    return () => query.removeEventListener?.('change', update);
-  }, []);
+  const reducedMotion = useReducedMotion();
 
   useEffect(() => {
     const dialog = dialogRef.current;

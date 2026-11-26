@@ -42,8 +42,8 @@ export default function RankDetailPage() {
       <RankProgression currentRank={rank} />
 
       <nav className="rank-detail-pagination" aria-label="Previous and next Ranks">
-        {previous ? <Link to={`/ranks/${previous.slug}`} className="rank-detail-pagination__link"><span>← PREVIOUS RANK</span><strong>{previous.number} — {previous.name}</strong></Link> : <span className="rank-detail-pagination__edge">LOWEST RANK</span>}
-        {next ? <Link to={`/ranks/${next.slug}`} className="rank-detail-pagination__link rank-detail-pagination__link--next"><span>NEXT RANK →</span><strong>{next.number} — {next.name}</strong></Link> : <span className="rank-detail-pagination__edge rank-detail-pagination__edge--highest">HIGHEST RANK</span>}
+        {previous ? <Link to={`/ranks/${previous.slug}`} className="rank-detail-pagination__link"><span>PREVIOUS RANK</span><strong>{previous.number} — {previous.name}</strong></Link> : <span className="rank-detail-pagination__edge">LOWEST RANK</span>}
+        {next ? <Link to={`/ranks/${next.slug}`} className="rank-detail-pagination__link rank-detail-pagination__link--next"><span>NEXT RANK</span><strong>{next.number} — {next.name}</strong></Link> : <span className="rank-detail-pagination__edge rank-detail-pagination__edge--highest">HIGHEST RANK</span>}
       </nav>
     </PublicLayout>
   );

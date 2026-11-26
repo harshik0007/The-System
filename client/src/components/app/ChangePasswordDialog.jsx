@@ -1,27 +1,26 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import AuthNotice from '../auth/AuthNotice.jsx';
 import PasswordInput from '../auth/PasswordInput.jsx';
 import PasswordStrengthIndicator from '../auth/PasswordStrengthIndicator.jsx';
 import AppIcon from './AppIcon.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
+import { useFlashMessages } from '../../context/FlashMessageContext.jsx';
 import { validatePasswordChange } from '../../utils/authValidation.js';
 
 const emptyForm = () => ({ currentPassword: '', newPassword: '', confirmPassword: '' });
 
 export default function ChangePasswordDialog({ open, onClose }) {
   const { changePassword } = useAuth();
+  const { notifySuccess, notifyError } = useFlashMessages();
   const dialogRef = useRef(null);
   const requestRef = useRef(false);
   const [form, setForm] = useState(emptyForm);
   const [errors, setErrors] = useState({});
   const [busy, setBusy] = useState(false);
-  const [notice, setNotice] = useState('');
 
   const close = useCallback(() => {
     setForm(emptyForm());
     setErrors({});
-    setNotice('');
     onClose();
   }, [onClose]);
 
@@ -51,7 +50,6 @@ export default function ChangePasswordDialog({ open, onClose }) {
   const handleField = (field) => (event) => {
     setForm((current) => ({ ...current, [field]: event.target.value }));
     setErrors((current) => ({ ...current, [field]: undefined }));
-    setNotice('');
   };
 
   const submit = async (event) => {
@@ -59,7 +57,6 @@ export default function ChangePasswordDialog({ open, onClose }) {
     if (requestRef.current) return;
     const nextErrors = validatePasswordChange(form);
     setErrors(nextErrors);
-    setNotice('');
     if (Object.keys(nextErrors).length) return;
 
     requestRef.current = true;
@@ -68,9 +65,9 @@ export default function ChangePasswordDialog({ open, onClose }) {
     try {
       const result = await changePassword(submitted);
       setForm(emptyForm());
-      setNotice(result.message || 'Your password was updated.');
+      notifySuccess(result.message || 'Your password was updated.');
     } catch (error) {
-      setNotice(error?.message || 'Password changes could not be completed. No password was changed.');
+      notifyError(error?.message || 'Password changes could not be completed. No password was changed.');
     } finally {
       requestRef.current = false;
       setBusy(false);
@@ -91,7 +88,6 @@ export default function ChangePasswordDialog({ open, onClose }) {
           <PasswordInput id="settings-new-password" label="New password" name="new-password" value={form.newPassword} onChange={handleField('newPassword')} error={errors.newPassword} autoComplete="new-password" />
           <PasswordStrengthIndicator value={form.newPassword} />
           <PasswordInput id="settings-confirm-password" label="Confirm new password" name="confirm-new-password" value={form.confirmPassword} onChange={handleField('confirmPassword')} error={errors.confirmPassword} autoComplete="new-password" />
-          {notice && <AuthNotice>{notice}</AuthNotice>}
           <div className="settings-dialog__actions"><button type="button" className="settings-dialog__cancel" onClick={close} disabled={busy}>Close</button><button type="submit" className="settings-dialog__submit" disabled={busy}>{busy ? 'Checking…' : 'Update password'}</button></div>
         </form>
       </section>

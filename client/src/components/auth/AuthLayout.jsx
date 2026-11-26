@@ -15,7 +15,6 @@ export default function AuthLayout({ children, compact = false }) {
           <p className="auth-aside__headline">Progress is built,<br /><span>not given.</span></p>
           <p className="auth-aside__support">Choose what matters. Commit to the work. Prove what you accomplish.</p>
         </div>
-        <div className="auth-aside__foot"><span>PERSONAL PROGRESSION FRAMEWORK</span><span>SYS / 001</span></div>
       </aside>
       <section className="auth-main">
         <div className="auth-main__inner">{children}</div>

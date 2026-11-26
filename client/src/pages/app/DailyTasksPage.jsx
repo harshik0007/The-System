@@ -10,6 +10,7 @@ import TaskCyclePanel from '../../components/tasks/TaskCyclePanel.jsx';
 import TaskChangeDialog from '../../components/tasks/TaskChangeDialog.jsx';
 import TaskSubmissionDialog from '../../components/tasks/TaskSubmissionDialog.jsx';
 import { useTaskBackend } from '../../context/TaskBackendContext.jsx';
+import { useFlashMessages } from '../../context/FlashMessageContext.jsx';
 import { useReducedMotion } from '../../hooks/useReducedMotion.js';
 import { getDailyTaskMetrics } from '../../utils/dailyTaskProgress.js';
 import { selectEligibleTaskOccurrences } from '../../utils/taskOccurrenceSelection.js';
@@ -55,7 +56,7 @@ export default function DailyTasksPage() {
   const reducedMotion = useReducedMotion();
   const { schedule, tasks: taskDefinitions, occurrences, allowance, todayDate, todayLabel, todayCycleDay, loading, error, refresh, refreshRecovery, clearError } = useTaskBackend();
   const [changeTarget, setChangeTarget] = useState(null);
-  const [feedback, setFeedback] = useState('');
+  const { notifySuccess, notifyError, notifyInfo } = useFlashMessages();
   const [changeSaving, setChangeSaving] = useState(false);
   const [changeError, setChangeError] = useState('');
   const changeSaveLockRef = useRef(false);
@@ -100,13 +101,15 @@ export default function DailyTasksPage() {
       idempotencyKeyRef.current = createIdempotencyKey();
       setChangeTarget(null);
       await refresh();
-      setFeedback(mode === 'delete'
+      notifySuccess(mode === 'delete'
         ? `Delete Task is pending until ${formatTaskDateKey(effectiveDate)}. Today's scheduled occurrence remains available; previous occurrences and snapshots are preserved.`
         : mode === 'reschedule'
           ? 'Task rescheduled from the next IST date. Current and historical occurrences were preserved.'
           : 'Task updated for future dates. Current and historical snapshots were preserved.');
     } catch (requestError) {
-      setChangeError(requestError.message || 'The Task change could not be saved.');
+      const message = requestError.message || 'The Task change could not be saved.';
+      setChangeError(message);
+      notifyError(message);
     } finally {
       changeSaveLockRef.current = false;
       setChangeSaving(false);
@@ -126,7 +129,7 @@ export default function DailyTasksPage() {
       await refresh();
       await refreshRecovery();
       if (result.idempotentReplay) {
-        setFeedback('This Task completion was already recorded. No duplicate XP or Rank reward was added.');
+        notifyInfo('This Task completion was already recorded. No duplicate XP or Rank reward was added.');
       } else {
         const award = result.xpReward;
         const creditedText = award?.creditedXp && Number(award.creditedXp) > 0
@@ -136,14 +139,16 @@ export default function DailyTasksPage() {
           const xpText = reward.xpRewardConfigured ? `+${Number(reward.creditedXpReward).toLocaleString('en-US')} XP` : 'Rank-entry XP is not configured';
           return `Rank ${reward.rankName} entered · ${xpText} · +${Number(reward.creditedDpReward).toFixed(2)} DP`;
         }).join(' · ');
-        setFeedback([
+        notifySuccess([
           `Task completed · ${creditedText}${award?.capped ? ' (daily cap applied)' : ''}.`,
           rankRewardText,
           result.progression ? `Current Rank ${result.progression.currentRank.name} · ${result.progression.currentRank.multiplierLabel} · ${Number(result.progression.dailyXp.remaining).toLocaleString('en-US')} daily XP remaining.` : '',
-        ].filter(Boolean).join(' '));
+        ].filter(Boolean).join(' '), { duration: 9000 });
       }
     } catch (requestError) {
-      setSubmissionError(requestError.message || 'The Task completion could not be saved.');
+      const message = requestError.message || 'The Task completion could not be saved.';
+      setSubmissionError(message);
+      notifyError(message);
     } finally {
       submissionLockRef.current = false;
       setSubmissionSaving(false);
@@ -160,15 +165,13 @@ export default function DailyTasksPage() {
         </div>
         <div className="daily-tasks-header__meta">
           <span className="app-demo-label"><i aria-hidden="true" />YOUR SCHEDULE</span>
-          <Link className="app-action-link" to="/rules#the-60-second-version">Rules in 60 seconds <AppIcon name="arrow" /></Link>
           <Link className="button button--primary daily-tasks-create-link" to="/app/tasks/create">{schedule ? 'Manage Tasks' : 'Create Schedule'} <span aria-hidden="true">↗</span></Link>
+          <Link className="app-action-link" to="/rules#the-60-second-version">Rules in 60 seconds <AppIcon name="arrow" /></Link>
           <div className="daily-tasks-date"><AppIcon name="clock" /><span><strong>{todayLabel || <SkeletonLine width="medium" label="Loading IST date" />}</strong><small>Daily deadline · 12:00 AM <Term term="IST">IST</Term> (India Standard Time)</small></span></div>
         </div>
       </header>
 
       {error && <div className="daily-task-feedback daily-task-reveal" role="alert"><AppIcon name="shield" /><p>{error}</p><button className="daily-task-feedback__retry" type="button" onClick={() => { clearError(); refresh(); }}><span aria-hidden="true">↻</span>Retry</button></div>}
-      {feedback && <div className="daily-task-feedback daily-task-reveal" role="status" aria-live="polite"><AppIcon name="shield" /><p>{feedback}</p><button className="daily-task-feedback__dismiss" type="button" aria-label="Dismiss message" onClick={() => setFeedback('')}><AppIcon name="close" /></button></div>}
-
       {schedule && <div className="daily-task-overview-grid daily-task-reveal">
         <DailyTaskSummary metrics={metrics} />
         <TaskCyclePanel context={{ weekday: todayLabel?.split(',')[0] || '', scheduleDate: todayLabel || '', cycleDay: todayCycleDay, cycleLength: schedule.cycleLength }} allowance={allowance} />

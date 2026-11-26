@@ -134,6 +134,7 @@ test('M28 account preferences, public privacy and manual reset preserve account/
   assert.equal(body.settings.account.resetCount, 4);
   assert.equal(body.settings.account.lifetimeLongestStreak, 28);
   assert.equal(body.settings.appearance.voidShardCursor, false);
+  assert.equal(Object.hasOwn(body.settings.appearance, 'theme'), false);
   assert.equal(body.settings.accessibility.reduceMotion, true);
   assert.equal(JSON.stringify(body).includes(String(user._id)), false);
   assert.equal(JSON.stringify(body).includes(user.emailNormalized), false);
@@ -144,6 +145,8 @@ test('M28 account preferences, public privacy and manual reset preserve account/
   assert.equal(response.status, 200);
   assert.equal(body.settings.appearance.voidShardCursor, true);
   assert.equal(body.settings.appearance.clickRipple, false);
+  ({ response } = await putJson('/account/preferences', { appearance: { theme: 'aurora' } }));
+  assert.equal(response.status, 400, 'retired appearance theme choices are no longer accepted');
   const accessibilityUpdate = await putJson('/account/preferences', { accessibility: { reduceMotion: null } });
   assert.equal(accessibilityUpdate.response.status, 200);
   assert.equal(accessibilityUpdate.body.settings.accessibility.reduceMotion, null);

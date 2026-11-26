@@ -6,6 +6,7 @@ import FormField from '../../components/auth/FormField.jsx';
 import PrimaryButton from '../../components/auth/PrimaryButton.jsx';
 import AuthNotice from '../../components/auth/AuthNotice.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
+import { useFlashMessages } from '../../context/FlashMessageContext.jsx';
 import { safeAuthenticatedDestination } from '../../utils/authNavigation.js';
 
 const USERNAME_PATTERN = /^[A-Za-z][A-Za-z0-9_]{2,23}$/;
@@ -14,6 +15,7 @@ export default function GoogleProfileCompletionPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const { googlePending, completeGoogleSignup, usernameAvailability } = useAuth();
+  const { notifyError } = useFlashMessages();
   const [profile, setProfile] = useState(location.state?.profile || null);
   const [form, setForm] = useState({ firstName: '', middleName: '', lastName: '', username: '', termsAccepted: false });
   const [usernameMessage, setUsernameMessage] = useState('');
@@ -69,7 +71,7 @@ export default function GoogleProfileCompletionPage() {
       const returnTo = new URLSearchParams(location.search).get('returnTo') || location.state?.from;
       navigate(safeAuthenticatedDestination(returnTo), { replace: true });
     } catch (requestError) {
-      setError(requestError?.message || 'Your account could not be completed. Review the details and retry.');
+      notifyError(requestError?.message || 'Your account could not be completed. Review the details and retry.');
     } finally { setBusy(false); }
   };
 

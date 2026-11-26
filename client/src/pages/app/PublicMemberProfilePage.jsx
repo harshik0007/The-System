@@ -6,7 +6,6 @@ import MemberAvatar from '../../components/app/MemberAvatar.jsx';
 import RankBadge from '../../components/ranks/RankBadge.jsx';
 import AppIcon from '../../components/app/AppIcon.jsx';
 import PageLoadingSkeleton from '../../components/app/PageLoadingSkeleton.jsx';
-import { APPEARANCE_THEMES } from '../../data/appearanceThemes.js';
 import { taskApi } from '../../services/taskApi.js';
 import '../../styles/public-pages.css';
 import '../../styles/leaderboard.css';
@@ -25,7 +24,7 @@ function rankName(slug) {
 }
 
 function ProfileUnavailable({ message }) {
-  return <main className="leaderboard-public-profile" data-system-theme="dark-navy"><Link className="leaderboard-back-link" to="/app/leaderboard"><AppIcon name="arrow" /> Back to Community Leaderboard</Link><section className="leaderboard-profile-unavailable"><p className="app-eyebrow">PUBLIC PROFILE</p><h1>Profile unavailable</h1><p>{message}</p></section></main>;
+  return <main className="leaderboard-public-profile"><Link className="leaderboard-back-link" to="/app/leaderboard"><AppIcon name="arrow" /> Back to Community Leaderboard</Link><section className="leaderboard-profile-unavailable"><p className="app-eyebrow">PUBLIC PROFILE</p><h1>Profile unavailable</h1><p>{message}</p></section></main>;
 }
 
 export default function PublicMemberProfilePage() {
@@ -50,7 +49,7 @@ export default function PublicMemberProfilePage() {
     if (!profile?.isCurrentMember) return undefined;
     let active = true;
     let controller = null;
-    const refreshOwnTheme = () => {
+    const refreshOwnProfile = () => {
       controller?.abort();
       controller = new AbortController();
       taskApi.publicMemberProfile(publicHandle, { signal: controller.signal }).then((result) => {
@@ -59,19 +58,18 @@ export default function PublicMemberProfilePage() {
         if (active && requestError?.name !== 'AbortError') setError(requestError?.message || 'The profile could not be refreshed.');
       });
     };
-    window.addEventListener('system:progression-theme-state-changed', refreshOwnTheme);
+    window.addEventListener('system:progression-state-changed', refreshOwnProfile);
     return () => {
       active = false;
       controller?.abort();
-      window.removeEventListener('system:progression-theme-state-changed', refreshOwnTheme);
+      window.removeEventListener('system:progression-state-changed', refreshOwnProfile);
     };
   }, [profile?.isCurrentMember, publicHandle]);
 
-  if (loading) return <main className="leaderboard-public-profile" data-system-theme="dark-navy"><Link className="leaderboard-back-link" to="/app/leaderboard"><AppIcon name="arrow" /> Back to Community Leaderboard</Link><PageLoadingSkeleton variant="profile" label="Loading public member profile" /></main>;
+  if (loading) return <main className="leaderboard-public-profile"><Link className="leaderboard-back-link" to="/app/leaderboard"><AppIcon name="arrow" /> Back to Community Leaderboard</Link><PageLoadingSkeleton variant="profile" label="Loading public member profile" /></main>;
   if (error || !profile) return <ProfileUnavailable message={error || 'This public profile is not available.'} />;
 
   const rank = profile.currentRank;
-  const profileTheme = APPEARANCE_THEMES.some(({ id }) => id === profile.theme) ? profile.theme : 'dark-navy';
   const statItems = [
     { key: 'level', label: 'LEVEL', value: profile.level == null ? null : String(profile.level).padStart(2, '0') },
     { key: 'xp', label: 'CURRENT-RUN XP', value: profile.totalXp == null ? null : formatNumber(profile.totalXp) },
@@ -85,7 +83,7 @@ export default function PublicMemberProfilePage() {
 
   return (
     <>
-      <main className="leaderboard-public-profile" data-system-theme={profileTheme}>
+      <main className="leaderboard-public-profile">
         <Link className="leaderboard-back-link" to="/app/leaderboard"><AppIcon name="arrow" /> Back to Community Leaderboard</Link>
         <article className="leaderboard-profile-card">
           <div className="leaderboard-profile-card__art">{rank ? <RankBadge rank={rank} size="large" presentation="reference" /> : <MemberAvatar name={profile.username} mark={profile.avatarMark} className="leaderboard-profile-card__avatar" />}</div>
@@ -102,7 +100,7 @@ export default function PublicMemberProfilePage() {
           </div>
         </article>
         {profile.personalBestRecords && <PersonalBestRecords records={profile.personalBestRecords} isCurrentMember={profile.isCurrentMember} />}
-        {profile.activityMap && <DisciplineActivityMap compact disciplineState={{ memberSince: profile.memberSince }} schedule={null} serverRecords={profile.activityMap.records} memberSince={profile.activityMap.memberSince} theme={profileTheme} />}
+        {profile.activityMap && <DisciplineActivityMap compact disciplineState={{ memberSince: profile.memberSince }} schedule={null} serverRecords={profile.activityMap.records} memberSince={profile.activityMap.memberSince} />}
       </main>
     </>
   );

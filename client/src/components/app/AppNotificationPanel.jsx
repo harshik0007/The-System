@@ -4,10 +4,11 @@ import AppIcon from './AppIcon.jsx';
 import PageLoadingSkeleton, { SkeletonLine } from './PageLoadingSkeleton.jsx';
 import NotificationItem from './NotificationItem.jsx';
 import { useNotificationCenter } from '../../context/NotificationCenterContext.jsx';
+import { useFlashMessages } from '../../context/FlashMessageContext.jsx';
 
 export default function AppNotificationPanel({ onClose }) {
+  const { notifySuccess, notifyError } = useFlashMessages();
   const { notifications, unreadCount, markRead, markAllRead, deleteNotification, loadNotifications, loading, error } = useNotificationCenter();
-  const [feedback, setFeedback] = useState(null);
   const [markAllLoading, setMarkAllLoading] = useState(false);
   const recent = notifications.slice(0, 5);
   useEffect(() => {
@@ -20,9 +21,9 @@ export default function AppNotificationPanel({ onClose }) {
     setMarkAllLoading(true);
     try {
       await markAllRead();
-      setFeedback({ message: 'All notifications marked as read.', type: 'success' });
+      notifySuccess('All notifications marked as read.');
     } catch (requestError) {
-      setFeedback({ message: requestError?.message || 'Notifications could not be updated.', type: 'error' });
+      notifyError(requestError?.message || 'Notifications could not be updated.');
     } finally {
       setMarkAllLoading(false);
     }
@@ -35,7 +36,6 @@ export default function AppNotificationPanel({ onClose }) {
         <button className="app-icon-button" type="button" aria-label="Close notifications" onClick={onClose}><AppIcon name="close" /></button>
       </div>
       {unreadCount > 0 && <div className="app-notifications__actions"><button type="button" disabled={markAllLoading} onClick={() => void handleMarkAll()}>{markAllLoading ? <SkeletonLine width="short" label="Updating notification status" /> : 'Mark all as read'}</button></div>}
-      {feedback && <p className={`app-notifications__feedback is-${feedback.type}`} role={feedback.type === 'error' ? 'alert' : 'status'} aria-live={feedback.type === 'error' ? 'assertive' : 'polite'}>{feedback.message}</p>}
       {recent.length > 0 ? (
         <div className="app-notifications__preview-list">
           {recent.map((notice) => <NotificationItem key={notice.id} notification={notice} compact onMarkRead={markRead} onDelete={deleteNotification} onNavigate={onClose} />)}

@@ -6,6 +6,7 @@ import TaskActionMenu from '../../components/tasks/TaskActionMenu.jsx';
 import TaskChangeDialog from '../../components/tasks/TaskChangeDialog.jsx';
 import QuickStartScheduleBuilder from '../../components/tasks/QuickStartScheduleBuilder.jsx';
 import { useTaskBackend } from '../../context/TaskBackendContext.jsx';
+import { useFlashMessages } from '../../context/FlashMessageContext.jsx';
 import { createIdempotencyKey, taskApi } from '../../services/taskApi.js';
 import { createCycleDays, formatTaskDateKey, getScheduleValidation, getScheduledTasksForDay } from '../../utils/taskScheduleBuilder.js';
 import { useReducedMotion } from '../../hooks/useReducedMotion.js';
@@ -107,13 +108,13 @@ function RulesStep({ allowance, allowanceLoaded, emergencyPause, gracePoints, di
       <article className="task-builder-rule-card"><p className="app-eyebrow">01 · TASK MANAGER</p><strong>Changes happen in the future</strong><p>New Tasks start on their next matching cycle day after today. Editing, rescheduling or deleting an existing Task takes effect from the next IST calendar day. Past completed records stay in history.</p><Link to="/app/tasks">Open Task Manager <span aria-hidden="true">↗</span></Link></article>
       <article className="task-builder-rule-card"><p className="app-eyebrow">02 · TASK CHANGE CHANCES</p><strong>{loaded ? `${allowance.remaining} of ${allowance.maximum} left` : 'Checking your allowance…'}</strong><p>{loaded ? `${allowance.used} used this week. Adding a Task is free; editing, deleting and rescheduling share these ${allowance.maximum} chances.` : 'One shared weekly limit applies.'} It renews Monday at 12:00 AM IST. Canceling without saving does not use a chance.</p></article>
       <article className="task-builder-rule-card task-builder-rule-card--featured"><p className="app-eyebrow">03 · MISSED TASKS</p><strong>Next day · 72 hours</strong><p>A missed Task creates its linked Forfeit at the next daily IST reset. You have 72 hours from activation to finish it. Emergency Pause freezes the countdown.</p><p>The actual overload limit is 6 active Forfeits at once—not 3. When the sixth appears, the active group is cleared and 1 Grace Point is deducted. Cleared records stay in your history.</p></article>
-      <article className="task-builder-rule-card"><p className="app-eyebrow">04 · GRACE POINTS</p><strong>{graceBalance === undefined || graceBalance === null ? 'Checking your balance…' : `${graceBalance} available`}</strong><p>One point is deducted when a Forfeit expires or the sixth active one triggers the overload rule. At zero, the current Progression Run ends and a fresh run starts at Rank 07, Level 0, 0 XP, 3 Grace Points and 0 DP. Its schedule is archived and the theme falls back to Dark Navy; your account, Task history, lifetime records and reset count remain.</p></article>
+      <article className="task-builder-rule-card"><p className="app-eyebrow">04 · GRACE POINTS</p><strong>{graceBalance === undefined || graceBalance === null ? 'Checking your balance…' : `${graceBalance} available`}</strong><p>One point is deducted when a Forfeit expires or the sixth active one triggers the overload rule. At zero, the current Progression Run ends and a fresh run starts at Rank 07, Level 0, 0 XP, 3 Grace Points and 0 DP. Its schedule is archived; your account, Task history, lifetime records and reset count remain.</p></article>
       <article className="task-builder-rule-card"><p className="app-eyebrow">05 · DP POINTS</p><strong>{dpBalance === undefined || dpBalance === null ? 'Checking your balance…' : `${Number(dpBalance).toFixed(2)} DP · 4.00 cap`}</strong><p>A day qualifies for Discipline progress after 5 original Tasks are completed. The qualifying cycle and DP reward depend on Rank. You can exchange 1.00 DP for 1 Grace Point; each exchange has a 72-hour cooldown.</p><Link to="/app/discipline">See your Discipline progress <span aria-hidden="true">↗</span></Link></article>
-      <article className="task-builder-rule-card"><p className="app-eyebrow">06 · SEVEN RANKS</p><strong>Rank 07 starts · Rank 01 is highest</strong><p>Rank entry rewards, XP multipliers, daily caps and recurring DP rewards follow Rank rules. Rank 01 has no entry XP reward. Theme and badge requirements follow your current Rank.</p><Link to="/ranks">View Rank information <span aria-hidden="true">↗</span></Link>
+      <article className="task-builder-rule-card"><p className="app-eyebrow">06 · SEVEN RANKS</p><strong>Rank 07 starts · Rank 01 is highest</strong><p>Each Rank has its own entry rewards, XP multiplier, daily cap and recurring DP reward. Rank 01 has no entry XP reward. Badges follow your current Rank.</p><Link to="/ranks">View Rank information <span aria-hidden="true">↗</span></Link>
         {rankConfiguration?.ranks?.length > 0 ? <div className="task-builder-rank-table-wrap"><table className="task-builder-rank-table"><caption>Current Rank rewards</caption><thead><tr><th>Rank</th><th>Entry XP</th><th>Entry DP</th><th>Cycle DP</th></tr></thead><tbody>{rankConfiguration.ranks.map((rank) => <tr key={rank.slug}><th scope="row">{rank.number} · {rank.name}</th><td>{rank.entryXpConfigured ? `${Number(rank.entryXp).toLocaleString()} XP` : 'Not available'}</td><td>{Number(rank.entryDp).toFixed(2)}</td><td>{rank.recurringDpPreview.qualifyingDays} days · {Number(rank.recurringDpPreview.rewardDp).toFixed(2)}</td></tr>)}</tbody></table></div> : rankConfiguration?.unavailable && <p>Rank values could not be loaded right now. Use the Rank information page to review them.</p>}
       </article>
       <article className="task-builder-rule-card"><p className="app-eyebrow">07 · EARN XP</p><strong>Normal completed Tasks only</strong><p>THE SYSTEM shares a 300 XP daily base pool across that day’s scheduled Tasks, then applies your Rank multiplier and daily XP cap. The exact amount per Task varies with that day’s schedule. Forfeits give no XP.</p><p>Unfinished active Forfeits can drain XP at daily reset: 7% of the current Level requirement per active one. This is separate from Task completion rewards.</p></article>
-      <article className="task-builder-rule-card task-builder-rule-card--featured"><p className="app-eyebrow">08 · EMERGENCY PAUSE</p><strong>{pauseLoaded ? `${emergencyPause.activationsRemaining} of ${emergencyPause.allowance} uses left` : 'Checking your allowance…'}</strong><p>Emergency Pause currently allows {pauseLoaded ? `${emergencyPause.allowance} uses per IST calendar month` : 'a limited number of uses'}; it renews when the IST month changes. You can choose 1–7 days. Ending early still uses that activation.</p><p>Activating Pause has no separate XP fee. While active, missed-Task processing and daily XP drain are suspended, Forfeit time is frozen, and your Discipline streak is protected. A Pause that reaches a new month ends at 12:00 AM IST on its first day.</p></article>
+      <article className="task-builder-rule-card task-builder-rule-card--featured"><p className="app-eyebrow">08 · EMERGENCY PAUSE</p><strong>{pauseLoaded ? `${emergencyPause.activationsRemaining} of ${emergencyPause.allowance} uses left` : 'Checking your allowance…'}</strong><p>{pauseLoaded ? `You can use Emergency Pause ${emergencyPause.allowance} times per IST calendar month` : 'Emergency Pause has a monthly use limit'}; it renews when the IST month changes. You can choose 1–7 days. Ending early still uses that activation.</p><p>Activating Pause has no separate XP fee. While active, missed-Task processing and daily XP drain are suspended, Forfeit time is frozen, and your Discipline streak is protected. A Pause that reaches a new month ends at 12:00 AM IST on its first day.</p></article>
     </div>
   </section>;
 }
@@ -277,7 +278,7 @@ function ScheduleReview({ cycleLength, cycleDays, startDate, tasks, validation, 
         const isValid = dayTasks.length >= 7;
         return <article className={`task-review-day${isValid ? ' is-valid' : ' is-incomplete'}`} key={day.dayNumber}>
           <header><div><p className="app-eyebrow">CYCLE DAY {String(day.dayNumber).padStart(2, '0')}</p><h3>{day.label}</h3><small>{day.sublabel}</small></div><span className={isValid ? 'is-valid' : 'is-incomplete'}>{dayTasks.length} Tasks · {isValid ? 'Valid' : `${7 - dayTasks.length} more needed`}</span></header>
-          {dayTasks.length ? <ul>{dayTasks.map((task) => <li key={task.id}><div><strong>{task.name}</strong><p>{task.description || 'No description provided.'}</p></div><aside><span>FORFEIT</span><strong>{task.actionTitle || 'Not available'}</strong><p>{task.actionDescription || 'Description required.'}</p></aside></li>)}</ul> : <p className="task-review-empty">No Tasks assigned to this day yet.</p>}
+          {dayTasks.length ? <ul>{dayTasks.map((task) => <li key={task.id}><div><strong>{task.name}</strong><p>{task.description || 'No description provided.'}</p></div><aside><span>FORFEIT</span><strong>{task.actionTitle || 'Not configured'}</strong><p>{task.actionDescription || 'Description required.'}</p></aside></li>)}</ul> : <p className="task-review-empty">No Tasks assigned to this day yet.</p>}
         </article>;
       })}</div>
       <div className="task-review-edit-links"><button type="button" onClick={onEditCycle}>Edit schedule</button><button type="button" onClick={onEditTasks}>Edit Task details</button><button type="button" onClick={onEditActions}>Edit Forfeits</button></div>
@@ -290,6 +291,7 @@ function ScheduleReview({ cycleLength, cycleDays, startDate, tasks, validation, 
 }
 
 export default function CreateTaskSchedulePage() {
+  const { notifySuccess, notifyError, notifyInfo } = useFlashMessages();
   const { schedule: currentSchedule, tasks: serverTasks, allowance, allowanceLoaded, todayDate, loading, error: backendError, errorInfo: backendErrorInfo, refresh, progressionResetNotice, emergencyPause, gracePoints, disciplineSummary } = useTaskBackend();
   const location = useLocation();
   const navigate = useNavigate();
@@ -309,8 +311,6 @@ export default function CreateTaskSchedulePage() {
   const [rulesAcknowledged, setRulesAcknowledged] = useState(false);
   const [attempted, setAttempted] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [saveError, setSaveError] = useState('');
-  const [saveErrorInfo, setSaveErrorInfo] = useState(null);
   const scheduleKeyRef = useRef(createIdempotencyKey());
   const scheduleSaveLockRef = useRef(false);
   const cycleDays = useMemo(() => cycleLength ? createCycleDays(cycleLength, startDate) : [], [cycleLength, startDate]);
@@ -320,7 +320,24 @@ export default function CreateTaskSchedulePage() {
   } : progressionResetNotice?.recentReset?.reason === 'automatic-grace-exhaustion' ? progressionResetNotice : null;
   const manualReset = location.state?.manualProgressionReset
     || progressionResetNotice?.recentReset?.reason === 'manual-reset-and-restart';
-
+  const resetToastShownRef = useRef(false);
+  useEffect(() => {
+    if (resetToastShownRef.current) return;
+    if (resetNotice) {
+      resetToastShownRef.current = true;
+      notifySuccess('Your new progression run is ready.');
+      if (!resetNotice.persisted) notifyInfo('This change could not be saved in this browser. Refreshing may restore your previous progress.');
+      setResetNotice(null);
+      return;
+    }
+    if (manualReset) {
+      resetToastShownRef.current = true;
+      notifySuccess('Your fresh Progression Run is ready. Your account and saved history remain.');
+    } else if (automaticReset) {
+      resetToastShownRef.current = true;
+      notifySuccess('Grace Points were exhausted. A new progression run is ready.');
+    }
+  }, [automaticReset, manualReset, notifyInfo, notifySuccess, resetNotice]);
   useEffect(() => {
     if (todayDate && !startDateTouched) setStartDate(todayDate);
   }, [todayDate, startDateTouched]);
@@ -370,8 +387,6 @@ export default function CreateTaskSchedulePage() {
   const confirmSchedule = async () => {
     if (scheduleSaveLockRef.current) return;
     setAttempted(true);
-    setSaveError('');
-    setSaveErrorInfo(null);
     if (!rulesAcknowledged) return;
     if (!validation.valid) return;
     scheduleSaveLockRef.current = true;
@@ -389,15 +404,10 @@ export default function CreateTaskSchedulePage() {
       }, scheduleKeyRef.current);
       await refresh();
       scheduleKeyRef.current = createIdempotencyKey();
+      notifySuccess('Your schedule is ready. Start with today’s Tasks.');
       navigate('/app/tasks', { replace: true, state: { scheduleCreated: true } });
     } catch (requestError) {
-      setSaveError(requestError.message || 'The schedule could not be saved.');
-      setSaveErrorInfo({
-        status: Number.isFinite(requestError?.status) ? requestError.status : null,
-        code: requestError?.code || 'REQUEST_FAILED',
-        requestId: requestError?.requestId || null,
-        details: Array.isArray(requestError?.details) ? requestError.details : [],
-      });
+      notifyError(requestError.message || 'The schedule could not be saved.');
     } finally {
       scheduleSaveLockRef.current = false;
       setSaving(false);
@@ -410,9 +420,6 @@ export default function CreateTaskSchedulePage() {
       <QuickStartScheduleBuilder onCancel={() => navigate('/app/tasks')} />
     </div>
     <div hidden={!customizeEverything} className={`task-creation-page${reducedMotion ? ' is-reduced-motion' : ''}`}>
-      {resetNotice && <aside className="task-builder-reset-success" role="status" aria-live="polite"><span aria-hidden="true">✓</span><div><strong>THE SYSTEM has been reset. Your new journey begins now.</strong>{!resetNotice.persisted && <p>This change could not be saved in this browser. Refreshing may restore your previous progress.</p>}</div><button type="button" onClick={() => setResetNotice(null)} aria-label="Dismiss reset confirmation">×</button></aside>}
-      {manualReset && <aside className="task-builder-reset-success" role="status" aria-live="polite"><span aria-hidden="true">✓</span><div><strong>Your fresh Progression Run is ready.</strong><p>Your account, Member Since date, Reset Count, Lifetime Longest Streak, preferences and Monthly Analysis history remain. Create a new Task Schedule to continue.</p></div></aside>}
-      {automaticReset && <aside className="task-builder-reset-success" role="status" aria-live="polite"><span aria-hidden="true">✓</span><div><strong>Grace Points were exhausted. Your new progression journey is ready.</strong><p>Your identity and lifetime achievements remain. Create a new Task Schedule to continue{automaticReset.resetCount ? ` · Reset ${automaticReset.resetCount}` : ''}.</p></div></aside>}
       <header className="task-creation-header"><div><p className="app-eyebrow">MY PROGRESS · SCHEDULE BUILDER</p><h1>Create your Daily Schedule</h1><p>Set a repeating cycle, add your Tasks and choose a Forfeit for each one.</p><Link className="task-builder-back-to-quick-start" to="/app/tasks/create"><span aria-hidden="true">←</span> Back to Quick Start</Link></div><span className="app-demo-label"><i aria-hidden="true" />SCHEDULE READY</span></header>
 
       <nav className="task-builder-progress" aria-label="Schedule creation progress">
@@ -440,7 +447,6 @@ export default function CreateTaskSchedulePage() {
       {step === 4 && attempted && (!tasks.length || validation.dayCounts.some((day) => !day.valid)) && <p className="task-builder-confirm-hint">Add at least 7 Tasks to every day before choosing Forfeits.</p>}
       {step === 5 && attempted && validation.issues.some((issue) => issue.type === 'action') && <p className="task-builder-confirm-hint">Give every scheduled Task its own Forfeit name and description before continuing.</p>}
       {step === 6 && !validation.valid && <p className="task-builder-confirm-hint">Complete the cycle, every day’s 7 Task minimum and all Forfeit assignments before starting.</p>}
-      {saveError && <div className="task-builder-validation" role="alert"><AppIcon name="shield" /><div><strong>{saveErrorInfo?.status >= 500 || saveErrorInfo?.code === 'NETWORK_ERROR' ? 'The schedule could not reach the service.' : saveErrorInfo?.code === 'VALIDATION_ERROR' ? 'Review the schedule details.' : 'The schedule could not be saved.'}</strong><p>{saveError}</p>{saveErrorInfo?.details?.length > 0 && <ul>{saveErrorInfo.details.slice(0, 12).map((detail, index) => <li key={`${detail.field || detail.code}-${index}`}>{detail.field ? `${detail.field.replaceAll('.', ' ')} · ` : ''}{detail.code}</li>)}</ul>}{saveErrorInfo?.status !== null && saveErrorInfo?.status !== undefined && <small>HTTP {saveErrorInfo.status} · {saveErrorInfo.code}{saveErrorInfo.requestId ? ` · Request ID ${saveErrorInfo.requestId}` : ''}</small>}</div></div>}
       <p className="task-builder-disclosure"><AppIcon name="activity" />Creating a schedule does not award XP. Completing a regular scheduled Task can earn XP; Forfeits do not.</p>
     </div>
     </>
@@ -448,10 +454,10 @@ export default function CreateTaskSchedulePage() {
 }
 
 function ActiveScheduleManager({ schedule, tasks, allowance, todayDate, loading, onRefresh }) {
+  const { notifySuccess, notifyError } = useFlashMessages();
   const [draft, setDraft] = useState(initialTaskDraft);
   const [attempted, setAttempted] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState('');
   const [changeTarget, setChangeTarget] = useState(null);
   const [changeSaving, setChangeSaving] = useState(false);
   const [changeError, setChangeError] = useState('');
@@ -474,7 +480,6 @@ function ActiveScheduleManager({ schedule, tasks, allowance, todayDate, loading,
     event.preventDefault();
     if (addLockRef.current) return;
     setAttempted(true);
-    setMessage('');
     if (!draft.name.trim() || !draft.cycleDays.length || !draft.actionTitle.trim() || !draft.actionDescription.trim()) return;
     addLockRef.current = true;
     setSaving(true);
@@ -489,9 +494,9 @@ function ActiveScheduleManager({ schedule, tasks, allowance, todayDate, loading,
       idempotencyKeyRef.current = createIdempotencyKey();
       setDraft(initialTaskDraft());
       setAttempted(false);
-      setMessage(`Task saved for ${formatTaskDateKey(result.task?.effectiveDate)}. It will not change today's Task list or XP calculation.`);
+      notifySuccess(`Task saved for ${formatTaskDateKey(result.task?.effectiveDate)}. It will not change today's Task list or XP calculation.`);
     } catch (requestError) {
-      setMessage(requestError.message || 'The Task could not be saved.');
+      notifyError(requestError.message || 'The Task could not be saved.');
     } finally {
       addLockRef.current = false;
       setSaving(false);
@@ -514,14 +519,16 @@ function ActiveScheduleManager({ schedule, tasks, allowance, todayDate, loading,
       }, changeKeyRef.current);
       changeKeyRef.current = createIdempotencyKey();
       setChangeTarget(null);
-      setMessage(mode === 'delete'
+      notifySuccess(mode === 'delete'
         ? `Delete Task is pending until ${formatTaskDateKey(result.task?.effectiveDate)}. Today's scheduled occurrence remains available; previous Task history is preserved.`
         : mode === 'reschedule'
           ? 'Task rescheduled from the next IST date.'
           : 'Task updated for future dates. Existing and current-day snapshots remain unchanged.');
       await onRefresh();
     } catch (requestError) {
-      setChangeError(requestError.message || 'The Task change could not be saved.');
+      const message = requestError.message || 'The Task change could not be saved.';
+      setChangeError(message);
+      notifyError(message);
     } finally {
       changeLockRef.current = false;
       setChangeSaving(false);
@@ -533,7 +540,6 @@ function ActiveScheduleManager({ schedule, tasks, allowance, todayDate, loading,
       <header className="task-creation-header"><div><p className="app-eyebrow">MY PROGRESS · SCHEDULE BUILDER</p><h1>Manage your Daily Schedule</h1><p>Your active cycle has {schedule.cycleLength} {schedule.cycleLength === 1 ? 'day' : 'days'} and {tasks.length} original Tasks. Changes apply to future occurrences.</p></div><span className="app-demo-label"><i aria-hidden="true" />ACTIVE SCHEDULE</span></header>
       <section className="task-builder-panel" aria-labelledby="active-schedule-title">
         <StepHeader eyebrow="ACTIVE TASK SCHEDULE" title="Current schedule" description="Every cycle day must retain at least seven original scheduled Tasks. All existing Tasks and their Forfeits are listed below." />
-        <div className="task-builder-review-grid">{dayCounts.map((day) => <article className="task-review-day is-valid" key={day.dayNumber}><header><div><p className="app-eyebrow">CYCLE DAY {String(day.dayNumber).padStart(2, '0')}</p><h3>{day.label}</h3></div><span className="is-valid">{day.count} Tasks</span></header></article>)}</div>
         <section className="task-builder-existing-list" aria-label="Existing Tasks grouped by cycle day">
           {activeDayTasks.map((day) => <article className="task-builder-existing-day" key={day.dayNumber} aria-labelledby={'managed-day-' + day.dayNumber}>
             <header><div><p className="app-eyebrow">CYCLE DAY {String(day.dayNumber).padStart(2, '0')}</p><h3 id={'managed-day-' + day.dayNumber}>{day.label}</h3></div><span>{day.tasks.length} {day.tasks.length === 1 ? 'Task' : 'Tasks'}</span></header>
@@ -553,7 +559,6 @@ function ActiveScheduleManager({ schedule, tasks, allowance, todayDate, loading,
           <label className="task-builder-field" htmlFor="active-task-weakness">What are you working to improve? <span>Optional</span><textarea id="active-task-weakness" rows="2" maxLength={240} value={draft.weakness} onChange={(event) => setDraft((current) => ({ ...current, weakness: event.target.value }))} /></label>
           <aside className="task-schedule-change-notice" role="note"><div><strong>SCHEDULE CHANGE NOTICE</strong><p>New Tasks become active from their next scheduled cycle day. They will not appear in today's Task list. Today's Task count and XP calculation will remain unchanged.</p></div></aside>
           <aside className="task-builder-rules"><AppIcon name="activity" /><div><strong>Weekly Existing Task Changes</strong><p><b>{allowance.remaining} of {allowance.maximum} changes remaining.</b> Adding new Tasks is free. Editing, rescheduling or deleting existing Tasks uses the weekly allowance.</p></div></aside>
-          {message && <p className={message.startsWith('Task saved') ? 'task-builder-note' : 'task-change-validation'} role={message.startsWith('Task saved') ? 'status' : 'alert'}>{message}</p>}
           <div className="task-builder-form__actions"><button className="task-builder-button task-builder-button--primary" type="submit" disabled={saving || loading}>{saving ? 'Saving…' : 'Save Task'}<span aria-hidden="true">↗</span></button><Link className="task-builder-button task-builder-button--quiet" to="/app/tasks">Return to Daily Tasks</Link><button className="task-builder-button task-builder-button--quiet" type="button" onClick={onRefresh} disabled={loading}>Refresh schedule</button></div>
         </form>
       </section>

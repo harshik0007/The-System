@@ -4,9 +4,11 @@ import AppIcon from '../app/AppIcon.jsx';
 import '../../styles/task-action-menu.css';
 
 const ACTIONS = [
-  { mode: 'edit', label: 'Edit Task', icon: 'tasks' },
-  { mode: 'reschedule', label: 'Reschedule Task', icon: 'clock' },
-  { mode: 'delete', label: 'Delete Task', icon: 'close', destructive: true },
+  { mode: 'details', label: 'View Forfeit', icon: 'shield' },
+  { mode: 'proof', label: 'Submit Proof', icon: 'tasks' },
+  { mode: 'edit', label: 'Edit Task', icon: 'tasks', requiresAllowance: true },
+  { mode: 'reschedule', label: 'Reschedule Task', icon: 'clock', requiresAllowance: true },
+  { mode: 'delete', label: 'Delete Task', icon: 'close', destructive: true, requiresAllowance: true },
 ];
 
 export default function TaskActionMenu({ task, onSelect, canModify = true, allowanceNote = 'No weekly changes remain. The allowance resets Monday in IST.' }) {
@@ -120,7 +122,7 @@ export default function TaskActionMenu({ task, onSelect, canModify = true, allow
             type="button"
             role="menuitem"
             className={action.destructive ? 'is-destructive' : undefined}
-            disabled={!canModify}
+            disabled={action.requiresAllowance && !canModify}
             key={action.mode}
             onClick={() => select(action.mode)}
           ><AppIcon name={action.icon} /><span>{action.label}<i aria-hidden="true">›</i></span></button>)}

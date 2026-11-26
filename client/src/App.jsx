@@ -1,6 +1,5 @@
 import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter, Navigate, Outlet, Route, useLocation } from 'react-router-dom';
-import ThemeClickEffects from './components/ThemeClickEffects.jsx';
 import PageTransition from './components/PageTransition.jsx';
 import RouteErrorBoundary from './components/RouteErrorBoundary.jsx';
 import EmergencyPauseAtmosphere from './components/app/EmergencyPauseAtmosphere.jsx';
@@ -160,15 +159,11 @@ function EmergencyPauseAtmosphereGate() {
     ? new URLSearchParams(search).get('stasis')
     : null;
   const devPreview = stasisPreviewParam === 'on' ? true : stasisPreviewParam === 'off' ? false : undefined;
-  // Both themes follow the same server-confirmed active state; the selected
-  // theme only changes the decoration rendered by the shared atmosphere.
   return <EmergencyPauseAtmosphere
     active={Boolean(emergencyPause?.isActive)}
     activationId={emergencyPause?.pause?.id || emergencyPause?.pause?.startedAt || null}
     startedAt={emergencyPause?.pause?.startedAt || null}
     statusKnown={emergencyPause !== null}
-    theme={preferences.appearance.theme}
-    clickRipple={preferences.appearance.clickRipple}
     reduceDecorativeEffects={preferences.appearance.reduceDecorativeEffects}
     effectQuality={preferences.appearance.effectQuality}
     devPreview={devPreview}
@@ -257,7 +252,6 @@ export default function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </PageTransition>
       </AuthenticatedApplicationRuntime>
-      <ThemeClickEffects />
       </ApplicationErrorBoundary>
       </UserPreferencesProvider>
       </SignUpDraftProvider>

@@ -1,7 +1,0 @@
-:root[data-system-theme='obsidian'] .brand-logo__mark svg { color: var(--color-accent); filter: drop-shadow(0 0 7px rgb(217 107 39 / 25%)); }
-:root[data-system-theme='obsidian'] .brand-logo__mark svg path,
-:root[data-system-theme='obsidian'] .brand-logo__mark svg circle { stroke: var(--color-amber); }
-:root[data-system-theme='obsidian'] .brand-logo__wordmark { color: var(--color-text); }
-:root[data-system-theme='obsidian'] .brand-logo__wordmark b,
-:root[data-system-theme='obsidian'] .app-topbar__brand b { color: var(--color-accent); }
-:root[data-system-theme='obsidian'] .brand-logo:hover .brand-logo__mark { filter: drop-shadow(0 0 11px rgb(255 138 61 / 52%)); }

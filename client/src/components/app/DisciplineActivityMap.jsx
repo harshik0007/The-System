@@ -15,6 +15,8 @@ function weekdayOffset(dateKey) {
   return (['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].indexOf(weekday));
 }
 
+const WEEKDAY_LABELS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+
 function getIntensity(record) {
   if (!record?.completedTaskCount) return 0;
   if (record.completedTaskCount <= 2) return 1;
@@ -68,7 +70,7 @@ function placeTooltip(anchor, tooltip) {
   };
 }
 
-function ActivityTooltip({ dateKey, record, todayKey, position, tooltipRef, qualificationLabel, theme }) {
+function ActivityTooltip({ dateKey, record, todayKey, position, tooltipRef, qualificationLabel }) {
   if (!record) return null;
   const qualification = qualificationLabel || getActivityQualificationLabel(record, dateKey, todayKey);
   const hasReset = record.hasDailyResetRecord !== false;
@@ -84,7 +86,6 @@ function ActivityTooltip({ dateKey, record, todayKey, position, tooltipRef, qual
       className="discipline-activity-tooltip"
       role="tooltip"
       data-status={qualification.toLowerCase().replaceAll(' ', '-')}
-      data-system-theme={theme || undefined}
       style={position ? { left: `${position.left}px`, top: `${position.top}px` } : undefined}
       aria-hidden={!position}
     >
@@ -107,7 +108,7 @@ function ActivityTooltip({ dateKey, record, todayKey, position, tooltipRef, qual
   );
 }
 
-export default function DisciplineActivityMap({ disciplineState, schedule, emergencyPauseState, compact = false, serverRecords = null, serverToday = null, memberSince: memberSinceProp, theme = null, activityLoading = false, activityError = '', onRetryActivity }) {
+export default function DisciplineActivityMap({ disciplineState, schedule, emergencyPauseState, compact = false, serverRecords = null, serverToday = null, memberSince: memberSinceProp, activityLoading = false, activityError = '', onRetryActivity }) {
   const todayKey = getIstDateKey();
   const dateKeys = useMemo(() => getRollingActivityDates(todayKey, 365), [todayKey]);
   const groupedMonths = useMemo(() => {
@@ -240,6 +241,9 @@ export default function DisciplineActivityMap({ disciplineState, schedule, emerg
         {groupedMonths.map((month) => (
           <div className="discipline-activity__month" key={`${month.label}-${month.dates[0]}`}>
             <h3>{month.label}</h3>
+            <div className="discipline-activity__weekdays" aria-hidden="true">
+              {WEEKDAY_LABELS.map((label, index) => <span key={`${label}-${index}`}>{label}</span>)}
+            </div>
             <div className="discipline-activity__cells">
               {Array.from({ length: weekdayOffset(month.dates[0]) }, (_, index) => <span className="discipline-activity__empty-cell" key={`offset-${index}`} aria-hidden="true" />)}
               {month.dates.map((dateKey) => {
@@ -296,6 +300,6 @@ export default function DisciplineActivityMap({ disciplineState, schedule, emerg
       </aside>
             </>}
     </section>
-    {tooltipDate && tooltipRecord && <ActivityTooltip dateKey={tooltipDate} record={tooltipRecord} todayKey={todayKey} position={tooltipPosition} tooltipRef={tooltipRef} qualificationLabel={qualificationFor(tooltipRecord, tooltipDate)} theme={theme} />}
+    {tooltipDate && tooltipRecord && <ActivityTooltip dateKey={tooltipDate} record={tooltipRecord} todayKey={todayKey} position={tooltipPosition} tooltipRef={tooltipRef} qualificationLabel={qualificationFor(tooltipRecord, tooltipDate)} />}
   </>;
 }

@@ -4,6 +4,7 @@ import AppIcon from '../../components/app/AppIcon.jsx';
 import PageLoadingSkeleton from '../../components/app/PageLoadingSkeleton.jsx';
 import GracePointSummary from '../../components/app/GracePointSummary.jsx';
 import { useTaskBackend } from '../../context/TaskBackendContext.jsx';
+import { useFlashMessages } from '../../context/FlashMessageContext.jsx';
 import { RECOVERY_STATUS } from '../../utils/recoveryQuestManager.js';
 import { useReducedMotion } from '../../hooks/useReducedMotion.js';
 
@@ -78,11 +79,11 @@ function QuestCard({ quest, onComplete, paused = false }) {
 }
 
 export default function RecoveryQuestsPage() {
+  const { notifySuccess, notifyError } = useFlashMessages();
   const { recoveryQuests, gracePoints, gracePointTransactions, progression, recoveryLoading, recoveryLoaded, recoveryError, refreshRecovery, completeRecoveryQuest } = useTaskBackend();
   const reduceMotion = useReducedMotion();
   const [filter, setFilter] = useState('active');
   const [confirmQuest, setConfirmQuest] = useState(null);
-  const [feedback, setFeedback] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const quests = recoveryQuests || [];
   const isEmergencyPauseActive = Boolean(progression?.progression?.emergencyPauseActive);
@@ -127,10 +128,10 @@ export default function RecoveryQuestsPage() {
     if (!confirmQuest || isEmergencyPauseActive) return;
     setSubmitting(true);
     completeRecoveryQuest(confirmQuest.id).then(() => {
-      setFeedback(`“${confirmQuest.accountabilityActionTitle}” was completed and saved. No Grace Point was restored and no XP was awarded.`);
+      notifySuccess(`“${confirmQuest.accountabilityActionTitle}” was completed and saved. No Grace Point was restored and no XP was awarded.`);
       setConfirmQuest(null);
     }).catch((error) => {
-      setFeedback(error?.message || 'The Recovery Quest could not be completed. Refresh and try again.');
+      notifyError(error?.message || 'The Recovery Quest could not be completed. Refresh and try again.');
     }).finally(() => setSubmitting(false));
   };
 
@@ -158,8 +159,6 @@ export default function RecoveryQuestsPage() {
       </div>
 
       {activeCount >= 4 && <div className={`recovery-threshold-note${activeCount === 5 ? ' is-at-limit' : ''}`} role="status"><AppIcon name="activity" /><span><strong>{activeCount === 5 ? 'Active quest limit reached.' : `${5 - activeCount} active quest${5 - activeCount === 1 ? '' : 's'} until the limit.`}</strong> Generating a 6th active quest deducts one Grace Point and clears the full active group.</span></div>}
-      {feedback && <p className="recovery-feedback" role="status"><AppIcon name="shield" />{feedback}<button type="button" aria-label="Dismiss message" onClick={() => setFeedback('')}><AppIcon name="close" /></button></p>}
-
       <section className="recovery-quest-section" aria-labelledby="recovery-quest-list-title">
         <div className="recovery-quest-section__heading"><div><p className="app-eyebrow">YOUR COMMITMENTS</p><h2 id="recovery-quest-list-title">Recovery Quest record</h2><p>Only the Forfeit attached to a missed task becomes a Recovery Quest.</p></div></div>
         <div className="recovery-tabs" role="group" aria-label="Filter Recovery Quests">

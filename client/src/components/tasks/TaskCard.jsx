@@ -14,6 +14,17 @@ export default function TaskCard({ task, onSubmit, onMarkMissed, onMarkCompleted
   const [expanded, setExpanded] = useState(false);
   const detailsId = `task-details-${task.id}`;
   const isScheduled = task.status === 'scheduled';
+  const handleMenuAction = (selectedTask, mode) => {
+    if (mode === 'details') {
+      setExpanded(true);
+      return;
+    }
+    if (mode === 'proof') {
+      onSubmit?.(selectedTask);
+      return;
+    }
+    onModify?.(selectedTask, mode);
+  };
 
   return (
     <li className={`task-list-item task-list-item--${task.status} daily-task-reveal`}>
@@ -22,14 +33,10 @@ export default function TaskCard({ task, onSubmit, onMarkMissed, onMarkCompleted
           <span className="task-card__number" aria-label={`Task ${task.number}`}>{String(task.number).padStart(2, '0')}</span>
           <div className="task-card__copy">
             <div className="task-card__title-row"><h3 id={`task-title-${task.id}`}>{task.name}</h3><span className={`task-status task-status--${task.status}`}><i aria-hidden="true" />{STATUS_LABELS[task.status]}</span></div>
-            <p>{task.description}</p>
-            <button className="task-card__details-toggle" type="button" aria-expanded={expanded} aria-controls={detailsId} onClick={() => setExpanded((value) => !value)}>
-              <AppIcon name="shield" />{expanded ? 'Hide task details' : 'View Forfeit'}<span aria-hidden="true">{expanded ? '−' : '+'}</span>
-            </button>
           </div>
           <div className="task-card__action">
             {isScheduled && <button className="task-submit-button" type="button" disabled={paused || !onSubmit} onClick={() => onSubmit?.(task)}><AppIcon name="tasks" />{backendMode ? 'Submit Proof' : 'Submit Completion'}</button>}
-            {isScheduled && <TaskActionMenu task={task} onSelect={onModify} canModify={canModify} />}
+            {isScheduled && <TaskActionMenu task={task} onSelect={handleMenuAction} canModify={canModify} />}
             {task.status === 'submitted' && <span className="task-card__locked"><AppIcon name="clock" />Awaiting review</span>}
             {task.status === 'completed' && <span className="task-card__locked task-card__locked--complete"><AppIcon name="tasks" />Completed</span>}
             {task.status === 'missed' && <span className="task-card__locked task-card__locked--missed">Missed</span>}

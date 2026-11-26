@@ -90,30 +90,6 @@ export function UserPreferencesProvider({ children }) {
   }, [isApplicationRoute, memberKey, savePreferences]);
 
   useEffect(() => {
-    if (!isApplicationRoute || !member) return undefined;
-    let active = true;
-    let controller = null;
-    const refreshThemeEntitlement = () => {
-      controller?.abort();
-      controller = new AbortController();
-      taskApi.accountSettings({ signal: controller.signal }).then(({ settings }) => {
-        if (active) mergePreferences({ appearance: settings.appearance });
-      }).catch((error) => {
-        if (active && error?.name !== 'AbortError') {
-          // The current persisted theme remains in place; the next settings
-          // refresh will reconcile it with the server's authoritative Rank.
-        }
-      });
-    };
-    window.addEventListener('system:progression-theme-state-changed', refreshThemeEntitlement);
-    return () => {
-      active = false;
-      controller?.abort();
-      window.removeEventListener('system:progression-theme-state-changed', refreshThemeEntitlement);
-    };
-  }, [isApplicationRoute, member?.id, mergePreferences]);
-
-  useEffect(() => {
     try {
       window.sessionStorage.setItem(USER_PREFERENCES_SESSION_KEY, JSON.stringify(preferences));
     } catch {
@@ -139,13 +115,11 @@ export function UserPreferencesProvider({ children }) {
   useLayoutEffect(() => {
     const root = document.documentElement;
     if (isApplicationRoute && member && preferencesReady) {
-      root.dataset.systemTheme = preferences.appearance.theme || 'dark-navy';
       root.dataset.effectQuality = preferences.appearance.effectQuality || 'balanced';
     } else {
-      delete root.dataset.systemTheme;
       delete root.dataset.effectQuality;
     }
-  }, [isApplicationRoute, member, preferences.appearance.theme, preferences.appearance.effectQuality, preferencesReady]);
+  }, [isApplicationRoute, member, preferences.appearance.effectQuality, preferencesReady]);
 
   const value = useMemo(() => ({ preferences, ready: preferencesReady, savePreferences, mergePreferences }), [preferences, preferencesReady, savePreferences, mergePreferences]);
   return <UserPreferencesContext.Provider value={value}>{children}</UserPreferencesContext.Provider>;

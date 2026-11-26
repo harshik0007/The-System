@@ -45,7 +45,6 @@ export default function LoginPage() {
       navigate(safeAuthenticatedDestination(location.state?.from || oauthReturnTo), { replace: true });
     } catch (error) {
       const message = error?.message || 'The sign-in details are incorrect.';
-      setNotice(message);
       notifyError(message);
     } finally { setBusy(false); }
   };

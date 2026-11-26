@@ -63,7 +63,7 @@ export function TaskBackendProvider({ children }) {
   const lastProgressionRunIdRef = useRef(null);
   const onboardingRunIdRef = useRef(null);
   const resetBroadcastRunIdRef = useRef(null);
-  const progressionThemeSnapshotRef = useRef(null);
+  const progressionSnapshotRef = useRef(null);
 
   const refresh = useCallback(async () => {
     const requestId = ++requestIdRef.current;
@@ -185,11 +185,11 @@ export function TaskBackendProvider({ children }) {
         setProgression(nextProgression);
         const run = nextProgression.progression;
         const nextRunId = run?.id || null;
-        const themeSnapshot = run ? `${run.id}:${run.level}:${run.currentRankSlug}` : 'no-active-run';
-        if (progressionThemeSnapshotRef.current && progressionThemeSnapshotRef.current !== themeSnapshot) {
-          window.dispatchEvent(new CustomEvent('system:progression-theme-state-changed', { detail: { runId: run?.id || null, level: run?.level ?? 0 } }));
+        const progressionSnapshot = run ? `${run.id}:${run.level}:${run.currentRankSlug}` : 'no-active-run';
+        if (progressionSnapshotRef.current && progressionSnapshotRef.current !== progressionSnapshot) {
+          window.dispatchEvent(new CustomEvent('system:progression-state-changed', { detail: { runId: run?.id || null, level: run?.level ?? 0 } }));
         }
-        progressionThemeSnapshotRef.current = themeSnapshot;
+        progressionSnapshotRef.current = progressionSnapshot;
         const previousRunId = lastProgressionRunIdRef.current;
         if (nextRunId) lastProgressionRunIdRef.current = nextRunId;
 

@@ -8,6 +8,7 @@ import PasswordInput from './PasswordInput.jsx';
 import PasswordStrengthIndicator from './PasswordStrengthIndicator.jsx';
 import PrimaryButton from './PrimaryButton.jsx';
 import AuthNotice from './AuthNotice.jsx';
+import { useFlashMessages } from '../../context/FlashMessageContext.jsx';
 
 function formatCode(value) {
   const normalized = value.replace(/[^a-f0-9]/gi, '').slice(0, 32).toUpperCase();
@@ -17,6 +18,7 @@ function formatCode(value) {
 export default function RecoveryCodeResetForm() {
   const navigate = useNavigate();
   const { resetPassword } = useAuth();
+  const { notifyError } = useFlashMessages();
   const [form, setForm] = useState({ identifier: '', code: '', newPassword: '', confirmPassword: '' });
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -38,7 +40,7 @@ export default function RecoveryCodeResetForm() {
       const result = await resetPassword({ identifier: form.identifier.trim(), code: form.code, newPassword: form.newPassword, confirmPassword: form.confirmPassword });
       navigate('/login', { replace: true, state: { notice: result.message } });
     } catch (requestError) {
-      setError(requestError?.message || 'The account or recovery code could not be verified.');
+      notifyError(requestError?.message || 'The account or recovery code could not be verified.');
     } finally { setBusy(false); }
   };
 

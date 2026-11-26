@@ -5,35 +5,33 @@ import NotificationClearDialog from '../../components/app/NotificationClearDialo
 import PageLoadingSkeleton, { SkeletonLine } from '../../components/app/PageLoadingSkeleton.jsx';
 import NotificationItem from '../../components/app/NotificationItem.jsx';
 import { useNotificationCenter } from '../../context/NotificationCenterContext.jsx';
+import { useFlashMessages } from '../../context/FlashMessageContext.jsx';
 import { NOTIFICATION_CATEGORIES } from '../../utils/notificationCenter.js';
 import '../../styles/notification-center.css';
 
 export default function NotificationsPage() {
+  const { notifySuccess, notifyError } = useFlashMessages();
   const { notifications, unreadCount, page, loading, error, loadNotifications, markRead, markAllRead, deleteNotification, deleteAllNotifications } = useNotificationCenter();
   const [activeCategory, setActiveCategory] = useState('');
   const [activeReadState, setActiveReadState] = useState('all');
-  const [feedback, setFeedback] = useState('');
   const [markAllLoading, setMarkAllLoading] = useState(false);
   const [clearAllOpen, setClearAllOpen] = useState(false);
   const [deleteAllLoading, setDeleteAllLoading] = useState(false);
   const [deleteAllError, setDeleteAllError] = useState('');
   useEffect(() => {
-    let active = true;
     const controller = new AbortController();
-    setFeedback('');
-    loadNotifications({ category: activeCategory || null, readState: activeReadState, signal: controller.signal })
-      .catch(() => { if (active) setFeedback('The inbox could not be refreshed. Please retry.'); });
-    return () => { active = false; controller.abort(); };
-  }, [activeCategory, activeReadState, loadNotifications]);
+    loadNotifications({ category: activeCategory || null, readState: activeReadState, signal: controller.signal }).catch(() => {});
+    return () => controller.abort();
+  }, [activeCategory, activeReadState, loadNotifications, notifyError]);
 
   const handleMarkAll = async () => {
     if (markAllLoading) return;
     setMarkAllLoading(true);
     try {
       await markAllRead();
-      setFeedback('All notifications marked as read. Your notification history is preserved.');
+      notifySuccess('All notifications marked as read. Your notification history is preserved.');
     } catch (requestError) {
-      setFeedback(requestError?.message || 'Notifications could not be updated. Please retry.');
+      notifyError(requestError?.message || 'Notifications could not be updated. Please retry.');
     } finally {
       setMarkAllLoading(false);
     }
@@ -45,9 +43,10 @@ export default function NotificationsPage() {
     setDeleteAllError('');
     try {
       await deleteAllNotifications();
-      setFeedback('Notification history cleared. New notifications will still arrive.');
+      notifySuccess('Notification history cleared. New notifications will still arrive.');
       setClearAllOpen(false);
-    } catch {
+    } catch (requestError) {
+      notifyError(requestError?.message || 'Notification history could not be cleared. Refresh and try again.');
       setDeleteAllError('Notification history could not be cleared. Refresh and try again.');
     } finally {
       setDeleteAllLoading(false);
@@ -102,9 +101,9 @@ export default function NotificationsPage() {
             </button>
           </div>
         </div>
-        {(feedback || error) && <div className="notifications-inbox__feedback" role={error ? 'alert' : 'status'}>
-          <span>{error || feedback}</span>
-          {error && <button type="button" onClick={() => void loadNotifications({ category: activeCategory || null, readState: activeReadState }).catch(() => {})}>Retry</button>}
+        {error && <div className="notifications-inbox__feedback" role="alert">
+          <span>{error}</span>
+          <button type="button" onClick={() => void loadNotifications({ category: activeCategory || null, readState: activeReadState }).catch(() => {})}>Retry</button>
         </div>}
 
         {notifications.length > 0 ? (

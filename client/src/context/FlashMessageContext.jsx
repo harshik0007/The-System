@@ -60,7 +60,7 @@ export function FlashMessageProvider({ children }) {
     activeFingerprints.current.clear();
   }, []);
 
-  const value = useMemo(() => ({ notify, notifySuccess: (text) => notify(text, 'success'), notifyError: (text) => notify(text, 'error'), notifyInfo: (text) => notify(text, 'info') }), [notify]);
+  const value = useMemo(() => ({ notify, notifySuccess: (text, options) => notify(text, 'success', options), notifyError: (text, options) => notify(text, 'error', options), notifyInfo: (text, options) => notify(text, 'info', options) }), [notify]);
   return <FlashMessageContext.Provider value={value}>{children}<FlashMessageHost messages={messages} dismiss={dismiss} /></FlashMessageContext.Provider>;
 }
 

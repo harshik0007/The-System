@@ -1,6 +1,0 @@
-:root[data-system-theme='obsidian'] .app-layout :is(input:not([type='checkbox']):not([type='radio']):not([type='file']), textarea, select),
-:root[data-system-theme='obsidian'] [role='dialog'] :is(input:not([type='checkbox']):not([type='radio']):not([type='file']), textarea, select) { border-color: var(--color-line); background: var(--surface-input); color: var(--color-text); accent-color: var(--color-accent); color-scheme: dark; }
-:root[data-system-theme='obsidian'] .app-layout :is(input, textarea, select)::placeholder { color: var(--color-subtle); }
-:root[data-system-theme='obsidian'] .app-layout :is(input, textarea, select):focus,
-:root[data-system-theme='obsidian'] [role='dialog'] :is(input, textarea, select):focus { border-color: var(--color-accent); box-shadow: 0 0 0 3px rgb(255 138 61 / 12%); }
-:root[data-system-theme='obsidian'] .app-layout :is(input[type='checkbox'], input[type='radio']) { accent-color: var(--color-accent); }

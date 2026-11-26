@@ -2,6 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import AppIcon from '../../components/app/AppIcon.jsx';
 import PageLoadingSkeleton, { SkeletonLine } from '../../components/app/PageLoadingSkeleton.jsx';
+import { useReducedMotion } from '../../hooks/useReducedMotion.js';
+import { useFlashMessages } from '../../context/FlashMessageContext.jsx';
 import { taskApi } from '../../services/taskApi.js';
 import '../../styles/monthly-analysis.css';
 
@@ -56,7 +58,7 @@ function DailyPerformance({ daily }) {
   </div>;
 }
 
-function Comparison({ months, firstMonth, secondMonth, setFirstMonth, setSecondMonth, comparison, loading, error, onCompare }) {
+function Comparison({ months, firstMonth, secondMonth, setFirstMonth, setSecondMonth, comparison, loading, onCompare }) {
   return <Panel id="monthly-comparison" eyebrow="SAME RUN · SIDE BY SIDE" title="Compare two months">
     <p className="monthly-inline-note">Only summaries from your current Progression Run are available. Changes are descriptive; an increase is not always an improvement.</p>
     <div className="m25-compare-controls">
@@ -64,12 +66,13 @@ function Comparison({ months, firstMonth, secondMonth, setFirstMonth, setSecondM
       <label><span>SECOND MONTH</span><select value={secondMonth} onChange={(event) => setSecondMonth(event.target.value)}><option value="">Choose a month</option>{months.filter((month) => month.monthKey !== firstMonth).map((month) => <option key={month.monthKey} value={month.monthKey}>{monthLabel(month.monthKey)}{month.status === 'partial' ? ' · Partial' : ''}</option>)}</select></label>
       <button className="button button--secondary" type="button" disabled={!firstMonth || !secondMonth || loading} onClick={onCompare}>{loading ? 'Comparing…' : 'Compare months'}</button>
     </div>
-    {error && <p className="m25-inline-error" role="alert">{error}</p>}
     {comparison && <div className="monthly-table-wrap"><table className="monthly-table"><thead><tr><th scope="col">Measure</th><th scope="col">{monthLabel(comparison.first.monthKey)} <small>({comparison.first.coverage.from}–{comparison.first.coverage.through})</small></th><th scope="col">{monthLabel(comparison.second.monthKey)} <small>({comparison.second.coverage.from}–{comparison.second.coverage.through})</small></th><th scope="col">Difference</th><th scope="col">Change</th></tr></thead><tbody>{comparison.metrics.map((item) => <tr key={item.label}><th scope="row">{item.label}</th><td>{number(item.first)}</td><td>{number(item.second)}</td><td>{item.difference === null ? 'Data unavailable' : `${item.difference > 0 ? '+' : ''}${number(item.difference)}`}</td><td>{item.percentChange === null ? '—' : `${item.percentChange > 0 ? '+' : ''}${number(item.percentChange, '%')}`}</td></tr>)}</tbody></table></div>}
   </Panel>;
 }
 
 export default function MonthlyAnalysisPage() {
+  const reduceMotion = useReducedMotion();
+  const { notifySuccess, notifyError } = useFlashMessages();
   const [loading, setLoading] = useState(true);
   const [pageError, setPageError] = useState('');
   const [months, setMonths] = useState([]);
@@ -84,9 +87,7 @@ export default function MonthlyAnalysisPage() {
   const [secondMonth, setSecondMonth] = useState('');
   const [comparison, setComparison] = useState(null);
   const [compareLoading, setCompareLoading] = useState(false);
-  const [compareError, setCompareError] = useState('');
   const [pdfLoading, setPdfLoading] = useState(false);
-  const [pdfError, setPdfError] = useState('');
 
   const loadPage = useCallback(async () => {
     setLoading(true);
@@ -158,21 +159,25 @@ export default function MonthlyAnalysisPage() {
       const response = await taskApi.monthlyAnalysisDetails(selected.monthKey, { limit: 50, cursor: detailCursor });
       setDetails((current) => [...current, ...(response.data?.items || [])]);
       setDetailCursor(response.data?.nextCursor || null);
-    } catch (error) { setDetailError(error?.message || 'More Task history could not be loaded.'); }
+    } catch (error) { notifyError(error?.message || 'More Task history could not be loaded.'); }
     finally { setDetailLoading(false); }
   };
 
   const runComparison = async () => {
     if (!firstMonth || !secondMonth || firstMonth === secondMonth || compareLoading) return;
-    setCompareLoading(true); setCompareError(''); setComparison(null);
-    try { const response = await taskApi.monthlyAnalysisCompare(firstMonth, secondMonth); setComparison(response.data); }
-    catch (error) { setCompareError(error?.message || 'These months could not be compared.'); }
+    setCompareLoading(true); setComparison(null);
+    try {
+      const response = await taskApi.monthlyAnalysisCompare(firstMonth, secondMonth);
+      setComparison(response.data);
+      notifySuccess('Your monthly comparison is ready.');
+    }
+    catch (error) { notifyError(error?.message || 'These months could not be compared.'); }
     finally { setCompareLoading(false); }
   };
 
   const downloadPdf = async () => {
     if (!selected || pdfLoading) return;
-    setPdfLoading(true); setPdfError('');
+    setPdfLoading(true);
     try {
       const blob = await taskApi.downloadMonthlyAnalysisPdf(selected.monthKey, comparison?.first.monthKey === selected.monthKey ? comparison.second.monthKey : comparison?.second.monthKey === selected.monthKey ? comparison.first.monthKey : null);
       const url = URL.createObjectURL(blob);
@@ -181,7 +186,8 @@ export default function MonthlyAnalysisPage() {
       anchor.download = `the-system-monthly-${selected.monthKey}.pdf`;
       document.body.appendChild(anchor); anchor.click(); anchor.remove();
       window.setTimeout(() => URL.revokeObjectURL(url), 1000);
-    } catch (error) { setPdfError(error?.message || 'The report could not be generated.'); }
+      notifySuccess('Your monthly report was downloaded.');
+    } catch (error) { notifyError(error?.message || 'The report could not be generated.'); }
     finally { setPdfLoading(false); }
   };
 
@@ -207,7 +213,6 @@ export default function MonthlyAnalysisPage() {
       <span className={`monthly-period-status${selected.status === 'partial' ? ' is-partial' : ''}`}>{status}</span>
       <button className="button button--secondary monthly-export-button" type="button" onClick={() => void downloadPdf()} disabled={pdfLoading}>{pdfLoading ? <SkeletonLine width="short" label="Preparing PDF" /> : 'Download PDF'}</button>
     </section>
-    {pdfError && <p className="m25-inline-error" role="alert">{pdfError}</p>}
     <p className="monthly-run-note">Current Progression Run · {selected.coverage.aggregationVersion ? `Report version ${selected.coverage.aggregationVersion}` : 'Saved report'} · Comparisons are isolated to this run.</p>
 
     <nav className="monthly-section-nav" aria-label="Monthly analysis sections">{[['monthly-overview', 'Overview'], ['monthly-performance', 'Performance Trends'], ['monthly-progression', 'Recovery & Progression'], ['monthly-history', 'Detailed History'], ['monthly-comparison', 'Compare']].map(([id, label]) => <a href={`#${id}`} key={id} onClick={(event) => {
@@ -222,9 +227,7 @@ export default function MonthlyAnalysisPage() {
       const targetTop = target.getBoundingClientRect().top;
       const visibleTop = Math.max(topbarBottom, navigationTop + navigationHeight) + 14;
       const scrollTop = (document.scrollingElement?.scrollTop ?? window.scrollY) + targetTop - visibleTop;
-      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-      window.scrollTo({ top: Math.max(0, scrollTop), behavior: reducedMotion ? 'auto' : 'smooth' });
+      window.scrollTo({ top: Math.max(0, scrollTop), behavior: reduceMotion ? 'auto' : 'smooth' });
       window.history.replaceState(null, '', `#${id}`);
     }}>{label}</a>)}</nav>
 
@@ -273,7 +276,7 @@ export default function MonthlyAnalysisPage() {
         </>}
     </section>
 
-    <Comparison months={months} firstMonth={firstMonth} secondMonth={secondMonth} setFirstMonth={setFirstMonth} setSecondMonth={setSecondMonth} comparison={comparison} loading={compareLoading} error={compareError} onCompare={() => void runComparison()} />
+    <Comparison months={months} firstMonth={firstMonth} secondMonth={secondMonth} setFirstMonth={setFirstMonth} setSecondMonth={setSecondMonth} comparison={comparison} loading={compareLoading} onCompare={() => void runComparison()} />
 
     <section className="monthly-retention-panel"><div><p className="app-eyebrow">DETAIL EXPIRY REMINDERS</p><h2>Keep your history in view</h2><p>Task details are retained for the current and immediately previous IST months. Their monthly summaries are preserved after detail expiry.</p></div>
       {reminders.length ? <ul className="monthly-reminder-list">{reminders.map((item) => <li key={`${item.monthKey}-${item.reminder}`}><AppIcon name="clock" /><span><strong>{item.status === 'due' ? 'Reminder' : 'Upcoming reminder'} · {item.reminder} before {monthLabel(item.monthKey)} detail expiry</strong><small>{item.status === 'due' ? 'Available now.' : `Scheduled for ${dateTimeLabel(item.remindAt)}.`} Detailed history expires {dateTimeLabel(item.expiresAt)}.</small></span></li>)}</ul> : <span className="monthly-reminder-empty">No retained Task detail is approaching expiry. Reminders appear at 7 days, 48 hours and 24 hours before expiry.</span>}

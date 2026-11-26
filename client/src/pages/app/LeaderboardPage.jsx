@@ -38,8 +38,8 @@ function PodiumCard({ member, slot, category, tied = false }) {
   const accent = visualPlace === 1 ? LEADERBOARD_POSITION_ACCENTS.first
     : visualPlace === 2 ? LEADERBOARD_POSITION_ACCENTS.second
       : visualPlace === 3 ? LEADERBOARD_POSITION_ACCENTS.third : '#55CFFF';
-  const placeName = competitionRank === 1 ? 'CHAMPION' : competitionRank === 2 ? 'ELITE' : competitionRank === 3 ? 'DIAMOND' : `RANK ${competitionRank}`;
-  const personalBestPosition = member.personalBestRecords?.[category]?.bestPosition;
+  const placeName = tied ? `SHARED · RANK ${competitionRank}`
+    : competitionRank === 1 ? 'CHAMPION' : competitionRank === 2 ? 'ELITE' : competitionRank === 3 ? 'DIAMOND' : `RANK ${competitionRank}`;
 
   return (
     <div className={`leaderboard-podium-slot leaderboard-podium-slot--place-${slot}`} style={{ '--place-accent': accent }}>
@@ -53,7 +53,6 @@ function PodiumCard({ member, slot, category, tied = false }) {
         <div className="leaderboard-podium__member"><MemberAvatar member={member} position={visualPlace} /><div><strong className="leaderboard-podium__name">{member.username}</strong><span className="leaderboard-podium__rank-label">Rank {member.rankNumber} · {member.rankName}</span>{member.isCurrentMember && <small className="leaderboard-podium__you">YOU</small>}</div></div>
         {rank && <span className="leaderboard-podium__rank-art"><RankBadge rank={rank} size="large" presentation="reference" /></span>}
         <div className="leaderboard-podium__stats"><span><small>LEVEL</small><b>{String(member.level).padStart(2, '0')}</b></span><span><small>{category === 'discipline' ? 'DISCIPLINE' : category === 'xp' ? 'TOTAL XP' : 'OVERALL'}</small><b>{getLeaderboardCategoryValue(member, category)}</b></span></div>
-        {personalBestPosition && <small className="leaderboard-podium__personal-best">PERSONAL BEST · #{personalBestPosition}</small>}
         <span className="leaderboard-podium__open">View public profile <AppIcon name="arrow" /></span>
       </Link>
     </div>

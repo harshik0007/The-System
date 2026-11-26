@@ -84,7 +84,6 @@ export default function SignUpPage() {
       notifyError(message);
       const field = error?.code === 'EMAIL_ALREADY_EXISTS' ? 'email' : error?.code === 'USERNAME_ALREADY_TAKEN' ? 'username' : null;
       if (field) setErrors({ [field]: message });
-      else setNotice(message);
     } finally { setBusy(false); }
   };
 

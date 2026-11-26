@@ -5,6 +5,7 @@ import QuickStartIntro from '../app/QuickStartIntro.jsx';
 import { TermText } from '../app/Term.jsx';
 import { useTaskBackend } from '../../context/TaskBackendContext.jsx';
 import { useReducedMotion } from '../../hooks/useReducedMotion.js';
+import { useFlashMessages } from '../../context/FlashMessageContext.jsx';
 import { createIdempotencyKey, taskApi } from '../../services/taskApi.js';
 import { getScheduleValidation } from '../../utils/taskScheduleBuilder.js';
 import { hasSeenQuickStartIntro, updateFirstRunProgress } from '../../utils/firstRunProgress.js';
@@ -110,6 +111,7 @@ function ScreenHeading({ step, title, description }) {
 }
 
 export default function QuickStartScheduleBuilder({ onCancel }) {
+  const { notifyInfo, notifySuccess, notifyError } = useFlashMessages();
   const { refresh } = useTaskBackend();
   const navigate = useNavigate();
   const reducedMotion = useReducedMotion();
@@ -120,7 +122,6 @@ export default function QuickStartScheduleBuilder({ onCancel }) {
   const [tasks, setTasks] = useState([]);
   const [selectedPack, setSelectedPack] = useState('');
   const [pasteText, setPasteText] = useState('');
-  const [pasteMessage, setPasteMessage] = useState('');
   const [attempted, setAttempted] = useState(false);
   const [sameForAll, setSameForAll] = useState(true);
   const [sharedForfeit, setSharedForfeit] = useState(FORFEIT_CHOICES[0]);
@@ -130,7 +131,6 @@ export default function QuickStartScheduleBuilder({ onCancel }) {
   const [weakness, setWeakness] = useState('');
   const [rulesAcknowledged, setRulesAcknowledged] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [saveError, setSaveError] = useState('');
   const validation = useMemo(() => getScheduleValidation(7, '', tasks), [tasks]);
 
   const filledCount = tasks.filter((task) => task.name.trim()).length;
@@ -159,7 +159,6 @@ export default function QuickStartScheduleBuilder({ onCancel }) {
   };
   const usePack = (pack) => {
     setSelectedPack(pack.name);
-    setPasteMessage('');
     setTasks(pack.tasks.map((name) => ({ ...makeTask(name), weakness })));
     setSharedForfeit(FORFEIT_CHOICES[0]);
     setSharedWording(forfeitWording(FORFEIT_CHOICES[0]));
@@ -184,7 +183,7 @@ export default function QuickStartScheduleBuilder({ onCancel }) {
       setSelectedPack('');
     }
     setPasteText('');
-    setPasteMessage(names.length ? `${names.length} Task${names.length === 1 ? '' : 's'} added${duplicates ? ` · ${duplicates} exact duplicate${duplicates === 1 ? '' : 's'} skipped` : ''}.` : duplicates ? 'Those exact Task names are already on your list.' : 'Enter one Task name per line.');
+    notifyInfo(names.length ? `${names.length} Task${names.length === 1 ? '' : 's'} added${duplicates ? ` · ${duplicates} exact duplicate${duplicates === 1 ? '' : 's'} skipped` : ''}.` : duplicates ? 'Those exact Task names are already on your list.' : 'Enter one Task name per line.');
   };
   const toggleTaskDays = (taskId) => setTasks((current) => current.map((task) => task.id === taskId ? { ...task, showDays: !task.showDays } : task));
   const continueFromTasks = () => {
@@ -241,7 +240,6 @@ export default function QuickStartScheduleBuilder({ onCancel }) {
   const startPlan = async () => {
     if (saveLockRef.current) return;
     setAttempted(true);
-    setSaveError('');
     if (!rulesAcknowledged || !taskStepValid || !forfeitStepValid || !validation.valid) return;
     saveLockRef.current = true;
     setSaving(true);
@@ -264,9 +262,10 @@ export default function QuickStartScheduleBuilder({ onCancel }) {
       updateFirstRunProgress({ planCreated: true });
       await refresh();
       idempotencyKeyRef.current = createIdempotencyKey();
+      notifySuccess('Your daily plan is ready.');
       navigate('/app/dashboard', { replace: true, state: { quickStartCreated: true, firstTaskName } });
     } catch {
-      setSaveError('We couldn’t save your plan just now. Your Tasks are still here. Please try again.');
+      notifyError('We couldn’t save your plan just now. Your Tasks are still here. Please try again.');
     } finally {
       saveLockRef.current = false;
       setSaving(false);
@@ -298,7 +297,6 @@ export default function QuickStartScheduleBuilder({ onCancel }) {
       <div className="quick-start-paste">
         <label className="quick-start-field" htmlFor="quick-start-task-paste"><span>Or add your own list</span><textarea id="quick-start-task-paste" rows="3" value={pasteText} onChange={(event) => setPasteText(event.target.value)} onPaste={(event) => { const pasted = event.clipboardData.getData('text'); if (pasted.includes('\n')) { event.preventDefault(); addPastedTasks(pasted); } }} placeholder="One Task per line" /></label>
         <button className="quick-start-secondary-button" type="button" onClick={addPastedTasks}>Add these Tasks</button>
-        {pasteMessage && <p className="quick-start-inline-message" role="status">{pasteMessage}</p>}
       </div>
 
       <div className="quick-start-task-list-heading">
@@ -370,7 +368,6 @@ export default function QuickStartScheduleBuilder({ onCancel }) {
         <p><span className="quick-start-facts__icon" aria-hidden="true"><AppIcon name="clock" /></span><span className="quick-start-facts__text"><TermText>A missed Task gives you 72 hours to complete its Recovery Quest.</TermText></span></p>
       </div>
       <label className="quick-start-acknowledgement"><input type="checkbox" checked={rulesAcknowledged} onChange={(event) => setRulesAcknowledged(event.target.checked)} /><span>I understand the rules.</span><Link to="/rules#the-60-second-version" target="_blank" rel="noreferrer">Read the full rules</Link></label>
-      {saveError && <p className="quick-start-form-error" role="alert">{saveError}</p>}
       <div className="quick-start-actions quick-start-actions--split">
         <button className="quick-start-secondary-button" type="button" onClick={() => setStep(2)}>Back</button>
         <button className="quick-start-primary-button" type="button" onClick={startPlan} disabled={!rulesAcknowledged || !taskStepValid || !forfeitStepValid || !validation.valid || saving}>{saving ? 'Starting your plan…' : 'Start my plan'} <AppIcon name="arrow" /></button>

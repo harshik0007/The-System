@@ -20,9 +20,6 @@ export function createDefaultUserPreferences() {
       gracePointBalance: true,
     },
     appearance: {
-      theme: 'dark-navy',
-      voidShardCursor: true,
-      clickRipple: true,
       nonessentialAnimations: true,
       reduceDecorativeEffects: false,
       effectQuality: 'balanced',
@@ -49,13 +46,7 @@ export function normalizeUserPreferences(value) {
       typeof value.privacy?.[key] === 'boolean' ? value.privacy[key] : defaults.privacy[key],
     ])),
     appearance: {
-      // Browser/session data cannot prove Rank eligibility. The server
-      // migrates legacy Rank 01 theme IDs after checking current Rank; until
-      // then, unknown legacy values fall back to the safe local default.
-      theme: ['dark-navy', 'obsidian', 'aurora', 'eclipse', 'galaxion'].includes(value.appearance?.theme)
-        ? value.appearance.theme
-        : defaults.appearance.theme,
-      ...Object.fromEntries(Object.keys(defaults.appearance).filter((key) => key !== 'theme').map((key) => [key,
+      ...Object.fromEntries(Object.keys(defaults.appearance).map((key) => [key,
         key === 'effectQuality'
           ? (['high', 'balanced', 'low'].includes(value.appearance?.[key]) ? value.appearance[key] : defaults.appearance[key])
           : typeof value.appearance?.[key] === 'boolean' ? value.appearance[key] : defaults.appearance[key],

@@ -4,12 +4,10 @@ import AppIcon from '../../components/app/AppIcon.jsx';
 import PageLoadingSkeleton, { SkeletonLine } from '../../components/app/PageLoadingSkeleton.jsx';
 import DisciplineActivityMap from '../../components/app/DisciplineActivityMap.jsx';
 import { useTaskBackend } from '../../context/TaskBackendContext.jsx';
-import { useUserPreferences } from '../../context/UserPreferencesContext.jsx';
-import ThemePreviewVisual from '../../components/app/ThemePreviewVisual.jsx';
-import { APPEARANCE_THEMES, getNextAppearanceThemeReward } from '../../data/appearanceThemes.js';
 import { getRankDisciplineConfig, DISCIPLINE_TASK_MINIMUM, GRACE_REDEMPTION_COOLDOWN_HOURS, RECOVERY_QUEST_XP_DRAIN_RATE } from '../../data/disciplineConfig.js';
 import { RECOVERY_STATUS } from '../../utils/recoveryQuestManager.js';
 import { createIdempotencyKey } from '../../services/taskApi.js';
+import { useFlashMessages } from '../../context/FlashMessageContext.jsx';
 import '../../styles/discipline.css';
 import '../../styles/settings.css';
 
@@ -66,51 +64,8 @@ function RedemptionDialog({ points, onCancel, onConfirm, busy }) {
   </div>;
 }
 
-const THEME_FEATURES = Object.freeze({
-  'dark-navy': ['Original THE SYSTEM design', 'Deep navy surfaces and cyan details', 'Crimson Emergency Pause effect'],
-  obsidian: ['Graphite and charcoal surfaces', 'Amber molten-light accents', 'Emberfall Emergency Pause effect'],
-  aurora: ['Violet and teal atmosphere', 'Flowing northern-light visuals', 'Aurora Veil Emergency Pause effect'],
-  eclipse: ['Premium lunar-black appearance', 'Silver-violet orbital details', 'Totality Emergency Pause effect'],
-  galaxion: ['Large black-hole visual and glowing accretion disc', 'Falling stars, comets and meteors', 'Celestial Star pointer with a flowing light tail'],
-});
-
-function ThemeRewards({ currentRank, equippedTheme, preferencesReady }) {
-  const currentRankNumber = Number(currentRank?.number);
-  const knownRank = Number.isInteger(currentRankNumber) && currentRankNumber >= 1 && currentRankNumber <= 7;
-  const themeRewardProgress = knownRank ? getNextAppearanceThemeReward(currentRankNumber) : null;
-  const nextTheme = themeRewardProgress?.theme || null;
-  const totalRankSteps = themeRewardProgress?.totalRankSteps || 0;
-  const completedRankSteps = themeRewardProgress?.completedRankSteps || 0;
-  const remainingRankSteps = themeRewardProgress?.remainingRankSteps || 0;
-  const nextPercent = themeRewardProgress?.progressPercent ?? 100;
-  const equipped = APPEARANCE_THEMES.find((theme) => theme.id === equippedTheme) || APPEARANCE_THEMES[0];
-
-  return <section className="discipline-theme-rewards" aria-labelledby="theme-rewards-title">
-    <div className="discipline-section-heading"><div><p className="app-eyebrow">RANK PROGRESSION · APPEARANCE REWARDS</p><h2 id="theme-rewards-title">Theme rewards</h2></div><span>{currentRank ? `Current Rank: ${currentRank.number} · ${currentRank.name}` : 'Rank loading'}</span></div>
-    <article className="discipline-next-theme app-panel">
-      <div className="discipline-next-theme__copy"><p className="app-eyebrow">YOUR NEXT THEME</p>
-        {!preferencesReady || !knownRank ? <><h3>Checking your next unlock…</h3><p>Your current Rank and equipped theme are loaded from your account.</p></> : nextTheme ? <><h3>{nextTheme.name}</h3><p>{nextTheme.requirement}. Your current Rank is Rank {String(currentRankNumber).padStart(2, '0')} · {currentRank.name}.</p><div className="discipline-next-theme__progress" role="progressbar" aria-label={`Rank progress toward ${nextTheme.name}`} aria-valuemin="0" aria-valuemax={totalRankSteps} aria-valuenow={completedRankSteps} aria-valuetext={`${completedRankSteps} of ${totalRankSteps} Rank promotions complete`}><span style={{ width: `${nextPercent}%` }} /></div><small>{completedRankSteps} of {totalRankSteps} Rank promotions · {remainingRankSteps} {remainingRankSteps === 1 ? 'Rank' : 'Ranks'} to reach Rank {String(nextTheme.requiredRankNumber).padStart(2, '0')}</small></> : <><h3>ALL THEMES UNLOCKED</h3><p>All five themes are available at your current Rank.</p></>}
-      </div>
-      <div className="discipline-next-theme__active"><span>CURRENT THEME</span><strong>{preferencesReady ? equipped.name : 'Loading…'}</strong><Link to="/app/settings?category=appearance">Open Appearance settings <AppIcon name="arrow" /></Link></div>
-    </article>
-    <div className="discipline-theme-grid" aria-label="Theme rewards by Rank">{APPEARANCE_THEMES.map((theme) => {
-      const accessKnown = knownRank && preferencesReady;
-      const isEligible = theme.requiredRankNumber === null || (knownRank && currentRankNumber <= theme.requiredRankNumber);
-      const isEquipped = preferencesReady && equippedTheme === theme.id;
-      const status = !accessKnown ? 'Checking availability' : isEquipped ? 'Equipped' : isEligible ? 'Available to equip' : `Unlock at ${theme.requirement}`;
-      const stateClass = !accessKnown ? ' is-pending' : isEquipped ? ' is-equipped' : isEligible ? ' is-unlocked' : ' is-locked';
-      return <article className={`discipline-theme-card${stateClass}`} key={theme.id}>
-        <ThemePreviewVisual theme={theme} size="card" />
-        <div className="discipline-theme-card__heading"><div><h3>{theme.name}</h3><span>{theme.requirement}</span></div><strong>{status}</strong></div>
-        <ul>{THEME_FEATURES[theme.id].map((feature) => <li key={feature}>{feature}</li>)}</ul>
-      </article>;
-    })}</div>
-    {!preferencesReady && <p className="discipline-disclosure">Theme access and the equipped theme are confirmed from your account settings.</p>}
-  </section>;
-}
-
 export default function DisciplinePage() {
-  const { preferences, ready: preferencesReady } = useUserPreferences();
+  const { notifySuccess, notifyError } = useFlashMessages();
   const {
     disciplineSummary: summary,
     disciplineCalendar,
@@ -125,7 +80,6 @@ export default function DisciplinePage() {
   const [now, setNow] = useState(Date.now());
   const [confirmRedemption, setConfirmRedemption] = useState(false);
   const [redeeming, setRedeeming] = useState(false);
-  const [feedback, setFeedback] = useState('');
   const redemptionKeyRef = useRef(null);
 
   useEffect(() => {
@@ -172,9 +126,9 @@ export default function DisciplinePage() {
       await redeemDisciplinePoint(redemptionKeyRef.current);
       redemptionKeyRef.current = null;
       setConfirmRedemption(false);
-      setFeedback('One Discipline Point was converted into one Grace Point. The 72-hour cooldown is now active.');
+      notifySuccess('One Discipline Point was converted into one Grace Point. The 72-hour cooldown is now active.');
     } catch (error) {
-      setFeedback(error?.message || 'The redemption could not be completed. Your balances and cooldown were not changed.');
+      notifyError(error?.message || 'The redemption could not be completed. Your balances and cooldown were not changed.');
     } finally {
       setRedeeming(false);
     }
@@ -191,8 +145,6 @@ export default function DisciplinePage() {
       </header>
 
       {disciplineError && <p className="discipline-feedback" role="alert"><AppIcon name="activity" />{disciplineError}</p>}
-      {feedback && <p className="discipline-feedback" role="status"><AppIcon name="activity" />{feedback}<button type="button" onClick={() => setFeedback('')} aria-label="Dismiss message"><AppIcon name="close" /></button></p>}
-
       <section className="discipline-overview" aria-label="Discipline overview">
         <article className="discipline-overview__main app-panel">
           <div className="discipline-overview__heading"><div><p className="app-eyebrow">CURRENT STREAK</p><h2>{summary ? summary.currentStreak : '—'}<span>{summary ? ' days' : ''}</span></h2></div><span className="discipline-overview__symbol"><AppIcon name="activity" /></span></div>
@@ -232,8 +184,6 @@ export default function DisciplinePage() {
           <RewardCategory tone="xp" eyebrow="CURRENT · RANK XP BENEFIT" title="Task XP multiplier" amount={rankData?.multiplierLabel || 'Unavailable'} description={rankData ? 'Applied to eligible Task base XP after allocation. The day’s XP cap is captured from the Rank held at IST day start.' : 'Current Rank XP benefits appear when your active Progression Run is ready.'} icon="spark" />
         </div>
       </section>
-
-      <ThemeRewards currentRank={rankData} equippedTheme={preferences.appearance.theme} preferencesReady={preferencesReady} />
 
       <section className="discipline-drain app-panel" aria-labelledby="discipline-drain-title">
         <div className="discipline-drain__icon"><AppIcon name="recovery" /></div>

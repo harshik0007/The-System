@@ -1,7 +1,0 @@
-:root[data-system-theme='obsidian'] { font-family: var(--font-body); }
-:root[data-system-theme='obsidian'] :is(button, input, textarea, select, option, table) { font-family: inherit; }
-:root[data-system-theme='obsidian'] .app-layout :is(.app-eyebrow, .settings-content__category) { color: var(--color-amber); font-size: .75rem; letter-spacing: .12em; }
-:root[data-system-theme='obsidian'] .app-layout :is(.app-panel h2, .settings-section-header h2) { color: var(--color-text); }
-:root[data-system-theme='obsidian'] .app-layout :is(.settings-toggle__copy small, .settings-notification-group > header p, .settings-security-card p:not(.app-eyebrow), .settings-inline-note, .app-panel__description) { color: var(--color-muted); font-size: .875rem; line-height: 1.55; }
-:root[data-system-theme='obsidian'] .app-layout :is(.settings-readonly > span, .settings-theme-card__requirement, .settings-category-toggle, .settings-session-status, .settings-pending-label) { font-size: .75rem; letter-spacing: .04em; }
-:root[data-system-theme='obsidian'] .app-layout :is(.settings-theme-card__heading h3, .settings-security-card h3, .app-popover__heading h2) { color: var(--color-text); font-family: var(--font-display); }

@@ -64,22 +64,20 @@ export default function PublicLayout({ title, description, eyebrow, heading, int
       const rankCards = pageRef.current.querySelectorAll('.rank-gallery .rank-card');
       if (rankCards.length) {
         gsap.from(rankCards, {
-          y: 16, autoAlpha: 0, stagger: 0.07, duration: 0.52, ease: 'power3.out',
+          autoAlpha: 0, duration: 0.56, ease: 'power2.out', clearProps: 'opacity,visibility',
           scrollTrigger: { trigger: '.rank-gallery', start: 'top 84%', once: true },
         });
-        const emblemPaths = pageRef.current.querySelectorAll(
-          '.rank-gallery .emblem-art .emblem-metal, .rank-gallery .emblem-art .emblem-inlay, .rank-gallery .emblem-art .emblem-engrave',
-        );
-        if (emblemPaths.length) gsap.fromTo(emblemPaths,
-          { strokeDasharray: 240, strokeDashoffset: 240 },
-          { strokeDashoffset: 0, stagger: { each: 0.025, from: 'start' }, duration: 0.74, ease: 'power2.out',
-            scrollTrigger: { trigger: pageRef.current.querySelector('.rank-gallery'), start: 'top 82%', once: true } },
-        );
-        gsap.from('.rank-gallery .rank-card__emblem', {
-          scale: 0.92, filter: 'brightness(.68)', stagger: 0.055, duration: 0.48, ease: 'power2.out',
-          scrollTrigger: { trigger: '.rank-gallery', start: 'top 83%', once: true },
-        });
       }
+      const rankDetail = pageRef.current.querySelector('.rank-detail-page');
+      if (rankDetail) gsap.from(rankDetail, {
+        y: 22, autoAlpha: 0, duration: 0.74, ease: 'power3.out',
+        scrollTrigger: { trigger: rankDetail, start: 'top 84%', once: true },
+      });
+      const rankProgression = pageRef.current.querySelector('.rank-progression');
+      if (rankProgression) gsap.from(rankProgression, {
+        y: 18, autoAlpha: 0, duration: 0.68, ease: 'power3.out',
+        scrollTrigger: { trigger: rankProgression, start: 'top 88%', once: true },
+      });
       const badgeShowcase = pageRef.current.querySelector('.rank-badge-showcase');
       if (badgeShowcase) gsap.fromTo(badgeShowcase.querySelector('.rank-badge-aura'),
         { autoAlpha: 0, y: 13, scale: 0.96 },

@@ -1,5 +1,4 @@
-/* Transient system feedback uses fixed semantic colors so status meaning stays
-   consistent across every equipped theme. */
+/* Transient system feedback uses fixed semantic colors for clear status meaning. */
 .system-flash-stack {
   position: fixed;
   z-index: var(--z-toast, 1100);
@@ -65,8 +64,6 @@
 .system-flash > button:hover { border-color: color-mix(in srgb, var(--flash-color) 35%, transparent); color: var(--flash-color); }
 .system-flash > button:focus-visible { outline: 2px solid var(--flash-color); outline-offset: 2px; }
 .system-flash > button .app-icon { width: 14px; height: 14px; }
-
-body.theme-transition-overlay-active .system-flash-stack { visibility: hidden; }
 
 @keyframes system-flash-enter {
   from { opacity: 0; transform: translate3d(0, -5px, 0); }

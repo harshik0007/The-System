@@ -1,8 +1,0 @@
-:root[data-system-theme='galaxion'] .settings-theme-card[data-theme-preview='galaxion'] {
-  --theme-card-accent: #A8B9DC;
-  border-color: rgb(168 185 220 / 37%);
-  background: linear-gradient(145deg, rgb(23 24 32 / 78%), rgb(12 13 18 / 96%) 72%);
-}
-:root[data-system-theme='galaxion'] .settings-theme-card[data-theme-preview='galaxion'].is-active {
-  box-shadow: 0 0 28px rgb(82 125 205 / 15%), 0 0 52px rgb(85 64 160 / 7%), inset 0 1px rgb(233 233 241 / 8%);
-}

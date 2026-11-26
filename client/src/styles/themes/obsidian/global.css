@@ -1,4 +1,0 @@
-:root[data-system-theme='obsidian'] body { background: var(--surface-page); color: var(--color-text); font-family: var(--font-body); }
-:root[data-system-theme='obsidian'] ::selection { color: var(--selection-text); background: var(--selection-bg); }
-:root[data-system-theme='obsidian'] :focus-visible { outline-color: var(--focus-ring); }
-.leaderboard-public-profile[data-system-theme='obsidian'] { color: var(--color-text); background: var(--surface-page); font-family: var(--font-body); }

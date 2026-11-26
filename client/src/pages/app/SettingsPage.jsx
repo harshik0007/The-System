@@ -5,15 +5,12 @@ import MemberAvatar from '../../components/app/MemberAvatar.jsx';
 import ResetAndRestartDialog from '../../components/app/ResetAndRestartDialog.jsx';
 import ChangePasswordDialog from '../../components/app/ChangePasswordDialog.jsx';
 import AccountDeletionDialog from '../../components/app/AccountDeletionDialog.jsx';
-import ThemeTransitionOverlay from '../../components/app/ThemeTransitionOverlay.jsx';
-import ThemePreviewDialog from '../../components/app/ThemePreviewDialog.jsx';
-import ThemePreviewVisual from '../../components/app/ThemePreviewVisual.jsx';
 import { ranks } from '../../data/ranks.js';
-import { APPEARANCE_THEMES, getAppearanceTheme, isAppearanceThemeEligible } from '../../data/appearanceThemes.js';
 import { useTaskBackend } from '../../context/TaskBackendContext.jsx';
 import { useUserPreferences } from '../../context/UserPreferencesContext.jsx';
 import { useAccountActions } from '../../context/AccountActionsContext.jsx';
 import { useNotificationCenter } from '../../context/NotificationCenterContext.jsx';
+import { useFlashMessages } from '../../context/FlashMessageContext.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { NOTIFICATION_CATEGORIES } from '../../utils/notificationCenter.js';
 import { getEffectiveReducedMotion, normalizeUserPreferences } from '../../utils/userPreferences.js';
@@ -22,22 +19,20 @@ import '../../styles/settings.css';
 
 function AuthenticationMethodsSettings() {
   const navigate = useNavigate();
+  const { notifyError, notifySuccess } = useFlashMessages();
   const { member, regenerateRecoveryCodes } = useAuth();
   const [recoveryPassword, setRecoveryPassword] = useState('');
   const [busy, setBusy] = useState(false);
-  const [status, setStatus] = useState('');
-  const [error, setError] = useState('');
   const authMethod = member?.authMethod;
 
   const run = async (action) => {
     if (busy) return;
     setBusy(true);
-    setError('');
-    setStatus('');
     try {
       await action();
     } catch (requestError) {
-      setError(requestError?.message || 'The account security change could not be completed.');
+      const message = requestError?.message || 'The account security change could not be completed.';
+      notifyError(message);
     } finally {
       setBusy(false);
     }
@@ -46,6 +41,7 @@ function AuthenticationMethodsSettings() {
   const regenerate = () => run(async () => {
     const result = await regenerateRecoveryCodes({ currentPassword: recoveryPassword });
     setRecoveryPassword('');
+    notifySuccess('New recovery codes were created. Save them now.');
     navigate('/recovery-codes', { replace: false, state: { codes: result.recoveryCodes, next: '/app/settings?category=security' } });
   });
 
@@ -79,8 +75,6 @@ function AuthenticationMethodsSettings() {
           )}
         </div>
       </section>
-      {error && <p className="settings-field__error" role="alert">{error}</p>}
-      {status && <p className="settings-inline-note" role="status">{status}</p>}
     </div>
   );
 }
@@ -88,7 +82,7 @@ function AuthenticationMethodsSettings() {
 const CATEGORIES = [
   { id: 'profile', label: 'Profile', icon: 'profile' },
   { id: 'privacy', label: 'Privacy & Visibility', icon: 'shield' },
-  { id: 'appearance', label: 'Appearance', icon: 'spark' },
+  { id: 'appearance', label: 'Interface & effects', icon: 'spark' },
   { id: 'notifications', label: 'Notification Preferences', icon: 'bell' },
   { id: 'security', label: 'Account & Security', icon: 'settings' },
   { id: 'accessibility', label: 'Accessibility', icon: 'activity' },
@@ -170,16 +164,15 @@ const notificationDescriptions = {
 
 function NotificationCategorySettings() {
   const { notificationPreferences, preferencesLoading, updateNotificationPreferences } = useNotificationCenter();
+  const { notifySuccess, notifyError } = useFlashMessages();
   const [savingCategory, setSavingCategory] = useState('');
-  const [feedback, setFeedback] = useState('');
   const toggle = async (categoryId, enabled) => {
     setSavingCategory(categoryId);
-    setFeedback('');
     try {
       await updateNotificationPreferences({ ...notificationPreferences, [categoryId]: enabled });
-      setFeedback(`${NOTIFICATION_CATEGORIES.find(({ id }) => id === categoryId)?.label || 'Category'} preference saved.`);
+      notifySuccess(`${NOTIFICATION_CATEGORIES.find(({ id }) => id === categoryId)?.label || 'Category'} preference saved.`);
     } catch (error) {
-      setFeedback(error?.message || 'Notification preferences could not be saved. Please retry.');
+      notifyError(error?.message || 'Notification preferences could not be saved. Please retry.');
     } finally {
       setSavingCategory('');
     }
@@ -192,16 +185,16 @@ function NotificationCategorySettings() {
           <div className="settings-notification-group__items"><Toggle title={`${category.label} notifications`} description="New in-app notifications in this category." checked={notificationPreferences[category.id] !== false} disabled={preferencesLoading || Boolean(savingCategory)} onChange={(checked) => void toggle(category.id, checked)} /></div>
         </section>
       ))}</div>
-      {feedback && <p className="settings-inline-note" role="status"><AppIcon name="bell" />{feedback}</p>}
       <p className="settings-inline-note"><AppIcon name="bell" />These controls affect future in-app notifications. Existing notification history remains available. Email and push delivery are not part of this milestone.</p>
     </>
   );
 }
 
 export default function SettingsPage() {
+  const { notifySuccess, notifyError, notifyInfo } = useFlashMessages();
   const location = useLocation();
   const navigate = useNavigate();
-  const { preferences, savePreferences, mergePreferences } = useUserPreferences();
+  const { preferences, savePreferences } = useUserPreferences();
   const { member, updateIdentity, deleteAccount } = useAuth();
   const hasLocalPassword = member?.authProviders?.localPassword === true || member?.authMethod === 'local';
   const { emergencyPause, progression, refresh, refreshRecovery } = useTaskBackend();
@@ -222,25 +215,15 @@ export default function SettingsPage() {
   const [changePasswordOpen, setChangePasswordOpen] = useState(false);
   const [deleteAccountOpen, setDeleteAccountOpen] = useState(false);
   const [nameError, setNameError] = useState('');
-  const [status, setStatus] = useState('');
   const [saving, setSaving] = useState(false);
-  const [themeApplying, setThemeApplying] = useState('');
-  const themeApplyingRef = useRef(false);
-  const [themePreview, setThemePreview] = useState('');
-  const themePreviewTriggerRef = useRef(null);
-  const closeThemePreview = useCallback(() => setThemePreview(''), []);
-  const [themeFeedback, setThemeFeedback] = useState(null);
-  const [themeTransition, setThemeTransition] = useState(null);
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
   const resetIdempotencyKey = useRef('');
-  const lastPreferencesRef = useRef(preferences);
   const identityChanged = Boolean(accountSettings?.profile && ['username', 'firstName', 'middleName', 'lastName'].some((key) => (identityDraft[key] || '') !== (accountSettings.profile[key] || '')));
   const dirty = useMemo(() => JSON.stringify(draft) !== JSON.stringify(preferences) || identityChanged, [draft, preferences, identityChanged]);
   const currentRank = ranks.find((rank) => rank.slug === accountSettings?.progression?.currentRank?.slug || rank.slug === progression?.progression?.currentRankSlug) || ranks[0];
 
   useEffect(() => {
     const controller = new AbortController();
-    let entitlementController = null;
     taskApi.accountSettings({ signal: controller.signal }).then(({ settings }) => {
       setAccountSettings(settings);
       setIdentityDraft({ username: settings.profile.username || '', firstName: settings.profile.firstName || '', middleName: settings.profile.middleName || '', lastName: settings.profile.lastName || '' });
@@ -248,65 +231,14 @@ export default function SettingsPage() {
     }).catch((error) => {
       if (error?.name !== 'AbortError') setAccountSettingsError(error?.message || 'Account settings could not be loaded.');
     });
-    const refreshEntitlements = () => {
-      entitlementController?.abort();
-      entitlementController = new AbortController();
-      taskApi.accountSettings({ signal: entitlementController.signal }).then(({ settings }) => {
-        setAccountSettings(settings);
-        setAccountSettingsError('');
-      }).catch((error) => {
-        if (error?.name !== 'AbortError') setAccountSettingsError(error?.message || 'Theme eligibility could not be refreshed.');
-      });
-    };
-    window.addEventListener('system:progression-theme-state-changed', refreshEntitlements);
     return () => {
       controller.abort();
-      entitlementController?.abort();
-      window.removeEventListener('system:progression-theme-state-changed', refreshEntitlements);
     };
   }, []);
 
   useEffect(() => {
-    const previous = lastPreferencesRef.current;
-    lastPreferencesRef.current = preferences;
-    const withoutTheme = (value) => ({ ...value, appearance: { ...value.appearance, theme: null } });
-    if (JSON.stringify(withoutTheme(previous)) === JSON.stringify(withoutTheme(preferences))) {
-      setDraft((current) => normalizeUserPreferences({ ...current, appearance: { ...current.appearance, theme: preferences.appearance.theme } }));
-    } else {
-      setDraft(normalizeUserPreferences(preferences));
-    }
+    setDraft(normalizeUserPreferences(preferences));
   }, [preferences]);
-
-  const applyTheme = async (theme) => {
-    if (themeApplyingRef.current || themeApplying || themeTransition || !isAppearanceThemeEligible(theme.id, accountSettings?.progression?.level ?? 0)) return;
-    const previousTheme = preferences.appearance.theme;
-    const transitionKey = `${theme.id}-${Date.now()}`;
-    themeApplyingRef.current = true;
-    setThemeApplying(theme.id);
-    setThemeFeedback(null);
-    try {
-      const response = await taskApi.updateAccountPreferences({ appearance: { theme: theme.id } });
-      const savedTheme = response.settings?.appearance?.theme;
-      if (savedTheme !== theme.id) throw new Error('Your theme selection could not be saved. Your existing theme remains active.');
-      // Keep the old appearance in place until the backend has confirmed the
-      // selection. The shared foreground overlay owns the visual transition.
-      mergePreferences({ appearance: response.settings.appearance });
-      setAccountSettings(response.settings);
-      setDraft((current) => ({ ...current, appearance: { ...current.appearance, theme: savedTheme } }));
-      const savedAt = performance.now();
-      setThemeTransition({ id: theme.id, key: transitionKey, startedAt: savedAt, saved: true, savedAt });
-      setThemeFeedback({ type: 'status', text: `${theme.name} is saved to your account.` });
-    } catch (error) {
-      // The active preference was not changed before server confirmation.
-      // Restore the draft too in case another settings update arrived in flight.
-      setDraft((current) => ({ ...current, appearance: { ...current.appearance, theme: previousTheme } }));
-      setThemeTransition(null);
-      setThemeFeedback({ type: 'error', text: error?.message || 'Theme could not be saved. Your existing theme remains active.' });
-    } finally {
-      themeApplyingRef.current = false;
-      setThemeApplying('');
-    }
-  };
 
   useEffect(() => {
     const requested = new URLSearchParams(location.search).get('category');
@@ -324,8 +256,9 @@ export default function SettingsPage() {
   const closeDeleteAccount = useCallback(() => setDeleteAccountOpen(false), []);
   const confirmDeleteAccount = useCallback(async (details) => {
     await deleteAccount(details);
+    notifySuccess('Your account has been deleted.');
     navigate('/login', { replace: true, state: { accountDeleted: true } });
-  }, [deleteAccount, navigate]);
+  }, [deleteAccount, navigate, notifySuccess]);
 
   useEffect(() => {
     if (!dirty) return undefined;
@@ -355,7 +288,6 @@ export default function SettingsPage() {
   }, [dirty, location.hash, location.pathname, location.search]);
 
   const update = (group, key, value) => {
-    setStatus('');
     setDraft((current) => ({ ...current, [group]: { ...current[group], [key]: value } }));
   };
 
@@ -390,19 +322,20 @@ export default function SettingsPage() {
           privacy: valuesToSave.privacy,
         });
         savePreferences(valuesToSave);
-        setStatus('Profile and visibility saved to this member account.');
+        notifySuccess('Profile and visibility saved.');
       } else if (activeCategory === 'appearance' || activeCategory === 'accessibility') {
         const response = await taskApi.updateAccountPreferences({ [activeCategory]: valuesToSave[activeCategory] });
         valuesToSave = normalizeUserPreferences({ ...valuesToSave, appearance: response.settings.appearance, accessibility: response.settings.accessibility });
         setAccountSettings(response.settings);
         savePreferences(valuesToSave);
-        setStatus('Preferences saved to this member account.');
+        notifySuccess('Preferences saved.');
       } else {
         savePreferences(valuesToSave);
-        setStatus('Settings saved.');
+        notifySuccess('Settings saved.');
       }
     } catch (saveError) {
-      setStatus(saveError?.message || 'Settings could not be saved. Please retry.');
+      const message = saveError?.message || 'Settings could not be saved. Please retry.';
+      notifyError(message);
     } finally {
       setSaving(false);
     }
@@ -412,14 +345,13 @@ export default function SettingsPage() {
     setDraft(normalizeUserPreferences(preferences));
     if (accountSettings?.profile) setIdentityDraft({ username: accountSettings.profile.username || '', firstName: accountSettings.profile.firstName || '', middleName: accountSettings.profile.middleName || '', lastName: accountSettings.profile.lastName || '' });
     setNameError('');
-    setStatus('Unsaved changes discarded.');
+    notifyInfo('Unsaved changes discarded.');
   };
 
   const changeCategory = (categoryId) => {
     if (dirty && !window.confirm('Discard your unsaved settings changes?')) return;
     if (dirty) cancel();
     setActiveCategory(categoryId);
-    setStatus('');
   };
 
   const openResetDialog = async () => {
@@ -431,7 +363,9 @@ export default function SettingsPage() {
       const response = await taskApi.manualResetPreview();
       setResetPreview(response.preview);
     } catch (error) {
-      setResetError(error?.message || 'Reset details could not be loaded. Please close this dialog and retry.');
+      const message = error?.message || 'Reset details could not be loaded. Please close this dialog and retry.';
+      setResetError(message);
+      notifyError(message);
     } finally {
       setResetPreviewLoading(false);
     }
@@ -447,13 +381,16 @@ export default function SettingsPage() {
       resetIdempotencyKey.current = '';
       setResetDialogOpen(false);
       await Promise.all([refresh(), refreshRecovery()]);
+      notifySuccess('Your progress run has restarted. Your account and history are preserved.');
       navigate('/app/tasks/create', {
         replace: true,
         state: { manualProgressionReset: true, resetCount: reset.resetCount },
       });
     } catch (error) {
       if (error?.code === 'RESET_PREVIEW_STALE') resetIdempotencyKey.current = '';
-      setResetError(error?.message || 'Reset & Restart could not be completed. Your current progression is unchanged.');
+      const message = error?.message || 'Reset & Restart could not be completed. Your current progression is unchanged.';
+      setResetError(message);
+      notifyError(message);
     } finally {
       setResetSubmitting(false);
     }
@@ -478,7 +415,7 @@ export default function SettingsPage() {
               <AppIcon name={category.icon} /><span>{category.label}</span>
             </button>
           ))}
-          <div className="settings-nav__note"><AppIcon name="shield" /><p>Profile, privacy, appearance and accessibility choices are saved with your account. Notification categories are saved with your preferences.</p></div>
+          <div className="settings-nav__note"><AppIcon name="shield" /><p>Profile, privacy, interface and accessibility choices are saved with your account. Notification categories are saved with your preferences.</p></div>
         </nav>
 
         <section className="settings-content app-panel" aria-labelledby={`settings-category-${activeCategory}`}>
@@ -509,54 +446,20 @@ export default function SettingsPage() {
             </>}
 
             {activeCategory === 'appearance' && <>
-              <SectionHeader eyebrow="INTERFACE" title="Appearance" description="Choose a visual identity available at your current Rank." icon="spark" />
-              <div className="settings-choice-group">
-                <p className="settings-choice-group__title">Rank-based themes</p>
-                <p className="settings-theme-intro">Obsidian unlocks at Rank 05 — Surge, Aurora at Rank 03 — Apex, Eclipse at Rank 02 — Zenith, and Galaxion exclusively at Rank 01 — Continuum. Your selection is saved with your account.</p>
-                <div className="settings-theme-grid" aria-label="Available interface themes">
-                  {APPEARANCE_THEMES.map((theme) => {
-                    const unlocked = isAppearanceThemeEligible(theme.id, accountSettings?.progression?.level ?? 0);
-                    const active = preferences.appearance.theme === theme.id;
-                    return (
-                      <article className={`settings-theme-card${active ? ' is-active' : ''}${!unlocked ? ' is-locked' : ''}`} data-theme-preview={theme.id} key={theme.id}>
-                        <ThemePreviewVisual theme={theme} />
-                        <div className="settings-theme-card__heading"><div><h3>{theme.name}</h3><p>{theme.description}</p></div>{active && <span className="settings-theme-card__active">ACTIVE</span>}</div>
-                        <p className={`settings-theme-card__requirement${unlocked ? ' is-unlocked' : ''}`}><span>{theme.minimumLevel === 0 ? 'Always available' : theme.requirement}</span><strong>{unlocked ? 'UNLOCKED' : 'LOCKED'}</strong></p>
-                        <div className="settings-theme-card__actions">
-                          <button type="button" className="settings-theme-card__preview-button" aria-haspopup="dialog" aria-expanded={themePreview === theme.id} aria-controls={themePreview === theme.id ? 'theme-preview-dialog' : undefined} onClick={(event) => { themePreviewTriggerRef.current = event.currentTarget; setThemePreview(theme.id); }}>Preview</button>
-                          <button
-                            type="button"
-                            className={`settings-theme-card__apply-button${theme.id === 'galaxion' ? ' settings-theme-card__apply-button--rank-one' : theme.id === 'eclipse' ? ' settings-theme-card__apply-button--eclipse' : ''}`}
-                            disabled={!unlocked || Boolean(themeApplying) || Boolean(themeTransition) || active}
-                            onClick={() => void applyTheme(theme)}
-                          >
-                            {theme.id === 'galaxion' ? <>
-                              <svg className="settings-theme-card__rank-one-mark" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.5 14.6 9l6.9 3-6.9 2.8-2.6 6.7-2.7-6.7L2.5 12l6.8-3 2.7-6.5Z" /></svg>
-                              <span>{themeApplying === theme.id ? 'Securing…' : active ? 'Rank 01 equipped' : !unlocked ? 'Rank 01 required' : 'Ascend to Galaxion'}</span>
-                              <small aria-hidden="true">01</small>
-                            </> : themeApplying === theme.id ? 'Saving…' : active ? 'Active theme' : !unlocked ? 'Locked' : 'Apply theme'}
-                          </button>
-                        </div>
-                      </article>
-                    );
-                  })}
-                </div>
-                {themeFeedback && <p className={`settings-theme-feedback is-${themeFeedback.type}`} role={themeFeedback.type === 'error' ? 'alert' : 'status'}>{themeFeedback.text}</p>}
-              </div>
+              <SectionHeader eyebrow="INTERFACE" title="Interface & effects" description="Control motion and optional visual effects." icon="spark" />
               <div className="settings-toggle-list">
-                <Toggle title="Click effects" description="Show the selected theme’s visual feedback when you click." checked={draft.appearance.clickRipple} onChange={(checked) => update('appearance', 'clickRipple', checked)} />
                 <Toggle title="Nonessential animations" description="Allow page entrances and decorative interface motion. Functional feedback remains available when off." checked={draft.appearance.nonessentialAnimations} onChange={(checked) => update('appearance', 'nonessentialAnimations', checked)} />
                 <Toggle title="Reduce decorative effects" description="Reduce decorative atmosphere particles and lighting. Emergency Pause status remains visible while active." checked={draft.appearance.reduceDecorativeEffects} onChange={(checked) => update('appearance', 'reduceDecorativeEffects', checked)} />
               </div>
               <label className="settings-effect-quality">
-                <span><strong>Visual effect quality</strong><small>Choose how many decorative layers run across themes. Lower settings reduce particle density and expensive shadows.</small></span>
+                <span><strong>Visual effect quality</strong><small>Choose how many decorative layers are shown. Lower settings reduce particle density and shadows.</small></span>
                 <select value={draft.appearance.effectQuality} onChange={(event) => update('appearance', 'effectQuality', event.target.value)}>
                   <option value="high">High · full detail</option>
                   <option value="balanced">Balanced · recommended</option>
                   <option value="low">Low · lighter effects</option>
                 </select>
               </label>
-              {emergencyPause?.isActive && <p className="settings-status-banner" role="status"><i />Emergency Pause is active. Its dates and controls remain available; decorative effects follow your theme and motion preferences.</p>}
+              {emergencyPause?.isActive && <p className="settings-status-banner" role="status"><i />Emergency Pause is active. Its dates and controls remain available; visual effects follow your motion preferences.</p>}
             </>}
 
             {activeCategory === 'notifications' && <>
@@ -571,7 +474,7 @@ export default function SettingsPage() {
                 {hasLocalPassword && <section className="settings-security-card settings-security-card--password"><div><p className="app-eyebrow">ACCOUNT SECURITY</p><h3>Credential management</h3><p>Change your password after confirming the current one. If you forget it, use one of your saved one-time recovery codes.</p><Link className="settings-security-card__text-link" to="/forgot-password">Recover access with a code <AppIcon name="arrow" /></Link></div><button type="button" className="settings-reset-action" onClick={() => setChangePasswordOpen(true)}>Change password</button></section>}
                 <AuthenticationMethodsSettings />
                 <section className="settings-security-card settings-security-card--reset"><div><p className="app-eyebrow">PERMANENT PROGRESS RESET</p><h3>Reset &amp; Restart</h3><p>Start a new progression run while preserving your permanent account identity, settings, Reset Count, Lifetime Longest Streak and historical monthly summaries.</p></div><button type="button" className="settings-reset-action" onClick={openResetDialog}>Reset &amp; Restart THE SYSTEM</button></section>
-                <section className="settings-security-card settings-security-card--logout"><div><p className="app-eyebrow">ACCOUNT SESSION</p><h3>Log Out</h3><p>Sign-out confirmation is shared with the account menu. Logging out will not erase progress.</p></div><button type="button" className="settings-secondary-link" onClick={requestLogout}>Log out</button></section>
+                <section className="settings-security-card settings-security-card--logout"><div><p className="app-eyebrow">ACCOUNT SESSION</p><h3>Log Out</h3><p>Sign-out confirmation is shared with the account menu. Logging out will not erase progress.</p></div><button type="button" className="settings-secondary-link account-logout-action" onClick={requestLogout}>Log out</button></section>
                 <section className="settings-security-card settings-security-card--delete"><div><p className="app-eyebrow">DANGER ZONE</p><h3>Delete Account</h3><p>Permanently delete this THE SYSTEM account and data owned exclusively by it. Local accounts must verify their current password; Google accounts must complete fresh Google verification.</p></div><button type="button" className="settings-delete-action" onClick={() => setDeleteAccountOpen(true)}>Delete account</button></section>
               </div>
     <p className="settings-inline-note"><AppIcon name="shield" />THE SYSTEM does not send email recovery codes. Save your one-time recovery codes privately; each code works once.</p>
@@ -580,11 +483,11 @@ export default function SettingsPage() {
             {activeCategory === 'accessibility' && <>
               <SectionHeader eyebrow="COMFORT & CONTROL" title="Accessibility" description="Motion preference follows your device until you choose an explicit setting. Keyboard operation and visible focus are supported throughout this interface." icon="activity" />
               <div className="settings-accessibility-motion"><Toggle title="Reduce Motion" description={systemReducedMotion ? 'Your device requests reduced motion. This setting currently follows that preference.' : 'Reduce nonessential movement across supported application transitions and effects.'} checked={effectiveReducedMotion} onChange={(checked) => update('accessibility', 'reduceMotion', checked)} /><button type="button" className="settings-follow-device" onClick={() => update('accessibility', 'reduceMotion', null)} disabled={draft.accessibility.reduceMotion === null}>Follow device preference</button></div>
-              <div className="settings-accessibility-grid"><article><span><AppIcon name="tasks" /></span><div><h3>Keyboard navigation</h3><p>Menus, navigation, forms and settings controls can be operated from the keyboard.</p><strong>SUPPORTED</strong></div></article><article><span><AppIcon name="spark" /></span><div><h3>Visible focus indicators</h3><p>Interactive controls keep a visible focus treatment for keyboard users.</p><strong>SUPPORTED</strong></div></article><article><span><AppIcon name="shield" /></span><div><h3>Readable contrast</h3><p>THE SYSTEM uses your selected theme with labeled controls and readable muted text.</p><strong>SUPPORTED</strong></div></article></div>
+              <div className="settings-accessibility-grid"><article><span><AppIcon name="tasks" /></span><div><h3>Keyboard navigation</h3><p>Menus, navigation, forms and settings controls can be operated from the keyboard.</p><strong>SUPPORTED</strong></div></article><article><span><AppIcon name="spark" /></span><div><h3>Visible focus indicators</h3><p>Interactive controls keep a visible focus treatment for keyboard users.</p><strong>SUPPORTED</strong></div></article><article><span><AppIcon name="shield" /></span><div><h3>Readable contrast</h3><p>THE SYSTEM uses a consistent interface style with labeled controls and readable muted text.</p><strong>SUPPORTED</strong></div></article></div>
             </>}
 
             <footer className="settings-form-footer">
-              <p className={status.startsWith('Unsaved') ? 'is-muted' : ''} role="status">{status || (dirty ? 'Changes are not saved yet.' : accountSettingsError || 'Profile, privacy and supported preferences are saved with this member account.')}</p>
+              <p role="status">{dirty ? 'Changes are not saved yet.' : accountSettingsError || 'Profile, privacy and supported preferences are saved with this member account.'}</p>
               <div><button type="button" className="settings-cancel" disabled={!dirty || saving} onClick={cancel}>Cancel</button><button type="submit" className="settings-save" disabled={!dirty || saving}>{saving ? 'Saving…' : 'Save changes'} <AppIcon name="arrow" /></button></div>
             </footer>
           </form>
@@ -594,25 +497,6 @@ export default function SettingsPage() {
     <ResetAndRestartDialog open={resetDialogOpen} onClose={() => { if (!resetSubmitting) setResetDialogOpen(false); }} onConfirm={completeReset} preview={resetPreview} loading={resetPreviewLoading} submitting={resetSubmitting} error={resetError} />
     {hasLocalPassword && <ChangePasswordDialog open={changePasswordOpen} onClose={() => setChangePasswordOpen(false)} />}
     <AccountDeletionDialog open={deleteAccountOpen} authMethod={member?.authMethod} initialNotice={deletionCallbackState || ''} onClose={closeDeleteAccount} onConfirm={confirmDeleteAccount} />
-      {themePreview && (() => {
-        const previewTheme = getAppearanceTheme(themePreview);
-        const previewUnlocked = isAppearanceThemeEligible(previewTheme.id, accountSettings?.progression?.level ?? 0);
-        return <ThemePreviewDialog
-          theme={previewTheme}
-          unlocked={previewUnlocked}
-          active={preferences.appearance.theme === previewTheme.id}
-          returnFocusRef={themePreviewTriggerRef}
-          onClose={closeThemePreview}
-        />;
-      })()}
-      {themeTransition && <ThemeTransitionOverlay
-        theme={getAppearanceTheme(themeTransition.id)}
-        startedAt={themeTransition.startedAt}
-        saved={themeTransition.saved}
-        savedAt={themeTransition.savedAt}
-        reducedMotion={effectiveReducedMotion || !draft.appearance.nonessentialAnimations}
-        onComplete={() => setThemeTransition((current) => current?.key === themeTransition.key ? null : current)}
-      />}
     </>
   );
 }
