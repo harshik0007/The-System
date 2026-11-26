@@ -92,6 +92,27 @@ export function NotificationCenterProvider({ children }) {
     setUnreadCount(Number(response?.data?.unreadCount) || 0);
   }, []);
 
+  const deleteNotification = useCallback(async (notificationId) => {
+    const response = await taskApi.deleteNotification(notificationId);
+    const result = response?.data || {};
+    listRequestSequence.current += 1;
+    setLoading(false);
+    setNotifications((current) => current.filter((item) => item.id !== notificationId));
+    if (Number.isFinite(Number(result.unreadCount))) setUnreadCount(Math.max(0, Number(result.unreadCount)));
+    return result;
+  }, []);
+
+  const deleteAllNotifications = useCallback(async () => {
+    const response = await taskApi.deleteAllNotifications();
+    listRequestSequence.current += 1;
+    setLoading(false);
+    setError('');
+    setNotifications([]);
+    setPage((current) => ({ nextCursor: null, hasMore: false, limit: current.limit || 20 }));
+    setUnreadCount(0);
+    return response?.data || {};
+  }, []);
+
   useEffect(() => {
     let active = true;
     const controller = new AbortController();
@@ -125,8 +146,10 @@ export function NotificationCenterProvider({ children }) {
   const value = useMemo(() => ({
     notifications, unreadCount, notificationPreferences, page, loading, preferencesLoading, error,
     loadNotifications, refreshUnreadCount, refreshPreferences, updateNotificationPreferences, markRead, markAllRead,
+    deleteNotification, deleteAllNotifications,
   }), [notifications, unreadCount, notificationPreferences, page, loading, preferencesLoading, error,
-    loadNotifications, refreshUnreadCount, refreshPreferences, updateNotificationPreferences, markRead, markAllRead]);
+    loadNotifications, refreshUnreadCount, refreshPreferences, updateNotificationPreferences, markRead, markAllRead,
+    deleteNotification, deleteAllNotifications]);
 
   return <NotificationCenterContext.Provider value={value}>{children}</NotificationCenterContext.Provider>;
 }

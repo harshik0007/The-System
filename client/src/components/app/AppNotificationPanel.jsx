@@ -6,7 +6,7 @@ import NotificationItem from './NotificationItem.jsx';
 import { useNotificationCenter } from '../../context/NotificationCenterContext.jsx';
 
 export default function AppNotificationPanel({ onClose }) {
-  const { notifications, unreadCount, markRead, markAllRead, loadNotifications, loading, error } = useNotificationCenter();
+  const { notifications, unreadCount, markRead, markAllRead, deleteNotification, loadNotifications, loading, error } = useNotificationCenter();
   const [feedback, setFeedback] = useState(null);
   const [markAllLoading, setMarkAllLoading] = useState(false);
   const recent = notifications.slice(0, 5);
@@ -38,7 +38,7 @@ export default function AppNotificationPanel({ onClose }) {
       {feedback && <p className={`app-notifications__feedback is-${feedback.type}`} role={feedback.type === 'error' ? 'alert' : 'status'} aria-live={feedback.type === 'error' ? 'assertive' : 'polite'}>{feedback.message}</p>}
       {recent.length > 0 ? (
         <div className="app-notifications__preview-list">
-          {recent.map((notice) => <NotificationItem key={notice.id} notification={notice} compact onMarkRead={markRead} onNavigate={onClose} />)}
+          {recent.map((notice) => <NotificationItem key={notice.id} notification={notice} compact onMarkRead={markRead} onDelete={deleteNotification} onNavigate={onClose} />)}
         </div>
       ) : loading ? (
         <PageLoadingSkeleton variant="rows" compact label="Loading notifications" />

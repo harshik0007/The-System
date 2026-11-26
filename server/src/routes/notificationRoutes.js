@@ -11,6 +11,8 @@ export function createNotificationRouter({ identityMiddleware } = {}) {
   router.get('/notifications', asyncHandler(controller.list));
   router.patch('/notifications/:notificationId/read', asyncHandler(controller.markOneRead));
   router.post('/notifications/read-all', asyncHandler(controller.markAllRead));
+  router.delete('/notifications/:notificationId', asyncHandler(controller.deleteOne));
+  router.delete('/notifications', asyncHandler(controller.deleteAll));
   router.get('/notification-preferences', asyncHandler(controller.getPreferences));
   router.patch('/notification-preferences', asyncHandler(controller.updatePreferences));
   return router;

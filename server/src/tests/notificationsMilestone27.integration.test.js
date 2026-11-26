@@ -85,6 +85,15 @@ test('M27 notifications persist, filter, deduplicate concurrently, respect categ
   assert.equal((await response.json()).data.notifications.length, 2, 'list retrieval ignores caller-supplied member identifiers');
   const notificationId = listResult.data.notifications[0].id;
 
+  const deleteTarget = await Notification.create({
+    userId: user._id, category: 'tasks', eventType: 'task-completed', title: 'Temporary notice', description: 'Remove this item only.',
+    targetRoute: '/app/tasks', idempotencyKey: 'delete-one:source-1',
+  });
+  response = await fetch(`${base}/notifications/${deleteTarget._id}`, { method: 'DELETE' });
+  assert.equal(response.status, 200);
+  assert.equal((await response.json()).data.deleted, true);
+  assert.equal(await Notification.exists({ _id: deleteTarget._id, userId: user._id }), null);
+
   response = await fetch(`${base}/notifications/${notificationId}/read`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: '{}' });
   assert.equal(response.status, 200);
   assert.equal((await response.json()).data.unreadCount, 1);
@@ -125,6 +134,9 @@ test('M27 notifications persist, filter, deduplicate concurrently, respect categ
   response = await fetch(`${base}/notifications/${ownedByOther._id}/read`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: '{}' });
   assert.equal(response.status, 404);
   assert.equal((await Notification.findById(ownedByOther._id)).readAt, null);
+  response = await fetch(`${base}/notifications/${ownedByOther._id}`, { method: 'DELETE' });
+  assert.equal(response.status, 404);
+  assert.ok(await Notification.findById(ownedByOther._id), 'a member cannot delete another member’s notification');
 
   await new Promise((resolve) => server.close(resolve));
   server = app.listen(0, '127.0.0.1');
@@ -138,4 +150,10 @@ test('M27 notifications persist, filter, deduplicate concurrently, respect categ
   assert.equal((await getUnreadNotificationCount(user._id)).unreadCount, 0);
   await markAllNotificationsRead(user._id);
   assert.equal((await getUnreadNotificationCount(user._id)).unreadCount, 0, 'repeated mark-all remains idempotent');
+
+  response = await fetch(`${restartedBase}/notifications`, { method: 'DELETE' });
+  assert.equal(response.status, 200);
+  assert.equal((await response.json()).data.deletedCount, previouslyStoredCount);
+  assert.equal(await Notification.countDocuments({ userId: user._id }), 0, 'clear-all removes all of the signed-in member’s current notifications');
+  assert.equal(await Notification.countDocuments({ userId: other._id }), 1, 'clear-all leaves other members’ notifications untouched');
 });

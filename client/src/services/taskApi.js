@@ -97,6 +97,8 @@ export const taskApi = Object.freeze({
   notificationCategories: (options) => request('/notifications/categories', options),
   markNotificationRead: (id, options) => request(`/notifications/${encodeURIComponent(id)}/read`, { ...options, method: 'PATCH', body: {} }),
   markAllNotificationsRead: (options) => request('/notifications/read-all', { ...options, method: 'POST', body: {} }),
+  deleteNotification: (id, options) => request(`/notifications/${encodeURIComponent(id)}`, { ...options, method: 'DELETE' }),
+  deleteAllNotifications: (options) => request('/notifications', { ...options, method: 'DELETE' }),
   notificationPreferences: (options) => request('/notification-preferences', options),
   updateNotificationPreferences: (categories, options) => request('/notification-preferences', { ...options, method: 'PATCH', body: { categories } }),
   downloadMonthlyAnalysisPdf: (monthKey, compareMonth = null, { signal } = {}) => {

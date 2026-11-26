@@ -13,8 +13,15 @@ const categoryIcons = {
   'monthly-retention': 'analysis',
 };
 
-export default function NotificationItem({ notification, compact = false, onMarkRead, onNavigate }) {
+const notificationIconFor = (notification) => {
+  if (notification.category === 'emergency-pause' && notification.eventType?.includes('resumed')) return 'play';
+  if (notification.category === 'emergency-pause' && notification.eventType?.includes('activated')) return 'pause';
+  return categoryIcons[notification.category] || 'bell';
+};
+
+export default function NotificationItem({ notification, compact = false, onMarkRead, onDelete, onNavigate }) {
   const [markingRead, setMarkingRead] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [actionError, setActionError] = useState('');
   const tone = notification.eventType?.includes('deduction') || notification.eventType?.includes('expired')
     ? 'warning'
@@ -24,7 +31,7 @@ export default function NotificationItem({ notification, compact = false, onMark
   const destination = resolveNotificationDestination(notification) || '/app/notifications';
   const displayedAt = notification.occurredAt || notification.createdAt;
   const markReadSafely = async () => {
-    if (notification.isRead || !onMarkRead || markingRead) return;
+    if (notification.isRead || !onMarkRead || markingRead || deleting) return;
     setMarkingRead(true);
     setActionError('');
     try {
@@ -35,15 +42,27 @@ export default function NotificationItem({ notification, compact = false, onMark
       setMarkingRead(false);
     }
   };
+  const deleteSafely = async () => {
+    if (!onDelete || deleting || markingRead) return;
+    setDeleting(true);
+    setActionError('');
+    try {
+      await onDelete(notification.id);
+    } catch {
+      setActionError('This notification could not be deleted. Refresh your inbox and try again.');
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   return (
-    <article className={`notification-item notification-item--${tone}${notification.isRead ? ' is-read' : ' is-unread'}${compact ? ' notification-item--compact' : ''}`}>
+    <article className={`notification-item notification-item--${tone} notification-item--category-${notification.category || 'other'}${notification.isRead ? ' is-read' : ' is-unread'}${compact ? ' notification-item--compact' : ''}`}>
       <Link
         className="notification-item__main"
         to={destination}
         onClick={() => { void markReadSafely(); onNavigate?.(); }}
       >
-        <span className="notification-item__icon"><AppIcon name={categoryIcons[notification.category] || 'bell'} /></span>
+        <span className="notification-item__icon"><AppIcon name={notificationIconFor(notification)} /></span>
         <span className="notification-item__copy">
           <span className="notification-item__title-row">
             <strong>{notification.title}</strong>
@@ -53,11 +72,14 @@ export default function NotificationItem({ notification, compact = false, onMark
           <time className="notification-item__time" dateTime={displayedAt}>{formatNotificationDateTime(displayedAt)}</time>
         </span>
       </Link>
-      {!compact && !notification.isRead && (
-        <button className="notification-item__mark-read" type="button" disabled={markingRead} onClick={() => void markReadSafely()}>
+      {((!compact && !notification.isRead) || onDelete) && <div className="notification-item__actions">
+        {!compact && !notification.isRead && <button className="notification-item__mark-read" type="button" disabled={markingRead || deleting} onClick={() => void markReadSafely()}>
           {markingRead ? 'Updating…' : 'Mark as read'}
-        </button>
-      )}
+        </button>}
+        {onDelete && <button className="notification-item__delete" type="button" aria-label={`Delete notification: ${notification.title}`} title="Delete notification" disabled={deleting || markingRead} onClick={() => void deleteSafely()}>
+          <AppIcon name="trash" />{compact ? null : deleting ? 'Deleting…' : 'Delete'}
+        </button>}
+      </div>}
       {actionError && <p className="notification-item__action-error" role="alert">{actionError}</p>}
     </article>
   );

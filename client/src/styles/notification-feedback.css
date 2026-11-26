@@ -14,3 +14,54 @@
   line-height: 1.45;
   overflow-wrap: anywhere;
 }
+
+.app-layout .notification-item__actions,
+.app-layout .notifications-inbox__actions {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.app-layout .notification-item__delete,
+.app-layout .notifications-delete-all {
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 12px;
+  border: 1px solid color-mix(in srgb, var(--color-danger) 34%, var(--color-line));
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--color-danger) 7%, var(--surface-card));
+  color: var(--color-danger);
+  font: 600 max(12px, .72rem)/1.2 var(--font-body);
+  cursor: pointer;
+  transition: border-color var(--motion-fast), background var(--motion-fast), color var(--motion-fast), box-shadow var(--motion-fast);
+}
+
+.app-layout .notification-item__delete .app-icon,
+.app-layout .notifications-delete-all .app-icon { width: 15px; height: 15px; }
+.app-layout .notification-item__delete:hover:not(:disabled),
+.app-layout .notifications-delete-all:hover:not(:disabled) { border-color: #873340; background: #a33d4b; color: #fff; }
+.app-layout .notification-item__delete:focus-visible,
+.app-layout .notifications-delete-all:focus-visible { outline: 3px solid color-mix(in srgb, var(--color-danger) 32%, transparent); outline-offset: 2px; }
+.app-layout .notification-item__delete:disabled,
+.app-layout .notifications-delete-all:disabled { opacity: .58; cursor: not-allowed; }
+
+.app-layout .notifications-list .notification-item__delete { min-height: 34px; padding-inline: 10px; border-radius: 8px; }
+.app-layout .app-notifications .notification-item__actions { align-items: flex-start; }
+.app-layout .app-notifications .notification-item__delete { width: 32px; height: 32px; min-height: 32px; flex: 0 0 32px; padding: 0; }
+.app-layout .app-notifications .notification-item__delete .app-icon { width: 15px; height: 15px; }
+.app-layout .notifications-inbox__actions .notifications-mark-all { min-height: 38px; }
+
+.app-layout .notifications-delete-dialog__eyebrow { color: var(--color-danger); }
+.app-layout .notifications-delete-dialog .account-action-dialog__icon { border-color: #ecc4ca; background: #fcecef; color: #a33d4b; }
+.app-layout .notifications-delete-dialog .account-action-dialog__confirm { border-color: #a33d4b; background: #a33d4b; color: #fff; }
+.app-layout .notifications-delete-dialog .account-action-dialog__confirm:hover:not(:disabled) { border-color: #873340; background: #873340; }
+
+@media (max-width: 850px) {
+  .app-layout .notifications-inbox__actions { width: 100%; justify-content: flex-start; }
+}

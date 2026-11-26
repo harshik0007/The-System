@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import AppIcon from '../../components/app/AppIcon.jsx';
+import NotificationClearDialog from '../../components/app/NotificationClearDialog.jsx';
 import PageLoadingSkeleton, { SkeletonLine } from '../../components/app/PageLoadingSkeleton.jsx';
 import NotificationItem from '../../components/app/NotificationItem.jsx';
 import { useNotificationCenter } from '../../context/NotificationCenterContext.jsx';
@@ -8,11 +9,14 @@ import { NOTIFICATION_CATEGORIES } from '../../utils/notificationCenter.js';
 import '../../styles/notification-center.css';
 
 export default function NotificationsPage() {
-  const { notifications, unreadCount, page, loading, error, loadNotifications, markRead, markAllRead } = useNotificationCenter();
+  const { notifications, unreadCount, page, loading, error, loadNotifications, markRead, markAllRead, deleteNotification, deleteAllNotifications } = useNotificationCenter();
   const [activeCategory, setActiveCategory] = useState('');
   const [activeReadState, setActiveReadState] = useState('all');
   const [feedback, setFeedback] = useState('');
   const [markAllLoading, setMarkAllLoading] = useState(false);
+  const [clearAllOpen, setClearAllOpen] = useState(false);
+  const [deleteAllLoading, setDeleteAllLoading] = useState(false);
+  const [deleteAllError, setDeleteAllError] = useState('');
   useEffect(() => {
     let active = true;
     const controller = new AbortController();
@@ -32,6 +36,21 @@ export default function NotificationsPage() {
       setFeedback(requestError?.message || 'Notifications could not be updated. Please retry.');
     } finally {
       setMarkAllLoading(false);
+    }
+  };
+
+  const handleDeleteAll = async () => {
+    if (deleteAllLoading) return;
+    setDeleteAllLoading(true);
+    setDeleteAllError('');
+    try {
+      await deleteAllNotifications();
+      setFeedback('Notification history cleared. New notifications will still arrive.');
+      setClearAllOpen(false);
+    } catch {
+      setDeleteAllError('Notification history could not be cleared. Refresh and try again.');
+    } finally {
+      setDeleteAllLoading(false);
     }
   };
 
@@ -74,9 +93,14 @@ export default function NotificationsPage() {
               ))}
             </div>
           </div>
-          <button className="notifications-mark-all" type="button" onClick={handleMarkAll} disabled={unreadCount === 0 || loading || markAllLoading}>
-            {markAllLoading ? <SkeletonLine width="short" label="Updating notification status" /> : 'Mark All as Read'} <AppIcon name="tasks" />
-          </button>
+          <div className="notifications-inbox__actions">
+            <button className="notifications-mark-all" type="button" onClick={handleMarkAll} disabled={unreadCount === 0 || loading || markAllLoading}>
+              {markAllLoading ? <SkeletonLine width="short" label="Updating notification status" /> : 'Mark All as Read'} <AppIcon name="tasks" />
+            </button>
+            <button className="notifications-delete-all" type="button" onClick={() => { setDeleteAllError(''); setClearAllOpen(true); }} disabled={deleteAllLoading}>
+              Delete all <AppIcon name="trash" />
+            </button>
+          </div>
         </div>
         {(feedback || error) && <div className="notifications-inbox__feedback" role={error ? 'alert' : 'status'}>
           <span>{error || feedback}</span>
@@ -86,7 +110,7 @@ export default function NotificationsPage() {
         {notifications.length > 0 ? (
           <div className="notifications-list" aria-live="polite">
             {notifications.map((notification) => (
-              <NotificationItem key={notification.id} notification={notification} onMarkRead={markRead} />
+              <NotificationItem key={notification.id} notification={notification} onMarkRead={markRead} onDelete={deleteNotification} />
             ))}
           </div>
         ) : loading ? <PageLoadingSkeleton variant="rows" compact label="Loading notifications" /> : (
@@ -100,6 +124,7 @@ export default function NotificationsPage() {
         {page.hasMore && <div className="notifications-inbox__pagination"><button className="notifications-mark-all" type="button" disabled={loading} onClick={() => void loadNotifications({ category: activeCategory || null, readState: activeReadState, cursor: page.nextCursor, limit: page.limit, append: true }).catch(() => {})}>{loading ? 'Loading…' : 'Load more notifications'}</button></div>}
         <p className="notifications-inbox__storage-note">Notification history is stored with your account and remains available after refresh. In-app notifications only.</p>
       </section>
+      <NotificationClearDialog open={clearAllOpen} onClose={() => { if (!deleteAllLoading) setClearAllOpen(false); }} onConfirm={handleDeleteAll} busy={deleteAllLoading} error={deleteAllError} />
     </section>
   );
 }

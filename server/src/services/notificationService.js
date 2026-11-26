@@ -148,3 +148,16 @@ export async function markAllNotificationsRead(userId, { now = new Date() } = {}
   const { unreadCount } = await getUnreadNotificationCount(userId);
   return { modifiedCount: result.modifiedCount, unreadCount };
 }
+
+export async function deleteNotification(userId, notificationId) {
+  if (!mongoose.isValidObjectId(notificationId)) throw new NotFoundError('The notification was not found.');
+  const deleted = await Notification.findOneAndDelete({ _id: notificationId, userId });
+  if (!deleted) throw new NotFoundError('The notification was not found.');
+  const { unreadCount } = await getUnreadNotificationCount(userId);
+  return { deleted: true, notificationId: String(deleted._id), unreadCount };
+}
+
+export async function deleteAllNotifications(userId) {
+  const result = await Notification.deleteMany({ userId });
+  return { deletedCount: result.deletedCount || 0, unreadCount: 0 };
+}

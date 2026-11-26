@@ -26,6 +26,14 @@ export async function markAllRead(request, response) {
   response.status(200).json({ data: await notifications.markAllNotificationsRead(request.user.id) });
 }
 
+export async function deleteOne(request, response) {
+  response.status(200).json({ data: await notifications.deleteNotification(request.user.id, request.params.notificationId) });
+}
+
+export async function deleteAll(request, response) {
+  response.status(200).json({ data: await notifications.deleteAllNotifications(request.user.id) });
+}
+
 export async function getPreferences(request, response) {
   response.status(200).json({ data: await notifications.getNotificationPreferences(request.user.id) });
 }
