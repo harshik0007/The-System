@@ -151,11 +151,15 @@ function RouteView({ children }) {
 }
 
 function EmergencyPauseAtmosphereGate() {
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
   const { emergencyPause } = useTaskBackend();
   const { preferences } = useUserPreferences();
 
   if (!isAuthenticatedExperiencePath(pathname)) return null;
+  const stasisPreviewParam = import.meta.env.DEV
+    ? new URLSearchParams(search).get('stasis')
+    : null;
+  const devPreview = stasisPreviewParam === 'on' ? true : stasisPreviewParam === 'off' ? false : undefined;
   // Both themes follow the same server-confirmed active state; the selected
   // theme only changes the decoration rendered by the shared atmosphere.
   return <EmergencyPauseAtmosphere
@@ -167,6 +171,7 @@ function EmergencyPauseAtmosphereGate() {
     clickRipple={preferences.appearance.clickRipple}
     reduceDecorativeEffects={preferences.appearance.reduceDecorativeEffects}
     effectQuality={preferences.appearance.effectQuality}
+    devPreview={devPreview}
   />;
 }
 

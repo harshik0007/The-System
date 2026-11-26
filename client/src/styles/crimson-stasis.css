@@ -1,0 +1,32 @@
+.crimson-stasis {
+  position: fixed;
+  z-index: 0;
+  inset: 0;
+  overflow: hidden;
+  opacity: 1;
+  pointer-events: none;
+  transition: opacity var(--stasis-exit-ms) var(--stasis-exit-ease);
+  contain: strict;
+}
+
+.crimson-stasis[data-phase='entering'] {
+  opacity: 0;
+  transition-duration: var(--stasis-enter-ms);
+  transition-timing-function: var(--stasis-enter-ease);
+}
+
+.crimson-stasis[data-phase='leaving'] { opacity: 0; }
+
+.crimson-stasis.is-static {
+  transition-duration: var(--stasis-reduced-ms);
+  transition-timing-function: var(--stasis-enter-ease);
+}
+
+.crimson-stasis[data-document-visible='false'] { transition: none; }
+
+body.crimson-stasis-running #root {
+  position: relative;
+  z-index: 1;
+}
+
+body.crimson-stasis-running .app-layout { background: transparent; }
