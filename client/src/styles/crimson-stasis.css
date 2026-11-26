@@ -5,7 +5,7 @@
   overflow: hidden;
   opacity: 1;
   pointer-events: none;
-  transition: opacity var(--stasis-exit-ms) var(--stasis-exit-ease);
+  transition: opacity var(--stasis-enter-ms) var(--stasis-enter-ease);
   contain: strict;
 }
 
@@ -15,7 +15,11 @@
   transition-timing-function: var(--stasis-enter-ease);
 }
 
-.crimson-stasis[data-phase='leaving'] { opacity: 0; }
+.crimson-stasis[data-phase='leaving'] {
+  opacity: 0;
+  transition-duration: var(--stasis-exit-ms);
+  transition-timing-function: var(--stasis-exit-ease);
+}
 
 .crimson-stasis.is-static {
   transition-duration: var(--stasis-reduced-ms);

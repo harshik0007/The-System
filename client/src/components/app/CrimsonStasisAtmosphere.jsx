@@ -40,6 +40,7 @@ export default function CrimsonStasisAtmosphere({
   const canvasRef = useRef(null);
   const phaseRef = useRef(phase);
   const activeRef = useRef(shouldShow);
+  const visible = phase !== 'idle';
   phaseRef.current = phase;
   activeRef.current = shouldShow;
 
@@ -82,7 +83,7 @@ export default function CrimsonStasisAtmosphere({
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (phase === 'idle' || reducedMotion || !canvas) return undefined;
+    if (!visible || reducedMotion || !canvas) return undefined;
     const context = canvas.getContext('2d', { alpha: true, desynchronized: true });
     if (!context) return undefined;
 
@@ -91,22 +92,26 @@ export default function CrimsonStasisAtmosphere({
       CRIMSON_STASIS_CONFIG.COLORS.rose,
       CRIMSON_STASIS_CONFIG.COLORS.blush,
     ];
+    const lowPower = (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4)
+      || (navigator.deviceMemory && navigator.deviceMemory <= 4)
+      || navigator.connection?.saveData;
     const sprites = createParticleSprites(colors);
     const width = { value: 0 };
     const height = { value: 0 };
     const pixelRatio = { value: 1 };
-    const particles = createParticlePool(window.innerWidth, window.innerHeight, effectQuality);
+    const particles = createParticlePool(window.innerWidth, window.innerHeight, effectQuality, lowPower);
     let frameId = 0;
     let lastFrame = 0;
     let elapsed = 0;
     let exitElapsed = 0;
+    let resizeTimer = 0;
 
     const resize = () => {
       const previousWidth = width.value || window.innerWidth;
       const previousHeight = height.value || window.innerHeight;
       width.value = window.innerWidth;
       height.value = window.innerHeight;
-      pixelRatio.value = Math.min(2, window.devicePixelRatio || 1);
+      pixelRatio.value = Math.min(lowPower ? 1.25 : 2, window.devicePixelRatio || 1);
       canvas.width = Math.round(width.value * pixelRatio.value);
       canvas.height = Math.round(height.value * pixelRatio.value);
       context.setTransform(pixelRatio.value, 0, 0, pixelRatio.value, 0, 0);
@@ -173,6 +178,11 @@ export default function CrimsonStasisAtmosphere({
       frameId = window.requestAnimationFrame(drawFrame);
     };
 
+    const scheduleResize = () => {
+      window.clearTimeout(resizeTimer);
+      resizeTimer = window.setTimeout(resize, 90);
+    };
+
     const start = () => {
       if (document.hidden || frameId) return;
       lastFrame = performance.now();
@@ -187,20 +197,25 @@ export default function CrimsonStasisAtmosphere({
     };
 
     resize();
-    window.addEventListener('resize', resize, { passive: true });
+    const resizeObserver = typeof ResizeObserver === 'function'
+      ? new ResizeObserver(scheduleResize)
+      : null;
+    if (resizeObserver) resizeObserver.observe(canvas.parentElement);
+    window.addEventListener('resize', scheduleResize, { passive: true });
     document.addEventListener('visibilitychange', onVisibilityChange);
     start();
     return () => {
       if (frameId) window.cancelAnimationFrame(frameId);
-      window.removeEventListener('resize', resize);
+      window.clearTimeout(resizeTimer);
+      resizeObserver?.disconnect();
+      window.removeEventListener('resize', scheduleResize);
       document.removeEventListener('visibilitychange', onVisibilityChange);
       context.clearRect(0, 0, width.value, height.value);
       canvas.width = 0;
       canvas.height = 0;
     };
-  }, [phase !== 'idle', reducedMotion, effectQuality]);
+  }, [visible, reducedMotion, effectQuality]);
 
-  const visible = phase !== 'idle';
   useLayoutEffect(() => {
     document.body.classList.toggle('crimson-stasis-running', visible);
     return () => document.body.classList.remove('crimson-stasis-running');
@@ -288,10 +303,8 @@ function createParticleSprites(colors) {
   return result;
 }
 
-function createParticlePool(width, height, effectQuality) {
+function createParticlePool(width, height, effectQuality, lowPower) {
   const mobile = width <= 640;
-  const lowPower = (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4)
-    || (navigator.deviceMemory && navigator.deviceMemory <= 4);
   let count = mobile ? CRIMSON_STASIS_CONFIG.PARTICLES_MOBILE : CRIMSON_STASIS_CONFIG.PARTICLES_DESKTOP;
   if (lowPower || effectQuality === 'low') count = Math.max(mobile ? 6 : 10, Math.round(count * 0.65));
   const particles = [];
